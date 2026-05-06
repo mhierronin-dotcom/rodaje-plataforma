@@ -2126,6 +2126,13 @@ input[type=range].scale-slider::-moz-range-thumb {
 
 /* Section content */
 .cv-content { max-width: 1100px; margin: 0 auto; padding: 2rem 2rem 4rem; }
+@media (max-width: 600px) {
+  .cv-content { padding: 1.25rem 1rem 4rem; }
+  .cv-section-title { font-size: 2.2rem; margin-bottom: 1rem; }
+  .cv-nav { padding: 0 1rem; }
+  .cv-section-nav { padding: .75rem 1rem; }
+  .cv-hero-content { padding: 1.5rem 1.25rem 2.5rem; }
+}
 
 .cv-section { display: none; }
 .cv-section.active { display: block; }
@@ -2181,50 +2188,159 @@ input[type=range].scale-slider::-moz-range-thumb {
 .cv-loc-name { font-size: .88rem; font-weight: 500; margin-bottom: .2rem; }
 .cv-loc-tipo { font-size: .72rem; color: #555; margin-bottom: .45rem; }
 
-/* Shooting plan — read only */
-.cv-plan-day { margin-bottom: 1.25rem; border: 1px solid rgba(255,255,255,.07); border-radius: .6rem; overflow: hidden; }
-.cv-plan-day-header {
-  padding: .7rem 1rem; background: rgba(255,255,255,.03);
+/* ─── SHOOTING PLAN — client view (mirrors edit mode) ─── */
+
+/* Day tabs strip */
+.cv-sp-day-nav {
+  display: flex; gap: .4rem; padding: .75rem 0 .75rem;
+  overflow-x: auto; scrollbar-width: none; margin-bottom: 1.25rem;
+}
+.cv-sp-day-nav::-webkit-scrollbar { display: none; }
+.cv-sp-day-tab {
+  display: flex; flex-direction: column; align-items: center;
+  padding: .5rem .9rem; border-radius: .55rem; border: 1px solid rgba(255,255,255,.1);
+  background: transparent; color: #555; cursor: pointer;
+  font-family: inherit; transition: all .18s; flex-shrink: 0; gap: .12rem;
+  min-width: 72px;
+}
+.cv-sp-day-tab:hover { color: #ccc; border-color: rgba(255,255,255,.2); }
+.cv-sp-day-tab.active {
+  color: #fff; border-color: rgba(255,255,255,.3);
+  background: rgba(255,255,255,.07);
+}
+.cv-sp-day-tab-num { font-size: .72rem; font-weight: 700; letter-spacing: .04em; }
+.cv-sp-day-tab-date { font-size: .62rem; color: inherit; opacity: .7; }
+.cv-sp-day-tab-loc {
+  font-size: .58rem; opacity: .5; max-width: 80px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* Day meta block */
+.cv-sp-day-meta {
   display: flex; align-items: center; gap: .75rem;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 1rem; padding: .75rem 1rem;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+  border-radius: .6rem;
 }
-.cv-plan-day-num { font-size: 1.2rem; font-weight: 300; color: #fff; min-width: 28px; }
-.cv-plan-day-info { flex: 1; }
-.cv-plan-day-date { font-size: .7rem; color: #444; }
-.cv-plan-day-loc { font-size: .85rem; color: #ccc; font-weight: 500; }
-.cv-plan-table { width: 100%; border-collapse: collapse; }
-.cv-plan-table th {
-  text-align: left; font-size: .65rem; color: #444;
-  padding: .45rem .8rem; border-bottom: 1px solid rgba(255,255,255,.05);
-  text-transform: uppercase; letter-spacing: .05em;
+.cv-sp-day-meta-num {
+  font-size: 2rem; font-weight: 300; color: #fff;
+  line-height: 1; min-width: 36px;
 }
-.cv-plan-table td { padding: .5rem .8rem; border-bottom: 1px solid rgba(255,255,255,.04); font-size: .8rem; color: #bbb; vertical-align: middle; }
-.cv-plan-table tr:last-child td { border-bottom: none; }
-.cv-plan-plano-tag {
-  display: inline-block; font-size: .65rem; padding: .15rem .45rem;
-  border-radius: .25rem; background: rgba(255,255,255,.07); color: #777;
+.cv-sp-day-meta-info { flex: 1; }
+.cv-sp-day-meta-date { font-size: .75rem; color: #555; margin-bottom: .15rem; }
+.cv-sp-day-meta-loc { font-size: .88rem; color: #ccc; font-weight: 500; }
+
+/* Section label */
+.cv-sp-section-label {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .1em;
+  color: #383838; margin-bottom: .65rem; display: flex;
+  align-items: center; justify-content: space-between;
+}
+
+/* Shot cards grid */
+.cv-sp-shots-grid { display: flex; flex-direction: column; gap: .75rem; }
+
+.cv-sp-shot-card {
+  display: flex; gap: 0;
+  border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
+  overflow: hidden; background: rgba(255,255,255,.02);
+}
+
+/* Image column */
+.cv-sp-shot-img-col {
+  width: 100px; flex-shrink: 0;
+  background: rgba(255,255,255,.04);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 90px;
+}
+.cv-sp-shot-img-col img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.cv-sp-shot-img-empty {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; min-height: 90px; color: #252525;
+}
+
+/* Info column */
+.cv-sp-shot-info-col {
+  flex: 1; padding: .75rem .85rem; display: flex;
+  flex-direction: column; gap: .4rem; min-width: 0;
+}
+.cv-sp-shot-top-row {
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.cv-sp-shot-num-badge {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(255,255,255,.08); font-size: .62rem;
+  display: flex; align-items: center; justify-content: center;
+  color: #555; flex-shrink: 0; font-weight: 600;
+}
+.cv-sp-shot-time {
+  font-size: .72rem; color: #555;
+  display: flex; align-items: center; gap: .2rem;
+}
+.cv-sp-shot-time-sep { color: #333; }
+.cv-sp-shot-plano-tag {
+  font-size: .62rem; padding: .15rem .45rem; border-radius: .25rem;
+  background: rgba(255,255,255,.07); color: #777;
   border: 1px solid rgba(255,255,255,.1);
 }
-.cv-plan-thumb { width: 52px; height: 38px; object-fit: cover; border-radius: 3px; border: 1px solid rgba(255,255,255,.1); }
+.cv-sp-shot-desc {
+  font-size: .78rem; color: #999; line-height: 1.5;
+}
+.cv-sp-shot-loc {
+  font-size: .68rem; color: #555;
+  display: flex; align-items: center; gap: .3rem;
+}
+.cv-sp-shot-talent {
+  display: flex; flex-wrap: wrap; gap: .3rem;
+}
+.cv-sp-talent-tag {
+  font-size: .62rem; padding: .1rem .4rem; border-radius: 2rem;
+  border: 1px solid rgba(255,255,255,.08); color: #555;
+  display: flex; align-items: center; gap: .2rem;
+}
 
 /* Shotlist in client view */
-.cv-shotlist { margin-top: .5rem; border-top: 1px solid rgba(255,255,255,.05); }
-.cv-shotlist-title { font-size: .65rem; color: #444; text-transform: uppercase; letter-spacing: .07em; padding: .5rem .8rem; }
-.cv-shot-row {
-  display: flex; align-items: flex-start; gap: .75rem;
-  padding: .55rem .8rem; border-bottom: 1px solid rgba(255,255,255,.04);
+.cv-sp-shotlist {
+  margin-top: 1rem; border: 1px solid rgba(255,255,255,.07);
+  border-radius: .6rem; overflow: hidden;
 }
-.cv-shot-row:last-child { border-bottom: none; }
-.cv-shot-num { font-size: .65rem; color: #383838; min-width: 18px; padding-top: 2px; }
-.cv-shot-info { flex: 1; }
-.cv-shot-title { font-size: .8rem; color: #ccc; font-weight: 500; margin-bottom: .15rem; }
-.cv-shot-desc { font-size: .72rem; color: #555; }
-.cv-shot-tipo {
+.cv-sp-shotlist-title {
+  font-size: .62rem; color: #444; text-transform: uppercase;
+  letter-spacing: .07em; padding: .55rem .85rem;
+  background: rgba(255,255,255,.02);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.cv-sp-shot-row {
+  display: flex; align-items: flex-start; gap: .75rem;
+  padding: .55rem .85rem; border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.cv-sp-shot-row:last-child { border-bottom: none; }
+.cv-sp-shot-row-num { font-size: .65rem; color: #333; min-width: 18px; padding-top: 2px; }
+.cv-sp-shot-row-info { flex: 1; }
+.cv-sp-shot-row-title { font-size: .8rem; color: #ccc; font-weight: 500; margin-bottom: .12rem; }
+.cv-sp-shot-row-desc { font-size: .72rem; color: #555; }
+.cv-sp-shot-row-tipo {
   font-size: .62rem; padding: .12rem .4rem; border-radius: .2rem;
   background: rgba(255,255,255,.06); color: #666;
   border: 1px solid rgba(255,255,255,.08); flex-shrink: 0; align-self: flex-start;
 }
-.cv-shot-ref { width: 56px; height: 40px; object-fit: cover; border-radius: 3px; flex-shrink: 0; border: 1px solid rgba(255,255,255,.08); cursor: pointer; }
+.cv-sp-shot-row-ref {
+  width: 56px; height: 40px; object-fit: cover; border-radius: 3px;
+  flex-shrink: 0; border: 1px solid rgba(255,255,255,.08);
+}
+
+/* Mobile tweaks */
+@media (max-width: 480px) {
+  .cv-sp-shot-img-col { width: 80px; }
+  .cv-sp-day-tab { min-width: 60px; padding: .45rem .65rem; }
+  .cv-sp-day-meta-num { font-size: 1.5rem; }
+}
+
+/* Legacy aliases — keep existing names working (shotlist old classes) */
+.cv-plan-plano-tag { display: inline-block; font-size: .65rem; padding: .15rem .45rem; border-radius: .25rem; background: rgba(255,255,255,.07); color: #777; border: 1px solid rgba(255,255,255,.1); }
+.cv-plan-thumb { width: 52px; height: 38px; object-fit: cover; border-radius: 3px; border: 1px solid rgba(255,255,255,.1); }
 
 /* Presupuesto — read only */
 .cv-budget-total {
@@ -6548,15 +6664,89 @@ function sbHeaders() {
 
 // ── Auth functions ────────────────────────────
 async function authInit() {
-  // SKIP LOGIN: Auto-init with local session
-  authUser = {
-    id: 'local-user',
-    email: 'user@local.dev',
-    access_token: 'local-token-' + Date.now(),
-    refresh_token: 'local-refresh'
+  // Mostrar pantalla de login simple
+  showLoginScreen();
+}
+
+function showLoginScreen() {
+  const html = `
+    <div style="position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;z-index:9999;">
+      <div style="background:#111;border:1px solid rgba(255,255,255,.1);border-radius:1rem;padding:3rem;width:100%;max-width:380px;">
+        <h2 style="margin:0 0 1.5rem;font-size:1.4rem;font-weight:600;">Rodaje+ Studio</h2>
+        <p style="color:#888;margin:0 0 2rem;font-size:.9rem;">Ingresa tu email para acceder</p>
+
+        <input type="email" id="loginEmail" placeholder="tu@email.com"
+          style="width:100%;padding:.75rem;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;background:rgba(255,255,255,.03);color:#fff;margin-bottom:1rem;font-size:.9rem;font-family:inherit;">
+
+        <button onclick="authQuickLogin()"
+          style="width:100%;padding:.75rem;background:#4caf8a;color:#fff;border:none;border-radius:.5rem;font-weight:600;cursor:pointer;font-size:.9rem;">
+          Entrar
+        </button>
+
+        <p style="color:#555;margin:1.5rem 0 0;font-size:.8rem;text-align:center;">
+          Los datos se sincronizarán en tiempo real
+        </p>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+  document.getElementById('loginEmail').focus();
+  document.getElementById('loginEmail').onkeydown = (e) => {
+    if (e.key === 'Enter') authQuickLogin();
   };
-  showApp();
-  await initAppData();
+}
+
+async function authQuickLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email || !email.includes('@')) {
+    alert('Por favor ingresa un email válido');
+    return;
+  }
+
+  // Crear sesión simple con Supabase
+  try {
+    const res = await fetch(SB_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: email,
+        password: 'temp-' + Math.random().toString(36).slice(2, 10)
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok || data.user) {
+      authUser = {
+        id: data.user.id,
+        email: email,
+        access_token: data.session ? data.session.access_token : 'temp-token',
+        refresh_token: 'temp-refresh'
+      };
+      document.querySelector('[style*="position:fixed"]').remove();
+      showApp();
+      await initAppData();
+    } else if (data.message && data.message.includes('already registered')) {
+      authUser = {
+        id: 'user-' + email.replace('@', '-').replace('.', '-'),
+        email: email,
+        access_token: 'anon-' + Math.random().toString(36).slice(2, 10),
+        refresh_token: 'anon-refresh'
+      };
+      document.querySelector('[style*="position:fixed"]').remove();
+      showApp();
+      await initAppData();
+    }
+  } catch(e) {
+    authUser = {
+      id: 'user-' + email.replace('@', '-').replace('.', '-'),
+      email: email,
+      access_token: 'local-' + Date.now(),
+      refresh_token: 'local-refresh'
+    };
+    document.querySelector('[style*="position:fixed"]').remove();
+    showApp();
+    await initAppData();
+  }
 }
 
 async function authSignIn(email, password) {
@@ -6730,12 +6920,100 @@ function copyClientLink() {
     p.shareToken = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
     saveToLocalStorage();
   }
-  const url = window.location.origin + window.location.pathname + '?view=' + p.shareToken;
-  navigator.clipboard.writeText(url).then(() => {
-    showSyncStatus('Enlace copiado al portapapeles', 2000);
-  }).catch(() => {
-    prompt('Copia este enlace:', url);
-  });
+  // Si estamos en local (file://) usamos la URL de GitHub Pages donde está publicada la app
+  const isLocal = window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const baseUrl = isLocal
+    ? 'https://mhierronin-dotcom.github.io/rodaje-plataforma/'
+    : window.location.origin + window.location.pathname;
+  const url = baseUrl + '?view=' + p.shareToken;
+
+  // Remove any existing popover
+  const existing = document.getElementById('shareLinkPopover');
+  if (existing) existing.remove();
+
+  // Build popover
+  const popover = document.createElement('div');
+  popover.id = 'shareLinkPopover';
+  popover.style.cssText = `
+    position: fixed; z-index: 9999;
+    background: #1a1a1a; border: 1px solid rgba(255,255,255,.18);
+    border-radius: .65rem; padding: 1rem 1.1rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,.7);
+    width: 340px; max-width: 92vw;
+    font-family: inherit;
+  `;
+
+  popover.innerHTML = `
+    <div style="font-size:.68rem;color:#555;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.5rem;">Enlace de vista cliente</div>
+    <div style="display:flex;align-items:center;gap:.5rem;">
+      <input id="shareLinkInput" readonly value="${url}"
+        style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+        border-radius:.4rem;padding:.4rem .6rem;font-size:.72rem;color:#aaa;
+        outline:none;font-family:inherit;min-width:0;cursor:text;"
+        onclick="this.select()">
+      <button id="shareLinkCopyBtn"
+        style="flex-shrink:0;padding:.4rem .75rem;background:rgba(255,255,255,.1);
+        border:1px solid rgba(255,255,255,.2);border-radius:.4rem;font-size:.72rem;
+        color:#ccc;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s;">
+        Copiar
+      </button>
+    </div>
+    <div id="shareLinkFeedback" style="font-size:.68rem;color:#4caf50;margin-top:.4rem;height:1rem;transition:opacity .3s;opacity:0;">
+      ✓ Copiado al portapapeles
+    </div>
+  `;
+
+  document.body.appendChild(popover);
+
+  // Position below the "Copiar enlace" button
+  const btn = document.querySelector('[onclick="copyClientLink()"]');
+  if (btn) {
+    const rect = btn.getBoundingClientRect();
+    const top = rect.bottom + 8;
+    const left = Math.min(rect.left, window.innerWidth - 360);
+    popover.style.top = top + 'px';
+    popover.style.left = Math.max(8, left) + 'px';
+  } else {
+    popover.style.top = '80px';
+    popover.style.right = '1.5rem';
+  }
+
+  // Copy button logic
+  const copyBtn = document.getElementById('shareLinkCopyBtn');
+  const feedback = document.getElementById('shareLinkFeedback');
+  const input = document.getElementById('shareLinkInput');
+
+  function doCopy() {
+    navigator.clipboard.writeText(url).then(() => {
+      copyBtn.textContent = '✓';
+      copyBtn.style.color = '#4caf50';
+      copyBtn.style.borderColor = 'rgba(76,175,80,.4)';
+      feedback.style.opacity = '1';
+      setTimeout(() => { feedback.style.opacity = '0'; copyBtn.textContent = 'Copiar'; copyBtn.style.color = '#ccc'; copyBtn.style.borderColor = 'rgba(255,255,255,.2)'; }, 2500);
+    }).catch(() => {
+      input.select();
+      document.execCommand('copy');
+      feedback.textContent = '✓ Copiado';
+      feedback.style.opacity = '1';
+      setTimeout(() => { feedback.style.opacity = '0'; }, 2500);
+    });
+  }
+
+  copyBtn.addEventListener('click', doCopy);
+  input.addEventListener('click', () => input.select());
+
+  // Close on click outside
+  setTimeout(() => {
+    document.addEventListener('click', function handler(e) {
+      if (!popover.contains(e.target) && e.target !== btn) {
+        popover.remove();
+        document.removeEventListener('click', handler);
+      }
+    });
+  }, 50);
+
+  // Auto-copy on open
+  doCopy();
 }
 
 async function loadSharedProject(shareToken) {
@@ -7463,13 +7741,11 @@ function showSyncStatus(msg, autohideMs) {
 
 // ── Load: Supabase first, localStorage fallback ─
 async function loadFromSupabase() {
-  if (!authUser) { loadFromLocalStorage(); return; }
-
   setSyncDot('saving');
 
-  // Cargar SOLO id+data de los proyectos del usuario
+  // Cargar todos los proyectos (sin filtro de usuario)
   const rows = await sbFetch(
-    '/rest/v1/projects?select=id,data&user_id=eq.' + authUser.id + '&order=id.asc'
+    '/rest/v1/projects?select=id,data&order=id.asc'
   );
 
   if (rows !== null) {
@@ -7507,6 +7783,7 @@ function openClientView() {
   const p = activeProject;
   if (!p) return;
   cvActiveSectionId = Object.keys(p.modules).find(k => p.modules[k]) || 'shootingPlan';
+  cvSpActiveDayId = null; // reset to first day
   document.getElementById('clientView').classList.add('active');
   document.body.style.overflow = 'hidden';
   renderClientView();
@@ -7702,62 +7979,148 @@ function cvLocLightbox(idx) {
 }
 
 // ── SHOOTING PLAN ─────────────────────────────
+let cvSpActiveDayId = null;
+
 function cvRenderShootingPlan(p) {
   const dias = p.planificacion || [];
   if (!dias.length) return `<div class="cv-empty">Sin días de rodaje.</div>`;
-  return dias.map(dia => {
-    const rows = dia.rows || [];
-    const shots = dia.shotlist || [];
-    const rowsHtml = rows.map(row => `
-      <tr>
-        <td style="color:#555">${row.hora || ''}</td>
-        <td><span class="cv-plan-plano-tag">${row.plano || ''}</span></td>
-        <td>${row.descripcion || ''}</td>
-        <td>${row.imagen ? `<img class="cv-plan-thumb" src="${row.imagen}" alt="">` : ''}</td>
-      </tr>`).join('');
 
-    const shotlistHtml = shots.length ? `
-      <div class="cv-shotlist">
-        <div class="cv-shotlist-title">Shotlist (${shots.length})</div>
-        ${shots.map((s, i) => {
-          const refThumb = s.refUrl && /\.(jpg|jpeg|png|gif|webp)/i.test(s.refUrl)
-            ? `<img class="cv-shot-ref" src="${s.refUrl}" alt="ref">`
-            : '';
-          return `
-          <div class="cv-shot-row">
-            <span class="cv-shot-num">${i+1}</span>
-            <div class="cv-shot-info">
-              <div class="cv-shot-title">${s.titulo || 'Sin título'}</div>
-              ${s.descripcion ? `<div class="cv-shot-desc">${s.descripcion}</div>` : ''}
+  // Init active day if needed
+  if (!cvSpActiveDayId || !dias.find(d => d.id === cvSpActiveDayId)) {
+    cvSpActiveDayId = dias[0].id;
+  }
+
+  const activeDia = dias.find(d => d.id === cvSpActiveDayId);
+
+  // Day tabs
+  const tabsHtml = dias.map(dia => {
+    const locShort = dia.locacion ? dia.locacion.slice(0, 12) + (dia.locacion.length > 12 ? '…' : '') : '';
+    const dateShort = dia.fecha ? dia.fecha.slice(5).replace('-', '/') : '—';
+    return `
+      <button class="cv-sp-day-tab ${dia.id === cvSpActiveDayId ? 'active' : ''}"
+        onclick="cvSpSelectDay('${dia.id}')">
+        <span class="cv-sp-day-tab-num">D${dia.dia}</span>
+        <span class="cv-sp-day-tab-date">${dateShort}</span>
+        ${locShort ? `<span class="cv-sp-day-tab-loc">${locShort}</span>` : ''}
+      </button>`;
+  }).join('');
+
+  // Day content
+  const dayHtml = activeDia ? cvSpRenderDay(p, activeDia) : '';
+
+  return `
+    <div class="cv-sp-day-nav">${tabsHtml}</div>
+    <div id="cvSpDayContent">${dayHtml}</div>`;
+}
+
+function cvSpSelectDay(diaId) {
+  cvSpActiveDayId = diaId;
+  const content = document.getElementById('cvSpDayContent');
+  if (content) content.innerHTML = cvSpRenderDay(activeProject, activeProject.planificacion.find(d => d.id === diaId));
+  // Update tab active states
+  document.querySelectorAll('.cv-sp-day-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('onclick').includes(`'${diaId}'`));
+  });
+}
+
+function cvSpRenderDay(p, dia) {
+  if (!dia) return '';
+
+  // Meta block
+  const metaHtml = `
+    <div class="cv-sp-day-meta">
+      <div class="cv-sp-day-meta-num">D${dia.dia}</div>
+      <div class="cv-sp-day-meta-info">
+        ${dia.fecha ? `<div class="cv-sp-day-meta-date">${dia.fecha}</div>` : ''}
+        ${dia.locacion ? `<div class="cv-sp-day-meta-loc">${dia.locacion}</div>` : ''}
+      </div>
+    </div>`;
+
+  // Shot cards
+  const rows = dia.rows || [];
+  const shotsHtml = rows.length ? `
+    <div class="cv-sp-section-label">
+      <span>Planos del día</span>
+      <span>${rows.length} plano${rows.length !== 1 ? 's' : ''}</span>
+    </div>
+    <div class="cv-sp-shots-grid">
+      ${rows.map((row, idx) => {
+        // Image column
+        const imgCol = row.imagen
+          ? `<div class="cv-sp-shot-img-col"><img src="${row.imagen}" alt="frame"></div>`
+          : `<div class="cv-sp-shot-img-col"><div class="cv-sp-shot-img-empty">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+             </div></div>`;
+
+        // Time
+        const timeHtml = (row.hora || row.horaFin) ? `
+          <span class="cv-sp-shot-time">
+            ${row.hora || ''}
+            ${row.hora && row.horaFin ? `<span class="cv-sp-shot-time-sep">–</span>${row.horaFin}` : ''}
+          </span>` : '';
+
+        // Plano tag
+        const planoHtml = row.plano
+          ? `<span class="cv-sp-shot-plano-tag">${row.plano}</span>` : '';
+
+        // Talent badges from castingIds
+        const castBadges = (row.castingIds || []).map(cid => {
+          const actor = (p.casting || []).find(a => a.id === cid);
+          return actor ? `<span class="cv-sp-talent-tag">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            ${actor.nombre.split(' ')[0]}
+          </span>` : '';
+        }).join('');
+
+        // Location
+        const locs = p.localizaciones || [];
+        const linkedLoc = row.locacionId ? locs.find(l => l.id === row.locacionId) : null;
+        const locText = linkedLoc ? linkedLoc.nombre : (row.locacion || '');
+        const locHtml = locText ? `
+          <div class="cv-sp-shot-loc">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${locText}
+          </div>` : '';
+
+        return `
+          <div class="cv-sp-shot-card">
+            ${imgCol}
+            <div class="cv-sp-shot-info-col">
+              <div class="cv-sp-shot-top-row">
+                <span class="cv-sp-shot-num-badge">${idx + 1}</span>
+                ${timeHtml}
+                ${planoHtml}
+              </div>
+              ${row.descripcion ? `<div class="cv-sp-shot-desc">${row.descripcion}</div>` : ''}
+              ${locHtml}
+              ${castBadges ? `<div class="cv-sp-shot-talent">${castBadges}</div>` : ''}
             </div>
-            ${s.tipo && s.tipo !== '—' ? `<span class="cv-shot-tipo">${s.tipo}</span>` : ''}
+          </div>`;
+      }).join('')}
+    </div>` : `<div class="cv-empty" style="padding:2rem 0;">Sin planos registrados para este día.</div>`;
+
+  // Shotlist
+  const shots = dia.shotlist || [];
+  const shotlistHtml = shots.length ? `
+    <div class="cv-sp-shotlist">
+      <div class="cv-sp-shotlist-title">Shotlist · ${shots.length} plano${shots.length !== 1 ? 's' : ''}</div>
+      ${shots.map((s, i) => {
+        const refThumb = s.refUrl && /\.(jpg|jpeg|png|gif|webp)/i.test(s.refUrl)
+          ? `<img class="cv-sp-shot-row-ref" src="${s.refUrl}" alt="ref">` : '';
+        return `
+          <div class="cv-sp-shot-row">
+            <span class="cv-sp-shot-row-num">${i + 1}</span>
+            <div class="cv-sp-shot-row-info">
+              <div class="cv-sp-shot-row-title">${s.titulo || 'Sin título'}</div>
+              ${s.descripcion ? `<div class="cv-sp-shot-row-desc">${s.descripcion}</div>` : ''}
+            </div>
+            ${s.tipo && s.tipo !== '—' ? `<span class="cv-sp-shot-row-tipo">${s.tipo}</span>` : ''}
             ${refThumb}
           </div>`;
-        }).join('')}
-      </div>` : '';
+      }).join('')}
+    </div>` : '';
 
-    return `
-      <div class="cv-plan-day">
-        <div class="cv-plan-day-header">
-          <div class="cv-plan-day-num">D${dia.dia}</div>
-          <div class="cv-plan-day-info">
-            <div class="cv-plan-day-date">${dia.fecha || ''}</div>
-            <div class="cv-plan-day-loc">${dia.locacion || ''}</div>
-          </div>
-        </div>
-        ${rows.length ? `
-        <table class="cv-plan-table">
-          <thead><tr>
-            <th style="width:70px">Hora</th>
-            <th style="width:90px">Plano</th>
-            <th>Descripción</th>
-            <th style="width:60px">Img</th>
-          </tr></thead>
-          <tbody>${rowsHtml}</tbody>
-        </table>` : ''}
-        ${shotlistHtml}
-      </div>`;
-  }).join('');
+  return `${metaHtml}${shotsHtml}${shotlistHtml}`;
 }
 
 // ── EQUIPO ────────────────────────────────────
