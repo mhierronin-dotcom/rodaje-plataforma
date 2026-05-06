@@ -6664,68 +6664,118 @@ function sbHeaders() {
 
 // ── Auth functions ────────────────────────────
 async function authInit() {
-  // Mostrar pantalla de login simple
+  // Recuperar sesión guardada
+  try {
+    const saved = localStorage.getItem('rp-session');
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s && s.access_token && s.id) {
+        authUser = s;
+        showApp();
+        await initAppData();
+        return;
+      }
+    }
+  } catch(e) {}
   showLoginScreen();
 }
 
 function showLoginScreen() {
   const html = `
-    <div style="position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;z-index:9999;">
+    <div id="loginOverlay" style="position:fixed;inset:0;background:#0a0a0a;display:flex;align-items:center;justify-content:center;z-index:9999;">
       <div style="background:#111;border:1px solid rgba(255,255,255,.1);border-radius:1rem;padding:3rem;width:100%;max-width:380px;">
-        <h2 style="margin:0 0 1.5rem;font-size:1.4rem;font-weight:600;">Rodaje+ Studio</h2>
-        <p style="color:#888;margin:0 0 2rem;font-size:.9rem;">Ingresa tu email para acceder</p>
-
-        <input type="email" id="loginEmail" placeholder="tu@email.com"
-          style="width:100%;padding:.75rem;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;background:rgba(255,255,255,.03);color:#fff;margin-bottom:1rem;font-size:.9rem;font-family:inherit;">
-
-        <button onclick="authQuickLogin()"
-          style="width:100%;padding:.75rem;background:#4caf8a;color:#fff;border:none;border-radius:.5rem;font-weight:600;cursor:pointer;font-size:.9rem;">
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:2rem;">
+          <div style="width:28px;height:28px;border:1.5px solid rgba(255,255,255,.7);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">RP</div>
+          <span style="font-size:.9rem;font-weight:600;">Rodaje+ Studio</span>
+        </div>
+        <p style="color:#888;margin:0 0 1.5rem;font-size:.85rem;">Accede con tu email y contraseña</p>
+        <input type="email" id="loginEmail" placeholder="tu@email.com" autocomplete="email"
+          style="width:100%;padding:.75rem;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;background:rgba(255,255,255,.03);color:#fff;margin-bottom:.6rem;font-size:.9rem;font-family:inherit;outline:none;">
+        <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password"
+          style="width:100%;padding:.75rem;border:1px solid rgba(255,255,255,.1);border-radius:.5rem;background:rgba(255,255,255,.03);color:#fff;margin-bottom:.75rem;font-size:.9rem;font-family:inherit;outline:none;">
+        <button id="loginBtn" onclick="authLogin()"
+          style="width:100%;padding:.75rem;background:#4caf8a;color:#fff;border:none;border-radius:.5rem;font-weight:600;cursor:pointer;font-size:.9rem;font-family:inherit;">
           Entrar
         </button>
-
-        <p style="color:#555;margin:1.5rem 0 0;font-size:.8rem;text-align:center;">
-          Los datos se sincronizarán en tiempo real
-        </p>
+        <p id="loginMsg" style="color:#e57373;margin:.75rem 0 0;font-size:.78rem;text-align:center;min-height:1.2rem;"></p>
       </div>
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', html);
   document.getElementById('loginEmail').focus();
-  document.getElementById('loginEmail').onkeydown = (e) => {
-    if (e.key === 'Enter') authQuickLogin();
-  };
+  document.getElementById('loginEmail').onkeydown = (e) => { if (e.key === 'Enter') document.getElementById('loginPassword').focus(); };
+  document.getElementById('loginPassword').onkeydown = (e) => { if (e.key === 'Enter') authLogin(); };
 }
 
-async function authQuickLogin() {
+async function authLogin() {
   const email = document.getElementById('loginEmail').value.trim();
-  if (!email || !email.includes('@')) {
-    alert('Por favor ingresa un email válido');
-    return;
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !email.includes('@')) { document.getElementById('loginMsg').textContent = 'Email no válido'; return; }
+  if (!password || password.length < 6) { document.getElementById('loginMsg').textContent = 'La contraseña debe tener al menos 6 caracteres'; return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'Entrando…'; btn.disabled = true;
+  document.getElementById('loginMsg').textContent = '';
+
+  // Intentar login primero
+  try {
+    const res = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.access_token) {
+      // Login correcto
+      authUser = { id: data.user.id, email: data.user.email, access_token: data.access_token, refresh_token: data.refresh_token, isAnon: false };
+      localStorage.setItem('rp-session', JSON.stringify(authUser));
+      document.getElementById('loginOverlay').remove();
+      showApp();
+      await initAppData();
+      return;
+    }
+
+    // Si falla, intentar registro (primera vez)
+    if (data.error === 'invalid_grant' || (data.message && data.message.includes('Invalid login'))) {
+      document.getElementById('loginMsg').textContent = 'Email o contraseña incorrectos';
+      btn.textContent = 'Entrar'; btn.disabled = false;
+      return;
+    }
+
+    // Usuario no existe — crear cuenta
+    const resReg = await fetch(SB_URL + '/auth/v1/signup', {
+      method: 'POST',
+      headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const dataReg = await resReg.json();
+    if (resReg.ok && dataReg.user) {
+      // Registro OK — intentar login inmediato
+      const res2 = await fetch(SB_URL + '/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data2 = await res2.json();
+      if (res2.ok && data2.access_token) {
+        authUser = { id: data2.user.id, email: data2.user.email, access_token: data2.access_token, refresh_token: data2.refresh_token, isAnon: false };
+        localStorage.setItem('rp-session', JSON.stringify(authUser));
+        document.getElementById('loginOverlay').remove();
+        showApp();
+        await initAppData();
+      } else {
+        document.getElementById('loginMsg').textContent = 'Cuenta creada. Revisa tu email para confirmarla.';
+        btn.textContent = 'Entrar'; btn.disabled = false;
+      }
+    } else {
+      document.getElementById('loginMsg').textContent = dataReg.message || 'Error al crear cuenta';
+      btn.textContent = 'Entrar'; btn.disabled = false;
+    }
+  } catch(e) {
+    document.getElementById('loginMsg').textContent = 'Sin conexión';
+    btn.textContent = 'Entrar'; btn.disabled = false;
   }
-
-  const btn = document.querySelector('[onclick="authQuickLogin()"]');
-  if (btn) { btn.textContent = 'Entrando…'; btn.disabled = true; }
-
-  // Usar anon key directamente — funciona para leer y escribir con RLS desactivado
-  // que es el caso de este proyecto (tabla projects es pública)
-  authUser = {
-    id: 'user-' + email.replace(/[^a-z0-9]/gi, '-'),
-    email: email,
-    access_token: SB_KEY,  // anon key — suficiente para leer/escribir sin RLS estricto
-    refresh_token: ''
-  };
-
-  // Intentar también un OTP en background (no bloqueante)
-  fetch(SB_URL + '/auth/v1/otp', {
-    method: 'POST',
-    headers: { 'apikey': SB_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, create_user: true })
-  }).catch(() => {});
-
-  // Entrar directamente sin esperar el email
-  document.querySelector('[style*="position:fixed;inset:0"]')?.remove();
-  showApp();
-  await initAppData();
 }
 
 async function authSignIn(email, password) {
@@ -7170,6 +7220,8 @@ async function loadProjectFilesFromSupabase(projectId) {
 // ── Persistence ──────────────────────────────
 function saveDB() {
   try { localStorage.setItem(DB_KEY, JSON.stringify(globalDB)); } catch(e) {}
+  // Solo sincronizar con Supabase si hay sesión real (no anónima)
+  if (authUser && authUser.isAnon) return;
   sbFetch('/rest/v1/globaldb', {
     method: 'POST',
     headers: { 'Prefer': 'resolution=merge-duplicates' },
@@ -7646,7 +7698,7 @@ async function _flushToSupabase() {
       id: p.id,
       data: p,
       updated_at: new Date().toISOString(),
-      user_id: authUser.id,
+      ...(authUser && !authUser.isAnon ? { user_id: authUser.id } : {}),
       ...(p.shareToken ? { share_token: p.shareToken } : {})
     };
 
