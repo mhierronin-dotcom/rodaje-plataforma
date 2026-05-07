@@ -338,6 +338,18 @@ input[type=range].scale-slider::-moz-range-thumb {
 .project-card .pc-cover-controls { display: none; }
 .project-card:hover .pc-cover-controls { display: flex; }
 
+/* Delete button — top right corner, visible on hover */
+.pc-delete-btn {
+  position: absolute; top: .6rem; right: .6rem; z-index: 3;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.12); color: #e57373;
+  display: none; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s;
+}
+.project-card:hover .pc-delete-btn { display: flex; }
+.pc-delete-btn:hover { background: rgba(229,115,115,.25); border-color: rgba(229,115,115,.4); }
+
 .pc-top { display: flex; justify-content: flex-start; align-items: flex-start; margin-bottom: .45rem; }
 .pc-icon { display: none; }
 .status-pill {
@@ -3090,6 +3102,12 @@ function renderProjects(filter = 'todos') {
         </div>`
       : '';
 
+    const deleteBtn = currentUser === 'admin'
+      ? `<button class="pc-delete-btn" onclick="deleteProject(${p.id}, event)" title="Eliminar proyecto">
+          ${icon('trash', 12)}
+        </button>`
+      : '';
+
     card.innerHTML = `
       ${coverLayer}
       <div class="pc-content">
@@ -3098,6 +3116,7 @@ function renderProjects(filter = 'todos') {
         </div>
         <div class="pc-title">${p.nombre}</div>
       </div>
+      ${deleteBtn}
       ${coverBtn}`;
     grid.appendChild(card);
   });
@@ -3135,6 +3154,81 @@ function removeCover(projectId, e) {
   if (e) e.stopPropagation();
   const proj = projects.find(p => p.id === projectId);
   if (proj) { proj.coverImg = null; saveToLocalStorage(); renderProjects(); }
+}
+
+function deleteProject(projectId, e) {
+  if (e) e.stopPropagation();
+  const proj = projects.find(p => p.id === projectId);
+  if (!proj) return;
+
+  // Primera confirmación
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:#161616;border:1px solid rgba(255,255,255,.12);border-radius:.85rem;padding:2rem;width:380px;max-width:92vw;">
+      <div style="font-size:1rem;font-weight:600;margin-bottom:.5rem;">Eliminar proyecto</div>
+      <div style="font-size:.82rem;color:#666;margin-bottom:1.5rem;line-height:1.6;">
+        ¿Seguro que quieres eliminar <strong style="color:#ccc;">${proj.nombre}</strong>?<br>
+        Esta acción no se puede deshacer.
+      </div>
+      <div style="display:flex;gap:.6rem;">
+        <button onclick="this.closest('[style*=fixed]').remove()"
+          style="flex:1;padding:.6rem;border:1px solid rgba(255,255,255,.1);border-radius:.4rem;background:transparent;color:#888;cursor:pointer;font-family:inherit;font-size:.82rem;">
+          Cancelar
+        </button>
+        <button id="confirmDelete1"
+          style="flex:1;padding:.6rem;border:1px solid rgba(229,115,115,.3);border-radius:.4rem;background:rgba(229,115,115,.1);color:#e57373;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:500;">
+          Sí, eliminar
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  document.getElementById('confirmDelete1').onclick = () => {
+    modal.remove();
+    // Segunda confirmación
+    const modal2 = document.createElement('div');
+    modal2.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal2.innerHTML = `
+      <div style="background:#161616;border:1px solid rgba(229,115,115,.25);border-radius:.85rem;padding:2rem;width:380px;max-width:92vw;">
+        <div style="font-size:1rem;font-weight:600;margin-bottom:.5rem;color:#e57373;">⚠ Confirmación final</div>
+        <div style="font-size:.82rem;color:#666;margin-bottom:1.5rem;line-height:1.6;">
+          Escribe el nombre del proyecto para confirmar:<br>
+          <strong style="color:#ccc;">${proj.nombre}</strong>
+        </div>
+        <input id="deleteConfirmInput" placeholder="Nombre del proyecto"
+          style="width:100%;padding:.6rem .75rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:.4rem;color:#fff;font-family:inherit;font-size:.85rem;margin-bottom:.75rem;outline:none;">
+        <div style="display:flex;gap:.6rem;">
+          <button onclick="this.closest('[style*=fixed]').remove()"
+            style="flex:1;padding:.6rem;border:1px solid rgba(255,255,255,.1);border-radius:.4rem;background:transparent;color:#888;cursor:pointer;font-family:inherit;font-size:.82rem;">
+            Cancelar
+          </button>
+          <button id="confirmDelete2"
+            style="flex:1;padding:.6rem;border:1px solid rgba(229,115,115,.3);border-radius:.4rem;background:rgba(229,115,115,.15);color:#e57373;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:500;">
+            Eliminar definitivamente
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal2);
+    document.getElementById('deleteConfirmInput').focus();
+
+    document.getElementById('confirmDelete2').onclick = async () => {
+      const input = document.getElementById('deleteConfirmInput').value.trim();
+      if (input !== proj.nombre) {
+        document.getElementById('deleteConfirmInput').style.borderColor = 'rgba(229,115,115,.6)';
+        document.getElementById('deleteConfirmInput').placeholder = 'El nombre no coincide';
+        return;
+      }
+      modal2.remove();
+      // Eliminar de array local
+      const idx = projects.findIndex(p => p.id === projectId);
+      if (idx !== -1) projects.splice(idx, 1);
+      // Eliminar de Supabase
+      await sbFetch(`/rest/v1/projects?id=eq.${projectId}`, { method: 'DELETE' });
+      saveToLocalStorage();
+      renderProjects();
+    };
+  };
 }
 
 /* ══════════════════════════════════════════════
