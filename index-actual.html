@@ -1145,58 +1145,16 @@ input[type=range].scale-slider::-moz-range-thumb {
 .tp-back:hover { color: #ccc; }
 
 /* ── HERO ── */
-.tp-hero {
-  position: relative; border-radius: 1rem; overflow: hidden;
-  background: #111; margin-bottom: 2rem;
-  aspect-ratio: 21/9; min-height: 260px;
+/* tp-hero eliminado — se entra directamente a la galería */
+.tp-hero { display: none; }
+
+/* ── AVATAR ── */
+.tp-avatar {
+  width: 72px; height: 72px; border-radius: 50%; overflow: hidden;
+  flex-shrink: 0; border: 2px solid rgba(255,255,255,.1);
+  background: #1a1a1a;
 }
-.tp-hero-img {
-  width: 100%; height: 100%; object-fit: cover;
-  object-position: center top;
-  transition: opacity .4s;
-}
-.tp-hero-placeholder {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(255,255,255,.03); color: #333;
-}
-/* Gradient overlay at bottom */
-.tp-hero::after {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.85) 100%);
-  pointer-events: none;
-}
-/* Carousel nav */
-.tp-hero-nav {
-  position: absolute; bottom: 1.25rem; right: 1.25rem; z-index: 2;
-  display: flex; gap: .4rem;
-}
-.tp-hero-nav-btn {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.2);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; backdrop-filter: blur(4px); transition: all .15s;
-}
-.tp-hero-nav-btn:hover { background: rgba(0,0,0,.85); }
-.tp-hero-dots {
-  position: absolute; bottom: 1.4rem; left: 50%; transform: translateX(-50%); z-index: 2;
-  display: flex; gap: .35rem;
-}
-.tp-hero-dot {
-  width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.3);
-  transition: background .2s, transform .2s;
-}
-.tp-hero-dot.active { background: #fff; transform: scale(1.3); }
-/* Upload button on hero */
-.tp-hero-upload-btn {
-  position: absolute; top: 1rem; right: 1rem; z-index: 2;
-  padding: .3rem .7rem; border-radius: .35rem;
-  background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.2);
-  font-size: .7rem; color: rgba(255,255,255,.75); backdrop-filter: blur(4px);
-  display: flex; align-items: center; gap: .3rem;
-  opacity: 0; transition: opacity .2s;
-}
-.tp-hero:hover .tp-hero-upload-btn { opacity: 1; }
+.tp-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 
 /* ── IDENTITY ROW ── */
 .tp-identity {
@@ -4629,21 +4587,15 @@ function renderTalentProfile(panel) {
         ${icon('chevron-down',13)} Volver a casting
       </div>
 
-      <!-- Hero carousel -->
-      <div class="tp-hero">
-        ${heroContent}
-        ${heroNav}
-        <button class="tp-hero-upload-btn" onclick="document.getElementById('tpHeroInput').click()">
-          ${icon('image',12)} ${heroImgs.length ? 'Añadir imagen' : 'Subir portada'}
-        </button>
-      </div>
-
       <!-- Identity -->
       <div class="tp-identity">
-        <div>
-          <div class="tp-name">${actor.nombre}</div>
-          <div class="tp-role">${actor.rol || ''}${actor.rol && estadoBadge ? ' · ' : ''}${estadoBadge}</div>
-          <div class="tp-meta-chips">${chips}</div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          ${heroImgs.length ? `<div class="tp-avatar"><img src="${heroImgs[0]}" alt="${actor.nombre}"></div>` : ''}
+          <div>
+            <div class="tp-name">${actor.nombre}</div>
+            <div class="tp-role">${actor.rol || ''}${actor.rol && estadoBadge ? ' · ' : ''}${estadoBadge}</div>
+            <div class="tp-meta-chips">${chips}</div>
+          </div>
         </div>
         <div class="tp-actions">
           <button class="tp-btn" onclick="openEditCast(${actor.id})">${icon('edit',14)} Editar perfil</button>
