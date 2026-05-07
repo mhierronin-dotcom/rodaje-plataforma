@@ -2069,9 +2069,12 @@ input[type=range].scale-slider::-moz-range-thumb {
 /* Cover hero */
 .cv-hero {
   position: relative; width: 100%;
-  height: 85vh; min-height: 520px; max-height: 900px;
+  height: 70vh; min-height: 360px; max-height: 750px;
   overflow: hidden; background: #111;
   display: flex; align-items: flex-end;
+}
+@media (max-width: 600px) {
+  .cv-hero { height: 45vh; min-height: 220px; }
 }
 .cv-hero-media {
   position: absolute; inset: 0;
@@ -2125,6 +2128,8 @@ input[type=range].scale-slider::-moz-range-thumb {
   display: flex; gap: .35rem; padding: 1rem 2rem;
   border-bottom: 1px solid rgba(255,255,255,.06);
   overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 56px; z-index: 9;
+  background: rgba(10,10,10,.95); backdrop-filter: blur(12px);
 }
 .cv-section-nav::-webkit-scrollbar { display: none; }
 .cv-section-btn {
@@ -2389,6 +2394,106 @@ input[type=range].scale-slider::-moz-range-thumb {
 
 /* Empty state */
 .cv-empty { padding: 3rem 0; text-align: center; color: #333; font-size: .82rem; }
+
+/* Styling (moodboard) in client view */
+.cv-sty-boards { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.cv-sty-board-btn {
+  padding: .3rem .75rem; border-radius: 2rem; font-size: .72rem;
+  color: #555; border: 1px solid rgba(255,255,255,.1); background: transparent;
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.cv-sty-board-btn.active { color: #e0e0e0; background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); }
+.cv-sty-board-btn:hover { color: #aaa; }
+.cv-sty-grid {
+  columns: 3; column-gap: .65rem;
+}
+@media (max-width: 760px) { .cv-sty-grid { columns: 2; } }
+@media (max-width: 450px) { .cv-sty-grid { columns: 2; } }
+.cv-sty-pin {
+  break-inside: avoid; margin-bottom: .65rem;
+  border-radius: .45rem; overflow: hidden;
+  cursor: pointer; position: relative;
+}
+.cv-sty-pin img { width: 100%; display: block; }
+.cv-sty-pin-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 55%);
+  opacity: 0; transition: opacity .2s;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: .6rem;
+}
+.cv-sty-pin:hover .cv-sty-pin-overlay { opacity: 1; }
+.cv-sty-pin-label { font-size: .72rem; color: #fff; font-weight: 500; line-height: 1.3; }
+.cv-sty-pin-chip { font-size: .62rem; color: rgba(255,255,255,.6); margin-top: .2rem; }
+.cv-sty-board-badge {
+  position: absolute; top: .4rem; left: .4rem;
+  font-size: .6rem; padding: .15rem .45rem; border-radius: 2rem;
+  background: rgba(0,0,0,.65); color: rgba(255,255,255,.7);
+  backdrop-filter: blur(4px);
+}
+
+/* Lightbox for styling pins */
+.cv-sty-lightbox {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.92); display: none;
+  align-items: center; justify-content: center;
+  padding: 2rem;
+}
+.cv-sty-lightbox.on { display: flex; }
+.cv-sty-lightbox img { max-width: 90vw; max-height: 88vh; object-fit: contain; border-radius: .5rem; }
+.cv-sty-lightbox-close {
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  background: rgba(255,255,255,.1); border: none; color: #fff;
+  width: 36px; height: 36px; border-radius: 50%; font-size: 1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.cv-sty-lightbox-info {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  text-align: center; color: rgba(255,255,255,.7); font-size: .8rem;
+}
+
+/* Calendario in client view */
+.cv-cal-wrapper { overflow-x: auto; }
+.cv-cal-table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.cv-cal-table th {
+  font-size: .65rem; color: #444; text-transform: uppercase; letter-spacing: .08em;
+  padding: .4rem .3rem; border-bottom: 1px solid rgba(255,255,255,.08);
+  text-align: center; font-weight: 500;
+}
+.cv-cal-week-label {
+  font-size: .58rem; color: #333; text-transform: uppercase; letter-spacing: 1px;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  width: 28px; text-align: center; border-right: 1px solid rgba(255,255,255,.06);
+}
+.cv-cal-day {
+  vertical-align: top; padding: .35rem .3rem; border: 1px solid rgba(255,255,255,.04);
+  min-width: 72px; min-height: 80px;
+}
+.cv-cal-day-num { font-size: .68rem; color: #383838; margin-bottom: .3rem; }
+.cv-cal-day.active .cv-cal-day-num { color: #666; }
+.cv-cal-chip {
+  display: block; border-radius: 3px; padding: 2px 5px; font-size: .65rem;
+  font-weight: 500; line-height: 1.3; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; margin-bottom: 2px; color: #fff;
+}
+.cv-cal-chip.rodaje   { background: rgba(26,115,232,.85); }
+.cv-cal-chip.scouting { background: rgba(3,155,229,.85); }
+.cv-cal-chip.viaje    { background: rgba(230,124,115,.85); }
+.cv-cal-chip.hotel    { background: rgba(51,182,121,.85); }
+.cv-cal-chip.familia  { background: rgba(11,128,67,.85); }
+.cv-cal-chip.vuelta   { background: rgba(246,191,38,.85); color: #1a1a1a; }
+.cv-cal-chip.custom   { background: rgba(255,255,255,.12); }
+.cv-cal-lugar {
+  font-size: .6rem; padding: 1px 4px; border-radius: 2px; margin-bottom: 2px;
+  background: rgba(26,40,80,.9); border: 1px solid rgba(26,115,232,.5); color: rgba(255,255,255,.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cv-cal-legend {
+  display: flex; flex-wrap: wrap; gap: .4rem .9rem; margin-bottom: 1rem;
+  font-size: .68rem; color: #555;
+}
+.cv-cal-legend-item { display: flex; align-items: center; gap: .35rem; }
+.cv-cal-legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
 
 /* Loc detail in client view */
 .cv-loc-detail-gallery { columns: 2; column-gap: .6rem; }
@@ -2789,6 +2894,13 @@ footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
   <div id="cvHero" class="cv-hero"></div>
   <div class="cv-section-nav" id="cvSectionNav"></div>
   <div class="cv-content" id="cvContent"></div>
+</div>
+
+<!-- Styling lightbox for client view -->
+<div class="cv-sty-lightbox" id="cvStyLightbox" onclick="cvStyLightboxClose()">
+  <button class="cv-sty-lightbox-close" onclick="cvStyLightboxClose()">✕</button>
+  <img id="cvStyLightboxImg" src="" alt="">
+  <div class="cv-sty-lightbox-info" id="cvStyLightboxInfo"></div>
 </div>
 
 <!-- ── FOOTER ── -->
@@ -7916,7 +8028,9 @@ let cvActiveSectionId = null;
 function openClientView() {
   const p = activeProject;
   if (!p) return;
-  cvActiveSectionId = Object.keys(p.modules).find(k => p.modules[k]) || 'shootingPlan';
+  // Pick first module that has content (enabled OR has data)
+  const firstWithContent = MODULE_DEFS.find(m => cvModuleHasContent(p, m.id));
+  cvActiveSectionId = firstWithContent ? firstWithContent.id : 'shootingPlan';
   cvSpActiveDayId = null; // reset to first day
   document.getElementById('clientView').classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -7977,9 +8091,26 @@ function renderCvHero(p) {
     </div>`;
 }
 
+function cvModuleHasContent(p, id) {
+  // A module is shown in client view if it's enabled in p.modules OR if it has actual data
+  if (p.modules && p.modules[id]) return true;
+  switch (id) {
+    case 'styling':       return !!(p.styling && p.styling.pins && p.styling.pins.length);
+    case 'calendario':    return !!(p.calData && p.calData.weeks && p.calData.weeks.length);
+    case 'casting':       return !!(p.casting && p.casting.length);
+    case 'localizaciones':return !!(p.localizaciones && p.localizaciones.length);
+    case 'equipo':        return !!(p.equipo && p.equipo.length);
+    case 'shootingPlan':  return !!(p.planificacion && p.planificacion.length);
+    case 'presupuesto':   return !!(p.presupuestoDetalle && p.presupuestoDetalle.departamentos && p.presupuestoDetalle.departamentos.length);
+    case 'tratamiento':   return !!p.tratamientoPDF;
+    case 'libre':         return !!(p.libreSection && p.libreSection.archivo);
+    default:              return false;
+  }
+}
+
 function renderCvSectionNav(p) {
   const nav = document.getElementById('cvSectionNav');
-  const enabledModules = MODULE_DEFS.filter(m => p.modules[m.id]);
+  const enabledModules = MODULE_DEFS.filter(m => cvModuleHasContent(p, m.id));
   nav.innerHTML = enabledModules.map(m => `
     <button class="cv-section-btn ${cvActiveSectionId === m.id ? 'active' : ''}"
       onclick="cvSwitchSection('${m.id}')">
@@ -8009,6 +8140,8 @@ function renderCvSection(p) {
     case 'presupuesto':   html += cvRenderPresupuesto(p);   break;
     case 'tratamiento':   html += cvRenderTratamiento(p);   break;
     case 'libre':         html += cvRenderLibre(p);         break;
+    case 'styling':       html += cvRenderStyling(p);       break;
+    case 'calendario':    html += cvRenderCalendario(p);    break;
     default:              html += `<div class="cv-empty">Contenido no disponible.</div>`; break;
   }
 
@@ -8338,6 +8471,144 @@ function cvRenderLibre(p) {
     return `<iframe src="${s.archivo}" style="width:100%;min-height:600px;border:none;border-radius:.5rem;background:#fff;"></iframe>`;
   }
   return `<div class="cv-empty">Formato no soportado.</div>`;
+}
+
+// ── STYLING (MOODBOARD) ───────────────────────
+let cvStyActiveBoard = '__all__';
+
+function cvRenderStyling(p) {
+  // Ensure styling data is initialised (same as edit mode does via styInit)
+  if (!p.styling) p.styling = { boards: [], pins: [] };
+  if (!p.styling.boards) p.styling.boards = [];
+  if (!p.styling.pins)   p.styling.pins   = [];
+  const boards = p.styling.boards;
+  const pins   = p.styling.pins;
+  if (!pins.length) return `<div class="cv-empty">Sin imágenes de styling.</div>`;
+
+  // Reset to __all__ if current board no longer exists
+  if (cvStyActiveBoard !== '__all__' && !boards.find(b => b.id === cvStyActiveBoard)) {
+    cvStyActiveBoard = '__all__';
+  }
+
+  const visiblePins = cvStyActiveBoard === '__all__'
+    ? pins
+    : pins.filter(pin => pin.boardId === cvStyActiveBoard);
+
+  // Board filter buttons
+  const boardBtns = [
+    `<button class="cv-sty-board-btn ${cvStyActiveBoard==='__all__'?'active':''}" onclick="cvStySetBoard('__all__')">Todo</button>`,
+    ...boards.map(b =>
+      `<button class="cv-sty-board-btn ${cvStyActiveBoard===b.id?'active':''}" onclick="cvStySetBoard('${b.id}')">${b.nombre}</button>`)
+  ].join('');
+
+  const pinsHtml = visiblePins.map((pin, idx) => {
+    const board = boards.find(b => b.id === pin.boardId);
+    const boardBadge = board && cvStyActiveBoard === '__all__'
+      ? `<span class="cv-sty-board-badge">${board.nombre}</span>` : '';
+
+    const actor = pin.talentId ? (p.casting||[]).find(a => a.id === pin.talentId) : null;
+    const dia   = pin.dayId   ? (p.planificacion||[]).find(d => d.id === pin.dayId) : null;
+    const loc   = pin.locId   ? (p.localizaciones||[]).find(l => l.id === pin.locId) : null;
+    const chips = [
+      actor ? actor.nombre.split(' ')[0] : '',
+      dia   ? `D${dia.dia}` : '',
+      loc   ? loc.nombre    : '',
+    ].filter(Boolean).join(' · ');
+
+    return `
+      <div class="cv-sty-pin" onclick="cvStyLightboxOpen(${idx})">
+        <img src="${pin.url}" alt="${(pin.label||'').replace(/"/g,'&quot;')}" loading="lazy">
+        ${boardBadge}
+        <div class="cv-sty-pin-overlay">
+          ${pin.label ? `<div class="cv-sty-pin-label">${pin.label}</div>` : ''}
+          ${chips ? `<div class="cv-sty-pin-chip">${chips}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Store visible pins for lightbox navigation
+  window._cvStyVisiblePins = visiblePins;
+
+  return `
+    <div class="cv-sty-boards">${boardBtns}</div>
+    <div class="cv-sty-grid" id="cvStyGrid">${pinsHtml}</div>`;
+}
+
+function cvStySetBoard(id) {
+  cvStyActiveBoard = id;
+  const p = activeProject;
+  const m = MODULE_DEFS.find(m => m.id === 'styling');
+  let html = m ? `<div class="cv-section-title">${m.label}</div>` : '';
+  html += cvRenderStyling(p);
+  document.getElementById('cvContent').innerHTML = html;
+}
+
+let _cvStyIdx = 0;
+
+function cvStyLightboxOpen(idx) {
+  _cvStyIdx = idx;
+  const pins = window._cvStyVisiblePins || [];
+  const pin = pins[idx];
+  if (!pin) return;
+  document.getElementById('cvStyLightboxImg').src = pin.url;
+  document.getElementById('cvStyLightboxInfo').textContent = pin.label || '';
+  document.getElementById('cvStyLightbox').classList.add('on');
+}
+
+function cvStyLightboxClose() {
+  document.getElementById('cvStyLightbox').classList.remove('on');
+}
+
+// ── CALENDARIO ────────────────────────────────
+function cvRenderCalendario(p) {
+  const calData = p.calData;
+  if (!calData || !calData.weeks || !calData.weeks.length) {
+    return `<div class="cv-empty">Sin calendario configurado.</div>`;
+  }
+
+  const legend = `
+    <div class="cv-cal-legend">
+      <div class="cv-cal-legend-item"><div class="cv-cal-legend-dot" style="background:#1a73e8"></div>Rodaje</div>
+      <div class="cv-cal-legend-item"><div class="cv-cal-legend-dot" style="background:#039be5"></div>Scouting</div>
+      <div class="cv-cal-legend-item"><div class="cv-cal-legend-dot" style="background:#e67c73"></div>Viaje</div>
+      <div class="cv-cal-legend-item"><div class="cv-cal-legend-dot" style="background:#33b679"></div>Alojamiento</div>
+      <div class="cv-cal-legend-item"><div class="cv-cal-legend-dot" style="background:#0b8043"></div>Cast</div>
+      <div class="cv-cal-legend-item"><div class="cv-cal-legend-dot" style="background:#f6bf26;color:#1a1a1a"></div>Vuelta</div>
+    </div>`;
+
+  const headerCells = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM']
+    .map(d => `<th>${d}</th>`).join('');
+
+  const rows = calData.weeks.map(week => {
+    const cells = week.days.map(day => {
+      if (!day.active) return `<td class="cv-cal-day"></td>`;
+      const lugarHtml = day.lugar
+        ? `<div class="cv-cal-lugar">${day.lugar.text || ''}</div>` : '';
+      const chipsHtml = (day.chips || []).map(chip => {
+        const style = chip.color ? `style="background:${chip.color}"` : '';
+        return `<span class="cv-cal-chip ${chip.type||'custom'}" ${style}>${chip.text||''}</span>`;
+      }).join('');
+      return `
+        <td class="cv-cal-day active">
+          <div class="cv-cal-day-num">${day.num}</div>
+          ${lugarHtml}${chipsHtml}
+        </td>`;
+    }).join('');
+    return `
+      <tr>
+        <td class="cv-cal-week-label">${week.label||''}</td>
+        ${cells}
+      </tr>`;
+  }).join('');
+
+  return `
+    ${legend}
+    <div class="cv-cal-wrapper">
+      <table class="cv-cal-table">
+        <thead><tr><th></th>${headerCells}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
 /* ══════════════════════════════════════════════
