@@ -6664,13 +6664,22 @@ function sbHeaders() {
 
 // ── Auth functions ────────────────────────────
 async function authInit() {
-  // Recuperar sesión guardada
+  // Recuperar sesión guardada y refrescar token automáticamente
   try {
     const saved = localStorage.getItem('rp-session');
     if (saved) {
       const s = JSON.parse(saved);
-      if (s && s.access_token && s.id) {
+      if (s && s.id) {
         authUser = s;
+        // Intentar refrescar el token en background
+        if (s.refresh_token) {
+          const refreshed = await authRefreshToken(s.refresh_token);
+          if (!refreshed) {
+            // Si el refresh falla, intentar entrar igualmente con el token guardado
+            // (puede que aún sea válido)
+          }
+        }
+        scheduleTokenRefresh();
         showApp();
         await initAppData();
         return;
