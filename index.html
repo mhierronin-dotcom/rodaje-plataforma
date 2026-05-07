@@ -8048,6 +8048,7 @@ function cvModuleHasContent(p, id) {
   if (p.modules && p.modules[id]) return true;
   switch (id) {
     case 'styling':       return !!(p.styling && p.styling.pins && p.styling.pins.length);
+    case 'visual':        return !!(p.styling && p.styling.pins && p.styling.pins.length);
     case 'calendario':    return !!(p.calData && p.calData.weeks && p.calData.weeks.length);
     case 'casting':       return !!(p.casting && p.casting.length);
     case 'localizaciones':return !!(p.localizaciones && p.localizaciones.length);
@@ -8093,6 +8094,7 @@ function renderCvSection(p) {
     case 'tratamiento':   html += cvRenderTratamiento(p);   break;
     case 'libre':         html += cvRenderLibre(p);         break;
     case 'styling':       html += cvRenderStyling(p);       break;
+    case 'visual':        html += cvRenderStyling(p);       break;
     case 'calendario':    html += cvRenderCalendario(p);    break;
     default:              html += `<div class="cv-empty">Contenido no disponible.</div>`; break;
   }
