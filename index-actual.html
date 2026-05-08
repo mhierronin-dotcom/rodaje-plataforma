@@ -2457,6 +2457,85 @@ input[type=range].scale-slider::-moz-range-thumb {
 .cv-loc-detail-gallery { columns: 2; column-gap: .6rem; }
 .cv-loc-detail-gallery img { width: 100%; display: block; margin-bottom: .6rem; border-radius: .4rem; cursor: pointer; }
 
+/* ─── RESUMEN / DASHBOARD ─── */
+.rs-wrap { padding: 0 0 3rem; max-width: 900px; }
+.rs-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;
+}
+.rs-project-name { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: .35rem; }
+.rs-project-meta { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; font-size: .78rem; color: #555; }
+.rs-estado-pill {
+  font-size: .62rem; padding: .18rem .6rem; border-radius: 2rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.rs-estado-pill.activo    { color: #a0d4a0; border: 1px solid rgba(160,212,160,.3); }
+.rs-estado-pill.produccion { color: #e8c547; border: 1px solid rgba(232,197,71,.3); }
+.rs-estado-pill.cerrado   { color: #666; border: 1px solid rgba(255,255,255,.12); }
+.rs-client-btn {
+  padding: .45rem 1rem; border-radius: .45rem; font-size: .78rem;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  color: #ccc; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: .4rem; white-space: nowrap;
+  transition: all .15s; flex-shrink: 0;
+}
+.rs-client-btn:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.22); color: #fff; }
+
+.rs-kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: .75rem; margin-bottom: 1.75rem;
+}
+.rs-kpi {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+  border-radius: .75rem; padding: 1rem 1.1rem 1rem;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.rs-kpi:hover { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.13); }
+.rs-kpi-label { font-size: .65rem; color: #444; text-transform: uppercase; letter-spacing: .09em; margin-bottom: .5rem; }
+.rs-kpi-value { font-size: 1.7rem; font-weight: 600; letter-spacing: -.03em; line-height: 1; margin-bottom: .6rem; }
+.rs-kpi-value span { font-size: 1rem; font-weight: 400; color: #555; }
+.rs-kpi-bar { height: 2px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; margin-bottom: .45rem; }
+.rs-kpi-fill { height: 100%; border-radius: 2px; transition: width .6s ease; }
+.rs-kpi-sub { font-size: .68rem; color: #444; }
+
+.rs-bottom { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+@media (max-width: 640px) { .rs-bottom { grid-template-columns: 1fr; } }
+.rs-card {
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+  border-radius: .75rem; padding: 1rem 1.1rem;
+}
+.rs-card-title { font-size: .68rem; color: #444; text-transform: uppercase; letter-spacing: .09em; margin-bottom: .9rem; display: flex; align-items: center; gap: .4rem; }
+.rs-upcoming-row {
+  display: flex; align-items: center; gap: .75rem; padding: .55rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  transition: opacity .15s;
+}
+.rs-upcoming-row:last-child { border-bottom: none; }
+.rs-upcoming-row:hover { opacity: .75; }
+.rs-upcoming-day { font-size: .7rem; font-weight: 600; color: #555; width: 24px; flex-shrink: 0; }
+.rs-upcoming-info { flex: 1; min-width: 0; }
+.rs-upcoming-date { font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rs-upcoming-meta { font-size: .67rem; color: #444; margin-top: .1rem; }
+.rs-upcoming-badge { font-size: .65rem; color: #555; white-space: nowrap; flex-shrink: 0; }
+.rs-cast-row { display: flex; flex-wrap: wrap; gap: .6rem; }
+.rs-cast-chip {
+  display: flex; align-items: center; gap: .55rem;
+  padding: .4rem .6rem; border-radius: .5rem;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+  transition: background .15s;
+}
+.rs-cast-chip:hover { background: rgba(255,255,255,.07); }
+.rs-cast-avatar {
+  width: 32px; height: 32px; border-radius: 50%; overflow: hidden;
+  background: rgba(255,255,255,.07); flex-shrink: 0;
+}
+.rs-cast-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.rs-cast-avatar-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #333; }
+.rs-cast-name { font-size: .78rem; font-weight: 500; }
+.rs-cast-status { font-size: .62rem; text-transform: capitalize; color: #444; margin-top: .05rem; }
+.rs-cast-status.confirmado { color: #a0d4a0; }
+.rs-cast-status.pendiente  { color: #e8c547; }
+
 /* ─── VISUAL ─── */
 .visual-placeholder {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -2828,6 +2907,7 @@ footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
     <div class="module-bar" id="moduleBar"></div>
 
     <!-- Panels -->
+    <div id="panelResumen"       class="module-panel"></div>
     <div id="panelShootingPlan"  class="module-panel"></div>
     <div id="panelCasting"       class="module-panel"></div>
     <div id="panelEquipo"        class="module-panel"></div>
@@ -3306,7 +3386,7 @@ function deleteProject(projectId, e) {
 ══════════════════════════════════════════════ */
 async function openProject(id) {
   activeProject = projects.find(p => p.id === id);
-  activeModuleId = Object.keys(activeProject.modules).find(k => activeProject.modules[k]) || 'shootingPlan';
+  activeModuleId = 'resumen'; // Siempre abre en el resumen
   document.getElementById('dashboardView').style.display = 'none';
   document.getElementById('projectDetail').classList.add('active');
   document.getElementById('detailTitle').textContent = activeProject.nombre;
@@ -3377,6 +3457,13 @@ function _goToDashboardOrig() {
 function renderModuleBar() {
   const bar = document.getElementById('moduleBar');
   bar.innerHTML = '';
+
+  // Tab Resumen (siempre visible, primero)
+  const resBtn = document.createElement('button');
+  resBtn.className = 'module-tab' + (activeModuleId === 'resumen' ? ' active' : '');
+  resBtn.innerHTML = `${icon('image')} Resumen`;
+  resBtn.onclick = () => { activeModuleId = 'resumen'; renderModuleBar(); renderActivePanel(); };
+  bar.appendChild(resBtn);
 
   // Módulos estándar
   MODULE_DEFS.forEach(m => {
@@ -3480,6 +3567,13 @@ function renderActivePanel() {
     return;
   }
 
+  // Resumen es un panel especial (no está en MODULE_DEFS)
+  if (activeModuleId === 'resumen') {
+    const panel = document.getElementById('panelResumen');
+    if (panel) { panel.classList.add('active'); renderResumen(panel); }
+    return;
+  }
+
   const def = MODULE_DEFS.find(m => m.id === activeModuleId);
   if (!def) return;
   const panel = document.getElementById(def.panelId);
@@ -3497,6 +3591,157 @@ function renderActivePanel() {
     case 'localizaciones':  renderLocalizaciones(panel);   break;
     case 'styling':          renderStyling(panel);           break;
   }
+}
+
+/* ══════════════════════════════════════════════
+   RESUMEN / DASHBOARD
+══════════════════════════════════════════════ */
+function renderResumen(panel) {
+  const p = activeProject;
+
+  // ── Métricas ──────────────────────────────
+  const totalCast   = (p.casting || []).length;
+  const confirmCast = (p.casting || []).filter(a => a.estado === 'confirmado').length;
+  const pendingCast = (p.casting || []).filter(a => !a.estado || a.estado === 'pendiente').length;
+  const pctCast     = totalCast ? Math.round(confirmCast / totalCast * 100) : 0;
+
+  const totalDias   = (p.planificacion || []).length;
+  const totalPlanos = (p.planificacion || []).reduce((s, d) => s + (d.rows || []).length, 0);
+
+  const totalLocs   = (p.localizaciones || []).length;
+  const locsOk      = (p.localizaciones || []).filter(l => l.estado === 'confirmada').length;
+
+  const depts       = p.presupuestoDetalle && p.presupuestoDetalle.departamentos || [];
+  const presTotal   = depts.reduce((s, d) => s + (d.partidas||[]).reduce((ss, pp) => ss + (parseFloat(pp.importe)||0), 0), 0);
+  const presGastado = depts.reduce((s, d) => s + (d.partidas||[]).reduce((ss, pp) => ss + (parseFloat(pp.gastado)||0), 0), 0);
+  const pctPres     = presTotal > 0 ? Math.round(presGastado / presTotal * 100) : 0;
+
+  const totalEquipo = (p.equipo || []).length;
+  const totalPins   = (p.styling && p.styling.pins || []).length;
+
+  // ── Próximos días ─────────────────────────
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const proximosDias = (p.planificacion || [])
+    .filter(d => d.fecha && new Date(d.fecha) >= today)
+    .sort((a,b) => new Date(a.fecha) - new Date(b.fecha))
+    .slice(0, 3);
+
+  const proximosDiasHtml = proximosDias.length ? proximosDias.map(d => {
+    const diff = Math.round((new Date(d.fecha) - today) / 86400000);
+    const diffLabel = diff === 0 ? 'Hoy' : diff === 1 ? 'Mañana' : `En ${diff} días`;
+    const nPlanos = (d.rows || []).length;
+    return `
+      <div class="rs-upcoming-row" onclick="activeModuleId='shootingPlan';renderModuleBar();renderActivePanel();" style="cursor:pointer">
+        <div class="rs-upcoming-day">D${d.dia}</div>
+        <div class="rs-upcoming-info">
+          <div class="rs-upcoming-date">${d.fecha}${d.locacion ? ` · ${d.locacion}` : ''}</div>
+          <div class="rs-upcoming-meta">${nPlanos} plano${nPlanos !== 1?'s':''}</div>
+        </div>
+        <div class="rs-upcoming-badge">${diffLabel}</div>
+      </div>`;
+  }).join('') : `<div style="color:#383838;font-size:.8rem;padding:.75rem 0;">Sin días de rodaje próximos</div>`;
+
+  // ── Casting reciente ──────────────────────
+  const recentCast = (p.casting || []).slice(0,4);
+  const recentCastHtml = recentCast.map(a => {
+    const photo = a.photo
+      ? `<img src="${a.photo}" alt="${a.nombre}">`
+      : `<div class="rs-cast-avatar-ph">${icon('person',14)}</div>`;
+    const stClass = a.estado || 'pendiente';
+    return `
+      <div class="rs-cast-chip" onclick="activeModuleId='casting';renderModuleBar();renderActivePanel();" style="cursor:pointer">
+        <div class="rs-cast-avatar">${photo}</div>
+        <div>
+          <div class="rs-cast-name">${a.nombre.split(' ')[0]}</div>
+          <div class="rs-cast-status ${stClass}">${stClass}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // ── Estado general ────────────────────────
+  const estadoLabel = { activo: 'Activo', produccion: 'En producción', cerrado: 'Cerrado', archivo: 'Archivo' }[p.estado] || 'Activo';
+  const fechas = p.fechaInicio && p.fechaFin && p.fechaInicio !== '—' ? `${p.fechaInicio} → ${p.fechaFin}` : '';
+
+  panel.innerHTML = `
+    <div class="rs-wrap">
+
+      <!-- Header -->
+      <div class="rs-header">
+        <div>
+          <div class="rs-project-name">${p.nombre}</div>
+          <div class="rs-project-meta">
+            ${p.cliente && p.cliente !== '—' ? `<span>${p.cliente}</span>` : ''}
+            ${p.director && p.director !== '—' ? `<span>Dir. ${p.director}</span>` : ''}
+            ${fechas ? `<span>${fechas}</span>` : ''}
+            <span class="rs-estado-pill ${p.estado||'activo'}">${estadoLabel}</span>
+          </div>
+        </div>
+        <button class="rs-client-btn" onclick="openClientView()">
+          ${icon('image',13)} Vista cliente
+        </button>
+      </div>
+
+      <!-- KPI grid -->
+      <div class="rs-kpi-grid">
+        <div class="rs-kpi" onclick="activeModuleId='casting';renderModuleBar();renderActivePanel();">
+          <div class="rs-kpi-label">Casting</div>
+          <div class="rs-kpi-value">${confirmCast}<span>/${totalCast}</span></div>
+          <div class="rs-kpi-bar"><div class="rs-kpi-fill" style="width:${pctCast}%;background:#a0d4a0"></div></div>
+          <div class="rs-kpi-sub">${pctCast}% confirmado · ${pendingCast} pendiente${pendingCast!==1?'s':''}</div>
+        </div>
+        <div class="rs-kpi" onclick="activeModuleId='shootingPlan';renderModuleBar();renderActivePanel();">
+          <div class="rs-kpi-label">Rodaje</div>
+          <div class="rs-kpi-value">${totalDias}<span> día${totalDias!==1?'s':''}</span></div>
+          <div class="rs-kpi-bar"><div class="rs-kpi-fill" style="width:100%;background:#7eb8d4"></div></div>
+          <div class="rs-kpi-sub">${totalPlanos} plano${totalPlanos!==1?'s':''} planificados</div>
+        </div>
+        <div class="rs-kpi" onclick="activeModuleId='localizaciones';renderModuleBar();renderActivePanel();">
+          <div class="rs-kpi-label">Localizaciones</div>
+          <div class="rs-kpi-value">${locsOk}<span>/${totalLocs}</span></div>
+          <div class="rs-kpi-bar"><div class="rs-kpi-fill" style="width:${totalLocs?Math.round(locsOk/totalLocs*100):0}%;background:#e8c547"></div></div>
+          <div class="rs-kpi-sub">${totalLocs ? Math.round(locsOk/totalLocs*100) : 0}% confirmadas</div>
+        </div>
+        <div class="rs-kpi" onclick="activeModuleId='presupuesto';renderModuleBar();renderActivePanel();">
+          <div class="rs-kpi-label">Presupuesto</div>
+          <div class="rs-kpi-value">${presTotal > 0 ? presTotal.toLocaleString('es-ES') + ' €' : '—'}</div>
+          <div class="rs-kpi-bar"><div class="rs-kpi-fill" style="width:${pctPres}%;background:${pctPres>85?'#e57373':'#aaa'}"></div></div>
+          <div class="rs-kpi-sub">${presTotal > 0 ? pctPres + '% ejecutado' : 'Sin presupuesto'}</div>
+        </div>
+        ${totalEquipo > 0 ? `
+        <div class="rs-kpi" onclick="activeModuleId='equipo';renderModuleBar();renderActivePanel();">
+          <div class="rs-kpi-label">Equipo</div>
+          <div class="rs-kpi-value">${totalEquipo}<span> persona${totalEquipo!==1?'s':''}</span></div>
+          <div class="rs-kpi-bar"><div class="rs-kpi-fill" style="width:100%;background:#b39ddb"></div></div>
+          <div class="rs-kpi-sub">Equipo técnico</div>
+        </div>` : ''}
+        ${totalPins > 0 ? `
+        <div class="rs-kpi" onclick="activeModuleId='styling';renderModuleBar();renderActivePanel();">
+          <div class="rs-kpi-label">Styling</div>
+          <div class="rs-kpi-value">${totalPins}<span> ref${totalPins!==1?'s':''}</span></div>
+          <div class="rs-kpi-bar"><div class="rs-kpi-fill" style="width:100%;background:#f48fb1"></div></div>
+          <div class="rs-kpi-sub">Referencias de imagen</div>
+        </div>` : ''}
+      </div>
+
+      <!-- Bottom: próximos días + casting -->
+      <div class="rs-bottom">
+
+        <div class="rs-card">
+          <div class="rs-card-title">${icon('calendar',13)} Próximos días de rodaje</div>
+          ${proximosDiasHtml}
+        </div>
+
+        ${recentCast.length ? `
+        <div class="rs-card">
+          <div class="rs-card-title">${icon('users',13)} Casting</div>
+          <div class="rs-cast-row">${recentCastHtml}</div>
+          ${totalCast > 4 ? `<div style="font-size:.7rem;color:#444;margin-top:.75rem;cursor:pointer" onclick="activeModuleId='casting';renderModuleBar();renderActivePanel();">Ver todos (${totalCast}) →</div>` : ''}
+        </div>` : ''}
+
+      </div>
+
+    </div>`;
 }
 
 /* ══════════════════════════════════════════════
