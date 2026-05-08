@@ -717,6 +717,70 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .sp-shot-add-talent:hover { color: #888; border-color: rgba(255,255,255,.18); }
 
+/* ─── Referencias extra por plano ─── */
+.sp-shot-refs-toggle {
+  display: inline-flex; align-items: center; gap: .25rem;
+  padding: .12rem .45rem; border-radius: 2rem; font-size: .65rem; color: #444;
+  border: 1px solid rgba(255,255,255,.07); cursor: pointer; background: transparent;
+  transition: all .15s; font-family: inherit; flex-shrink: 0;
+}
+.sp-shot-refs-toggle:hover { color: #888; border-color: rgba(255,255,255,.18); }
+.sp-shot-refs-toggle.has-refs { color: #888; border-color: rgba(255,255,255,.15); }
+.sp-shot-refs-panel {
+  display: none; margin-top: .4rem;
+  border-top: 1px solid rgba(255,255,255,.06); padding-top: .65rem;
+}
+.sp-shot-refs-panel.open { display: block; }
+.sp-shot-refs-strip {
+  display: flex; gap: .5rem; flex-wrap: wrap; align-items: flex-start;
+}
+.sp-shot-ref-thumb {
+  position: relative; width: 80px; height: 60px; border-radius: .35rem;
+  overflow: hidden; background: #111; flex-shrink: 0; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.sp-shot-ref-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sp-shot-ref-del {
+  position: absolute; top: 2px; right: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: rgba(0,0,0,.75); color: #ccc; font-size: 10px;
+  display: none; align-items: center; justify-content: center;
+  border: none; cursor: pointer; line-height: 1;
+}
+.sp-shot-ref-thumb:hover .sp-shot-ref-del { display: flex; }
+.sp-shot-ref-add {
+  width: 80px; height: 60px; border-radius: .35rem;
+  border: 1px dashed rgba(255,255,255,.1); background: transparent;
+  color: #333; font-size: .65rem; cursor: pointer; font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .2rem; transition: all .15s; flex-shrink: 0;
+}
+.sp-shot-ref-add:hover { color: #666; border-color: rgba(255,255,255,.25); }
+
+/* Lightbox refs */
+.sp-ref-lightbox {
+  position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,.93);
+  display: none; align-items: center; justify-content: center;
+}
+.sp-ref-lightbox.on { display: flex; }
+.sp-ref-lightbox img { max-width: 90vw; max-height: 88vh; object-fit: contain; border-radius: .5rem; }
+.sp-ref-lb-close {
+  position: absolute; top: 1.25rem; right: 1.25rem;
+  background: rgba(255,255,255,.1); border: none; color: #fff;
+  width: 36px; height: 36px; border-radius: 50%; font-size: 1rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.sp-ref-lb-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,.08); border: none; color: #fff;
+  width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s;
+}
+.sp-ref-lb-nav:hover { background: rgba(255,255,255,.18); }
+.sp-ref-lb-prev { left: 1.25rem; }
+.sp-ref-lb-next { right: 4.5rem; }
+
 /* ─── Inline location row ─── */
 .sp-row-loc-wrap {
   display: flex; align-items: center; gap: .4rem;
@@ -2934,6 +2998,17 @@ footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
   <div class="cv-content" id="cvContent"></div>
 </div>
 
+<!-- Referencias lightbox (shooting plan) -->
+<div class="sp-ref-lightbox" id="spRefLightbox" onclick="spRefLbClose()">
+  <button class="sp-ref-lb-close" onclick="spRefLbClose()">✕</button>
+  <button class="sp-ref-lb-nav sp-ref-lb-prev" onclick="event.stopPropagation();spRefLbNav(-1)">‹</button>
+  <img id="spRefLbImg" src="" alt="">
+  <button class="sp-ref-lb-nav sp-ref-lb-next" onclick="event.stopPropagation();spRefLbNav(1)">›</button>
+</div>
+
+<!-- Input oculto para subir referencias -->
+<input type="file" id="spRefInput" accept="image/*" multiple style="display:none" onchange="spHandleRefUpload(event)">
+
 <!-- Styling lightbox for client view -->
 <div class="cv-sty-lightbox" id="cvStyLightbox" onclick="cvStyLightboxClose()">
   <button class="cv-sty-lightbox-close" onclick="cvStyLightboxClose()">✕</button>
@@ -3918,7 +3993,27 @@ function spRenderDayContent(dia) {
             <button class="sp-shot-add-talent" onclick="spPickCast('${dia.id}','${row.id}')">
               ${icon('plus',8)} Talent
             </button>
+            <button class="sp-shot-refs-toggle ${(row.refImgs||[]).length ? 'has-refs' : ''}"
+              onclick="spToggleRefs('${row.id}')" id="spRefsBtn_${row.id}">
+              ${icon('image',8)} Refs ${(row.refImgs||[]).length ? `<span style="opacity:.6">(${row.refImgs.length})</span>` : ''}
+            </button>
           </div>
+
+          <!-- Panel de referencias (desplegable) -->
+          <div class="sp-shot-refs-panel" id="spRefsPanel_${row.id}">
+            <div class="sp-shot-refs-strip" id="spRefsStrip_${row.id}">
+              ${(row.refImgs||[]).map((src, ri) => `
+                <div class="sp-shot-ref-thumb" onclick="spRefLightbox('${row.id}',${ri})">
+                  <img src="${src}" alt="ref ${ri+1}" loading="lazy">
+                  <button class="sp-shot-ref-del" onclick="event.stopPropagation();spDeleteRef('${dia.id}','${row.id}',${ri})">×</button>
+                </div>`).join('')}
+              <button class="sp-shot-ref-add" onclick="spTriggerRefUpload('${dia.id}','${row.id}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Añadir</span>
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>`;
   }).join('');
@@ -8835,6 +8930,109 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Normal auth flow
   await authInit();
 });
+
+/* ══════════════════════════════════════════════
+   SHOOTING PLAN — REFERENCIAS POR PLANO
+══════════════════════════════════════════════ */
+let _spRefTarget = null; // { diaId, rowId }
+let _spRefLbImgs = [];
+let _spRefLbIdx  = 0;
+
+function spToggleRefs(rowId) {
+  const panel = document.getElementById('spRefsPanel_' + rowId);
+  if (!panel) return;
+  panel.classList.toggle('open');
+}
+
+function spTriggerRefUpload(diaId, rowId) {
+  _spRefTarget = { diaId, rowId };
+  document.getElementById('spRefInput').click();
+}
+
+async function spHandleRefUpload(e) {
+  if (!_spRefTarget) return;
+  const { diaId, rowId } = _spRefTarget;
+  const files = Array.from(e.target.files);
+  e.target.value = '';
+
+  for (const file of files) {
+    const url = await sbUploadFile(file);
+    if (!url) continue;
+    const dia = activeProject.planificacion.find(d => d.id === diaId);
+    if (!dia) continue;
+    const row = (dia.rows || []).find(r => r.id === rowId);
+    if (!row) continue;
+    if (!row.refImgs) row.refImgs = [];
+    row.refImgs.push(url);
+  }
+  saveToLocalStorage();
+  _spRefTarget = null;
+  // Re-render solo la tira de refs del plano, sin rerenderizar todo el panel
+  _spRefreshStrip(diaId, rowId);
+}
+
+function spDeleteRef(diaId, rowId, idx) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (!dia) return;
+  const row = (dia.rows || []).find(r => r.id === rowId);
+  if (!row || !row.refImgs) return;
+  row.refImgs.splice(idx, 1);
+  saveToLocalStorage();
+  _spRefreshStrip(diaId, rowId);
+}
+
+function _spRefreshStrip(diaId, rowId) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  const row = dia && (dia.rows || []).find(r => r.id === rowId);
+  if (!row) return;
+  const strip = document.getElementById('spRefsStrip_' + rowId);
+  const btn   = document.getElementById('spRefsBtn_' + rowId);
+  if (!strip) return;
+
+  const refs = row.refImgs || [];
+  strip.innerHTML = refs.map((src, ri) => `
+    <div class="sp-shot-ref-thumb" onclick="spRefLightbox('${rowId}',${ri})">
+      <img src="${src}" alt="ref ${ri+1}" loading="lazy">
+      <button class="sp-shot-ref-del" onclick="event.stopPropagation();spDeleteRef('${diaId}','${rowId}',${ri})">×</button>
+    </div>`).join('') + `
+    <button class="sp-shot-ref-add" onclick="spTriggerRefUpload('${diaId}','${rowId}')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Añadir</span>
+    </button>`;
+
+  if (btn) {
+    btn.className = 'sp-shot-refs-toggle' + (refs.length ? ' has-refs' : '');
+    btn.innerHTML = `<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Refs ${refs.length ? `<span style="opacity:.6">(${refs.length})</span>` : ''}`;
+  }
+}
+
+function spRefLightbox(rowId, idx) {
+  // Find all refs for this row
+  let imgs = [];
+  for (const dia of activeProject.planificacion || []) {
+    const row = (dia.rows || []).find(r => r.id === rowId);
+    if (row && row.refImgs) { imgs = row.refImgs; break; }
+  }
+  _spRefLbImgs = imgs;
+  _spRefLbIdx  = idx;
+  _spRefLbShow();
+}
+
+function _spRefLbShow() {
+  const src = _spRefLbImgs[_spRefLbIdx];
+  if (!src) return;
+  document.getElementById('spRefLbImg').src = src;
+  document.getElementById('spRefLightbox').classList.add('on');
+}
+
+function spRefLbClose() {
+  document.getElementById('spRefLightbox').classList.remove('on');
+}
+
+function spRefLbNav(dir) {
+  _spRefLbIdx = (_spRefLbIdx + dir + _spRefLbImgs.length) % _spRefLbImgs.length;
+  _spRefLbShow();
+}
 </script>
 </body>
 </html>
