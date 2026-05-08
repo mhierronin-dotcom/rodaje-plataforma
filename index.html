@@ -455,6 +455,18 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .manage-modules-btn:hover { color: #ccc; border-color: rgba(255,255,255,.3); }
 
+/* ─── VISIBILIDAD CLIENTE ─── */
+.cv-visibility-toggle {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .65rem; padding: .15rem .5rem; border-radius: 2rem;
+  cursor: pointer; border: 1px solid rgba(255,255,255,.1);
+  background: transparent; font-family: inherit; transition: all .15s;
+  color: #444;
+}
+.cv-visibility-toggle.visible { color: #a0d4a0; border-color: rgba(160,212,160,.3); }
+.cv-visibility-toggle.hidden  { color: #555; border-color: rgba(255,255,255,.08); }
+.cv-visibility-toggle:hover   { border-color: rgba(255,255,255,.25); color: #aaa; }
+
 /* ─── NUEVA SECCIÓN LIBRE ─── */
 .module-tab-add-libre {
   padding: .35rem .75rem;
@@ -2517,6 +2529,25 @@ input[type=range].scale-slider::-moz-range-thumb {
 .cv-cal-legend-item { display: flex; align-items: center; gap: .35rem; }
 .cv-cal-legend-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
 
+/* Secciones libres en vista cliente */
+.cv-libre-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+.cv-libre-item { }
+.cv-libre-item-name { font-size: .72rem; color: #555; margin-top: .5rem; }
+.cv-libre-img { cursor: pointer; }
+.cv-libre-img img { width: 100%; border-radius: .5rem; display: block; }
+.cv-libre-generic {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2rem; border: 1px solid rgba(255,255,255,.08); border-radius: .75rem;
+  text-align: center; gap: .75rem; color: #555;
+}
+.cv-libre-download-btn {
+  display: inline-flex; align-items: center; gap: .4rem; font-size: .75rem;
+  padding: .4rem .9rem; border-radius: .4rem;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  color: #ccc; text-decoration: none; transition: all .15s;
+}
+.cv-libre-download-btn:hover { background: rgba(255,255,255,.1); color: #fff; }
+
 /* Loc detail in client view */
 .cv-loc-detail-gallery { columns: 2; column-gap: .6rem; }
 .cv-loc-detail-gallery img { width: 100%; display: block; margin-bottom: .6rem; border-radius: .4rem; cursor: pointer; }
@@ -3582,10 +3613,21 @@ function renderModuleBar() {
 function openManageModules() {
   const list = document.getElementById('moduleList');
   list.innerHTML = '';
+
+  // Header explicativo
+  const hdr = document.createElement('div');
+  hdr.style = 'display:grid;grid-template-columns:1fr 60px 80px;gap:.5rem;padding:.25rem .5rem;font-size:.62rem;color:#444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;';
+  hdr.innerHTML = '<span>Sección</span><span style="text-align:center">Activa</span><span style="text-align:center">Cliente</span>';
+  list.appendChild(hdr);
+
   MODULE_DEFS.forEach(m => {
-    const enabled = !!activeProject.modules[m.id];
+    if (!activeProject.modules) activeProject.modules = {};
+    if (!activeProject.modulesClienteVisible) activeProject.modulesClienteVisible = {};
+    const enabled  = !!activeProject.modules[m.id];
+    const visible  = activeProject.modulesClienteVisible[m.id] !== false; // default visible
     const row = document.createElement('div');
     row.className = 'module-row';
+    row.style = 'grid-template-columns:1fr 60px 80px;';
     row.innerHTML = `
       <div class="module-row-left">
         <span class="module-row-icon">${icon(m.iconKey)}</span>
@@ -3594,13 +3636,58 @@ function openManageModules() {
           <div class="module-row-desc">${m.desc}</div>
         </div>
       </div>
-      <label class="toggle">
-        <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleModule('${m.id}', this.checked)">
-        <span class="toggle-track"></span>
-      </label>`;
+      <div style="display:flex;align-items:center;justify-content:center;">
+        <label class="toggle">
+          <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleModule('${m.id}', this.checked)">
+          <span class="toggle-track"></span>
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;">
+        <label class="toggle" title="Visible en vista cliente">
+          <input type="checkbox" ${visible ? 'checked' : ''} onchange="toggleModuleClienteVisible('${m.id}', this.checked)" ${!enabled ? 'disabled' : ''}>
+          <span class="toggle-track"></span>
+        </label>
+      </div>`;
     list.appendChild(row);
   });
+
+  // Secciones libres
+  const libres = activeProject.seccionesLibres || [];
+  if (libres.length) {
+    const libHdr = document.createElement('div');
+    libHdr.style = 'font-size:.62rem;color:#444;text-transform:uppercase;letter-spacing:.08em;padding:.75rem .5rem .25rem;';
+    libHdr.textContent = 'Secciones personalizadas';
+    list.appendChild(libHdr);
+    libres.forEach(sec => {
+      const visible = sec.clienteVisible !== false;
+      const row = document.createElement('div');
+      row.className = 'module-row';
+      row.style = 'grid-template-columns:1fr 60px 80px;';
+      row.innerHTML = `
+        <div class="module-row-left">
+          <span class="module-row-icon">${icon('file')}</span>
+          <div><div class="module-row-name">${sec.nombre || 'Sección'}</div></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:.65rem;color:#555;">✓</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;">
+          <label class="toggle" title="Visible en vista cliente">
+            <input type="checkbox" ${visible ? 'checked' : ''} onchange="libreToggleClienteVisibleById('${sec.id}', this.checked)">
+            <span class="toggle-track"></span>
+          </label>
+        </div>`;
+      list.appendChild(row);
+    });
+  }
+
   document.getElementById('manageModulesModal').classList.add('open');
+}
+
+function toggleModuleClienteVisible(id, val) {
+  if (!activeProject.modulesClienteVisible) activeProject.modulesClienteVisible = {};
+  activeProject.modulesClienteVisible[id] = val;
+  saveToLocalStorage();
 }
 
 function toggleModule(id, val) {
@@ -5904,6 +5991,21 @@ function crearNuevaSeccion() {
   renderActivePanel();
 }
 
+function libreToggleClienteVisible(secId) {
+  const sec = libreGetSec(secId);
+  if (!sec) return;
+  sec.clienteVisible = sec.clienteVisible === false ? true : false;
+  saveToLocalStorage();
+  renderSeccionLibre(document.getElementById('panel_libre_' + secId), secId);
+}
+
+function libreToggleClienteVisibleById(secId, val) {
+  const sec = libreGetSec(secId);
+  if (!sec) return;
+  sec.clienteVisible = val;
+  saveToLocalStorage();
+}
+
 function libreDeleteSec(secId) {
   if (!confirm('¿Eliminar esta sección y todos sus documentos?')) return;
   activeProject.seccionesLibres = (activeProject.seccionesLibres || []).filter(s => s.id !== secId);
@@ -5989,6 +6091,10 @@ function renderSeccionLibre(panel, secId) {
           title="Editar nombre de la sección">
       </div>
       <div style="display:flex;gap:.5rem;align-items:center;">
+        <button class="cv-visibility-toggle ${sec.clienteVisible !== false ? 'visible' : 'hidden'}"
+          onclick="libreToggleClienteVisible('${secId}')" title="Visibilidad en vista cliente">
+          ${sec.clienteVisible !== false ? '👁 Visible cliente' : '🚫 Oculto cliente'}
+        </button>
         ${sec.docs.length ? `<label class="cast-add-btn" style="cursor:pointer;">${icon('plus',13)} Añadir archivo<input type="file" accept="*/*" style="display:none" onchange="handleSeccionLibreUpload(event,'${secId}')"></label>` : ''}
         <button class="cast-add-btn" style="color:#e57373;border-color:rgba(229,115,115,.2);" onclick="libreDeleteSec('${secId}')">${icon('trash',13)} Eliminar sección</button>
       </div>
@@ -8322,8 +8428,10 @@ function openClientView() {
   if (!p) return;
   // Pick first module that has content (enabled OR has data)
   const firstWithContent = MODULE_DEFS.find(m => cvModuleHasContent(p, m.id));
-  cvActiveSectionId = firstWithContent ? firstWithContent.id : 'shootingPlan';
-  cvSpActiveDayId = null; // reset to first day
+  // Also check libre sections
+  const firstLibre = (p.seccionesLibres || []).find(s => s.clienteVisible !== false && s.docs && s.docs.length);
+  cvActiveSectionId = firstWithContent ? firstWithContent.id : (firstLibre ? 'libre_' + firstLibre.id : 'shootingPlan');
+  cvSpActiveDayId = null;
   document.getElementById('clientView').classList.add('active');
   document.body.style.overflow = 'hidden';
   renderClientView();
@@ -8384,7 +8492,8 @@ function renderCvHero(p) {
 }
 
 function cvModuleHasContent(p, id) {
-  // A module is shown in client view if it's enabled in p.modules OR if it has actual data
+  // Check visibility setting — hidden means don't show regardless of content
+  if (p.modulesClienteVisible && p.modulesClienteVisible[id] === false) return false;
   if (p.modules && p.modules[id]) return true;
   switch (id) {
     case 'styling':       return !!(p.styling && p.styling.pins && p.styling.pins.length);
@@ -8403,12 +8512,26 @@ function cvModuleHasContent(p, id) {
 
 function renderCvSectionNav(p) {
   const nav = document.getElementById('cvSectionNav');
-  const enabledModules = MODULE_DEFS.filter(m => cvModuleHasContent(p, m.id));
-  nav.innerHTML = enabledModules.map(m => `
-    <button class="cv-section-btn ${cvActiveSectionId === m.id ? 'active' : ''}"
-      onclick="cvSwitchSection('${m.id}')">
-      ${m.label}
-    </button>`).join('');
+
+  // Módulos estándar con contenido y visibles
+  const standardBtns = MODULE_DEFS
+    .filter(m => cvModuleHasContent(p, m.id))
+    .map(m => `
+      <button class="cv-section-btn ${cvActiveSectionId === m.id ? 'active' : ''}"
+        onclick="cvSwitchSection('${m.id}')">
+        ${m.label}
+      </button>`).join('');
+
+  // Secciones libres visibles con contenido
+  const libresBtns = (p.seccionesLibres || [])
+    .filter(sec => sec.clienteVisible !== false && sec.docs && sec.docs.length)
+    .map(sec => `
+      <button class="cv-section-btn ${cvActiveSectionId === 'libre_' + sec.id ? 'active' : ''}"
+        onclick="cvSwitchSection('libre_${sec.id}')">
+        ${sec.nombre || 'Sección'}
+      </button>`).join('');
+
+  nav.innerHTML = standardBtns + libresBtns;
 }
 
 function cvSwitchSection(id) {
@@ -8420,9 +8543,20 @@ function cvSwitchSection(id) {
 
 function renderCvSection(p) {
   const content = document.getElementById('cvContent');
+
+  // Sección libre personalizada
+  if (cvActiveSectionId && cvActiveSectionId.startsWith('libre_')) {
+    const secId = cvActiveSectionId.replace('libre_', '');
+    const sec = (p.seccionesLibres || []).find(s => s.id === secId);
+    if (!sec) return;
+    content.innerHTML = `
+      <div class="cv-section-title">${sec.nombre || 'Sección'}</div>
+      ${cvRenderSeccionLibre(sec)}`;
+    return;
+  }
+
   const m = MODULE_DEFS.find(m => m.id === cvActiveSectionId);
   if (!m) return;
-
   let html = `<div class="cv-section-title">${m.label}</div>`;
 
   switch (cvActiveSectionId) {
@@ -8440,6 +8574,64 @@ function renderCvSection(p) {
   }
 
   content.innerHTML = html;
+}
+
+// ── SECCIONES LIBRES EN VISTA CLIENTE ─────────
+function cvRenderSeccionLibre(sec) {
+  const docs = sec.docs || [];
+  if (!docs.length) return `<div class="cv-empty">Sin archivos.</div>`;
+
+  return `<div class="cv-libre-grid">` + docs.map(doc => {
+    const tipo = doc.tipo || '';
+    const isImg  = tipo.startsWith('image/');
+    const isVid  = tipo.startsWith('video/');
+    const isPdf  = tipo === 'application/pdf' || doc.nombre?.endsWith('.pdf');
+    const isXlsx = tipo.includes('spreadsheet') || doc.nombre?.endsWith('.xlsx') || doc.nombre?.endsWith('.xls');
+
+    if (isImg) {
+      return `
+        <div class="cv-libre-item cv-libre-img" onclick="cvLibreLightbox('${sec.id}',${docs.indexOf(doc)})">
+          <img src="${doc.archivo}" alt="${doc.nombre}" loading="lazy">
+          <div class="cv-libre-item-name">${doc.nombre}</div>
+        </div>`;
+    }
+    if (isVid) {
+      return `
+        <div class="cv-libre-item cv-libre-vid">
+          <video src="${doc.archivo}" controls style="width:100%;border-radius:.5rem;background:#000;"></video>
+          <div class="cv-libre-item-name">${doc.nombre}</div>
+        </div>`;
+    }
+    if (isPdf) {
+      return `
+        <div class="cv-libre-item cv-libre-pdf">
+          <iframe src="${doc.archivo}" style="width:100%;height:600px;border:none;border-radius:.5rem;background:#fff;"></iframe>
+          <div class="cv-libre-item-name">${doc.nombre}</div>
+        </div>`;
+    }
+    // Genérico — enlace de descarga
+    return `
+      <div class="cv-libre-item cv-libre-generic">
+        <div class="cv-libre-generic-icon">${icon('file', 32)}</div>
+        <div class="cv-libre-item-name">${doc.nombre}</div>
+        <a href="${doc.archivo}" download="${doc.nombre}" class="cv-libre-download-btn" onclick="event.stopPropagation()">Descargar</a>
+      </div>`;
+  }).join('') + `</div>`;
+}
+
+// Lightbox para imágenes de secciones libres
+let _cvLibreLbSec = null;
+let _cvLibreLbIdx = 0;
+
+function cvLibreLightbox(secId, idx) {
+  _cvLibreLbSec = secId;
+  _cvLibreLbIdx = idx;
+  const sec = (activeProject.seccionesLibres || []).find(s => s.id === secId);
+  const imgs = (sec?.docs || []).filter(d => d.tipo && d.tipo.startsWith('image/'));
+  if (!imgs.length) return;
+  document.getElementById('cvStyLightboxImg').src = imgs[idx]?.archivo || '';
+  document.getElementById('cvStyLightboxInfo').textContent = imgs[idx]?.nombre || '';
+  document.getElementById('cvStyLightbox').classList.add('on');
 }
 
 // ── CASTING ───────────────────────────────────
