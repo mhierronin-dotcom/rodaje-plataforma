@@ -4753,9 +4753,16 @@ function spOpenImportModal() {
 }
 
 function spParseImportTable(text) {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^[\|\-\s]+$/));
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   const rows = [];
   for (const line of lines) {
+    // Separador explícito de día: línea con solo guiones o "---"
+    if (line.match(/^-{3,}$/) || line.match(/^={3,}$/)) {
+      rows.push({ _newDay: true });
+      continue;
+    }
+    // Ignorar líneas de separación markdown (solo guiones y pipes)
+    if (line.match(/^[\|\-\s]+$/) && !line.match(/[a-zA-Z0-9]/)) continue;
     // Separar por tabulador o por | (formato markdown)
     let cols = line.includes('\t') ? line.split('\t') : line.split('|').map(c => c.trim()).filter(c => c);
     if (cols.length < 2) continue;
@@ -4766,7 +4773,8 @@ function spParseImportTable(text) {
       locacion: cols[1] || '',
       talent: cols[2] || '',
       descripcion: cols[3] || '',
-      props: cols[4] || ''
+      props: cols[4] || '',
+      vestuario: cols[5] || ''
     });
   }
   return rows;
@@ -4777,27 +4785,37 @@ function spGroupIntoDays(rows, fechaInicio) {
   let diaActual = null;
   let lastHoraNum = -1;
   let diaNum = 1;
-  let fechaBase = fechaInicio ? new Date(fechaInicio) : new Date();
+  let fechaBase = fechaInicio ? new Date(fechaInicio + 'T12:00:00') : new Date();
+
+  function nuevoDia() {
+    const fecha = new Date(fechaBase);
+    fecha.setDate(fechaBase.getDate() + (diaNum - 1));
+    diaActual = {
+      id: 'd' + Date.now() + diaNum + Math.random().toString(36).slice(2,4),
+      dia: diaNum,
+      fecha: fecha.toISOString().split('T')[0],
+      locacion: '',
+      locacionId: null, castingIds: [], rows: [], shotlist: [], slOpen: false
+    };
+    dias.push(diaActual);
+    diaNum++;
+    lastHoraNum = -1;
+  }
 
   for (const r of rows) {
+    // Separador explícito de día
+    if (r._newDay) { nuevoDia(); continue; }
+
     // Extraer hora numérica para detectar cambio de día
     const horaMatch = r.hora.match(/(\d{1,2}):(\d{2})/);
     const horaNum = horaMatch ? parseInt(horaMatch[1]) * 60 + parseInt(horaMatch[2]) : -1;
     const isPendiente = r.hora.toLowerCase().includes('pendiente') || r.hora.toLowerCase().includes('noche');
 
-    // Nuevo día si la hora retrocede significativamente (>3h) o es la primera fila
-    if (!diaActual || (horaNum >= 0 && lastHoraNum >= 0 && horaNum < lastHoraNum - 180)) {
-      const fecha = new Date(fechaBase);
-      fecha.setDate(fechaBase.getDate() + (diaNum - 1));
-      diaActual = {
-        id: 'd' + Date.now() + diaNum,
-        dia: diaNum,
-        fecha: fecha.toISOString().split('T')[0],
-        locacion: '',
-        locacionId: null, castingIds: [], rows: [], shotlist: [], slOpen: false
-      };
-      dias.push(diaActual);
-      diaNum++;
+    // Nuevo día si: primera fila, o la hora retrocede >2h respecto a última hora real
+    if (!diaActual || (horaNum >= 0 && lastHoraNum >= 0 && horaNum < lastHoraNum - 120)) {
+      nuevoDia();
+    } else if (!diaActual) {
+      nuevoDia();
     }
 
     if (!isPendiente && horaNum >= 0) lastHoraNum = horaNum;
@@ -4820,7 +4838,7 @@ function spGroupIntoDays(rows, fechaInicio) {
       locacionId: null,
       descripcion: desc,
       props: r.props || '',
-      vestuario: '',
+      vestuario: r.vestuario || '',
       plano: 'General',
       castingIds: [], refImgs: [], imagen: null
     });
