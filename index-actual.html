@@ -2457,7 +2457,7 @@ input[type=range].scale-slider::-moz-range-thumb {
 .cv-sp-refs-board {
   columns: 3; column-gap: .5rem;
 }
-@media (max-width: 600px) { .cv-sp-refs-board { columns: 2; } }
+/* refs mobile columns handled in the unified @media block below */
 .cv-sp-refs-pin {
   break-inside: avoid; margin-bottom: .5rem;
   border-radius: .45rem; overflow: hidden;
@@ -2481,10 +2481,14 @@ input[type=range].scale-slider::-moz-range-thumb {
   pointer-events: none;
 }
 
-/* Mobile tweaks */
-@media (max-width: 600px) {
-  .cv-sp-shot-body { grid-template-columns: 100px 1fr; min-height: 90px; }
-  .cv-sp-shot-col:nth-child(4), .cv-sp-shot-col:nth-child(5) { display: none; }
+/* Mobile — scroll horizontal, igual que la versión editable */
+@media (max-width: 768px) {
+  .cv-sp-shots-grid { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cv-sp-shot-card { min-width: 680px; }
+  .cv-sp-shot-topbar { flex-wrap: nowrap; }
+  .cv-sp-shot-body { grid-template-columns: 140px 2fr 1fr 1fr; }
+  /* Referencias: mantener 2 columnas masonry en móvil */
+  .cv-sp-refs-board { columns: 2; column-gap: .45rem; }
 }
 
 /* Shotlist in client view */
