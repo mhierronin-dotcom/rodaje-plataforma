@@ -714,14 +714,14 @@ input[type=range].scale-slider::-moz-range-thumb {
   background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09);
   border-radius: .35rem; outline: none;
   font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
-  color: #ccc; letter-spacing: .04em; padding: .2rem .4rem;
+  color: #ccc; letter-spacing: .04em; padding: .2rem .3rem;
   cursor: pointer; transition: border-color .15s, background .15s;
-  /* style the time picker */
-  width: 90px;
-  color-scheme: dark;
+  width: 42px; text-align: center; color-scheme: dark;
+  -webkit-appearance: none; appearance: none;
 }
 .sp-shot-time-input:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.07); }
 .sp-shot-time-input:focus { border-color: rgba(255,255,255,.3); color: #fff; outline: none; }
+.sp-time-colon { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: #444; }
 .sp-shot-time-sep {
   font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
   color: #2e2e2e; line-height: 1; user-select: none; flex-shrink: 0;
@@ -4070,6 +4070,36 @@ function spSelectDay(diaId) {
   renderShootingPlan(document.getElementById('panelShootingPlan'));
 }
 
+function spTimeSelect(val, diaId, rowId, field) {
+  // val formato "HH:MM" o vacío
+  const parts = val.match(/^(\d{1,2}):(\d{2})$/);
+  const selH = parts ? parseInt(parts[1]) : '';
+  const selM = parts ? parseInt(parts[2]) : '';
+
+  const hours = Array.from({length:24}, (_,i) => i);
+  const mins  = Array.from({length:12}, (_,i) => i*5);
+
+  const hOpts = `<option value="">--</option>` + hours.map(h =>
+    `<option value="${String(h).padStart(2,'0')}" ${selH===h?'selected':''}>${String(h).padStart(2,'0')}</option>`
+  ).join('');
+  const mOpts = `<option value="">--</option>` + mins.map(m =>
+    `<option value="${String(m).padStart(2,'0')}" ${selM===m?'selected':''}>${String(m).padStart(2,'0')}</option>`
+  ).join('');
+
+  const onChange = `(function(el){
+    var card=el.closest('.sp-shot-topbar');
+    var hEl=card.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
+    var mEl=card.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
+    if(hEl&&mEl&&hEl.value&&mEl.value){
+      updateRowField('${diaId}','${rowId}','${field}',hEl.value+':'+mEl.value);
+    } else if(hEl&&mEl&&!hEl.value&&!mEl.value){
+      updateRowField('${diaId}','${rowId}','${field}','');
+    }
+  })(this)`;
+
+  return `<select class="sp-shot-time-input" data-tf="${diaId}_${rowId}_${field}_h" onchange="${onChange}" title="Hora">${hOpts}</select><span class="sp-time-colon">:</span><select class="sp-shot-time-input" data-tf="${diaId}_${rowId}_${field}_m" onchange="${onChange}" title="Minutos">${mOpts}</select>`;
+}
+
 function spRenderDayContent(dia) {
   // ── Meta block ──
   const metaHtml = `
@@ -4160,11 +4190,9 @@ function spRenderDayContent(dia) {
         <div class="sp-shot-topbar">
           <span class="sp-shot-num-badge">${idx + 1}</span>
           <div class="sp-shot-time-row">
-            <input type="time" class="sp-shot-time-input" value="${row.hora||''}"
-              onchange="updateRowField('${dia.id}','${row.id}','hora',this.value)" title="Hora inicio">
+            ${spTimeSelect(row.hora||'', dia.id, row.id, 'hora')}
             <span class="sp-shot-time-sep">–</span>
-            <input type="time" class="sp-shot-time-input" value="${row.horaFin||''}"
-              onchange="updateRowField('${dia.id}','${row.id}','horaFin',this.value)" title="Hora fin">
+            ${spTimeSelect(row.horaFin||'', dia.id, row.id, 'horaFin')}
           </div>
           <select class="sp-shot-plano-select"
             onchange="updateRowField('${dia.id}','${row.id}','plano',this.value)">
