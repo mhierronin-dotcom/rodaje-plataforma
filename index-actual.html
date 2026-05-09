@@ -2329,64 +2329,144 @@ input[type=range].scale-slider::-moz-range-thumb {
 .cv-sp-shots-grid { display: flex; flex-direction: column; gap: .75rem; }
 
 .cv-sp-shot-card {
-  display: flex; gap: 0;
+  display: flex; flex-direction: column;
   border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
   overflow: hidden; background: rgba(255,255,255,.02);
 }
 
+/* Top bar */
+.cv-sp-shot-topbar {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .45rem .75rem;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  background: rgba(255,255,255,.015);
+}
+.cv-sp-shot-num-badge {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(255,255,255,.08); font-size: .6rem;
+  display: flex; align-items: center; justify-content: center;
+  color: #555; flex-shrink: 0; font-weight: 600;
+}
+.cv-sp-shot-time {
+  font-size: .7rem; color: #555;
+  display: flex; align-items: center; gap: .2rem;
+  font-variant-numeric: tabular-nums;
+}
+.cv-sp-shot-time-sep { color: #333; }
+.cv-sp-shot-plano-tag {
+  font-size: .62rem; padding: .12rem .4rem; border-radius: .25rem;
+  background: rgba(255,255,255,.07); color: #777;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.cv-sp-shot-loc {
+  font-size: .65rem; color: #444;
+  display: flex; align-items: center; gap: .25rem; margin-left: auto;
+}
+
+/* Body: 4 columns like editor */
+.cv-sp-shot-body {
+  display: grid; grid-template-columns: 160px 2fr 1fr 1fr;
+  min-height: 110px;
+}
 /* Image column */
 .cv-sp-shot-img-col {
-  width: 100px; flex-shrink: 0;
   background: rgba(255,255,255,.04);
   display: flex; align-items: center; justify-content: center;
-  min-height: 90px;
+  overflow: hidden;
 }
 .cv-sp-shot-img-col img {
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .cv-sp-shot-img-empty {
   display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%; min-height: 90px; color: #252525;
+  width: 100%; height: 100%; min-height: 110px; color: #252525;
+  font-size: .65rem;
 }
-
-/* Info column */
-.cv-sp-shot-info-col {
-  flex: 1; padding: .75rem .85rem; display: flex;
-  flex-direction: column; gap: .4rem; min-width: 0;
+/* Data columns */
+.cv-sp-shot-col {
+  padding: .55rem .7rem;
+  border-left: 1px solid rgba(255,255,255,.05);
+  display: flex; flex-direction: column; gap: .3rem;
 }
-.cv-sp-shot-top-row {
-  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
-}
-.cv-sp-shot-num-badge {
-  width: 20px; height: 20px; border-radius: 50%;
-  background: rgba(255,255,255,.08); font-size: .62rem;
-  display: flex; align-items: center; justify-content: center;
-  color: #555; flex-shrink: 0; font-weight: 600;
-}
-.cv-sp-shot-time {
-  font-size: .72rem; color: #555;
-  display: flex; align-items: center; gap: .2rem;
-}
-.cv-sp-shot-time-sep { color: #333; }
-.cv-sp-shot-plano-tag {
-  font-size: .62rem; padding: .15rem .45rem; border-radius: .25rem;
-  background: rgba(255,255,255,.07); color: #777;
-  border: 1px solid rgba(255,255,255,.1);
+.cv-sp-shot-col-label {
+  font-size: .58rem; color: #3a3a3a;
+  text-transform: uppercase; letter-spacing: .07em;
 }
 .cv-sp-shot-desc {
-  font-size: .78rem; color: #999; line-height: 1.5;
+  font-size: .76rem; color: #999; line-height: 1.5; flex: 1;
 }
-.cv-sp-shot-loc {
-  font-size: .68rem; color: #555;
-  display: flex; align-items: center; gap: .3rem;
+.cv-sp-shot-col-val {
+  font-size: .76rem; color: #888; line-height: 1.5;
 }
 .cv-sp-shot-talent {
-  display: flex; flex-wrap: wrap; gap: .3rem;
+  display: flex; flex-wrap: wrap; gap: .3rem; margin-top: auto;
 }
 .cv-sp-talent-tag {
   font-size: .62rem; padding: .1rem .4rem; border-radius: 2rem;
   border: 1px solid rgba(255,255,255,.08); color: #555;
   display: flex; align-items: center; gap: .2rem;
+}
+
+/* Referencias — panel desplegable */
+.cv-sp-shot-refs-bar {
+  border-top: 1px solid rgba(255,255,255,.05);
+  display: flex; align-items: center;
+  padding: .35rem .75rem; gap: .5rem; cursor: pointer;
+  user-select: none; background: rgba(255,255,255,.01);
+  transition: background .15s;
+}
+.cv-sp-shot-refs-bar:hover { background: rgba(255,255,255,.04); }
+.cv-sp-shot-refs-bar-label {
+  font-size: .62rem; text-transform: uppercase; letter-spacing: .07em;
+  color: #444; flex: 1;
+}
+.cv-sp-shot-refs-bar-count {
+  font-size: .62rem; color: #555;
+}
+.cv-sp-shot-refs-bar-chevron {
+  font-size: .65rem; color: #444;
+  transition: transform .2s;
+}
+.cv-sp-shot-refs-bar.open .cv-sp-shot-refs-bar-chevron { transform: rotate(180deg); }
+.cv-sp-shot-refs-panel {
+  display: none;
+  padding: .5rem .75rem .65rem;
+  border-top: 1px solid rgba(255,255,255,.04);
+  background: rgba(0,0,0,.12);
+}
+.cv-sp-shot-refs-panel.open { display: block; }
+.cv-sp-refs-board {
+  columns: 5; column-gap: .4rem;
+}
+@media (max-width: 600px) { .cv-sp-refs-board { columns: 3; } }
+.cv-sp-refs-pin {
+  break-inside: avoid; margin-bottom: .4rem;
+  border-radius: .4rem; overflow: hidden;
+  cursor: pointer; position: relative;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.cv-sp-refs-pin img {
+  width: 100%; display: block; object-fit: cover;
+}
+.cv-sp-refs-pin-vid::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.3);
+  display: flex; align-items: center; justify-content: center;
+}
+.cv-sp-refs-pin-play {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px) {
+  .cv-sp-shot-body { grid-template-columns: 100px 1fr; min-height: 90px; }
+  .cv-sp-shot-col:nth-child(4), .cv-sp-shot-col:nth-child(5) { display: none; }
 }
 
 /* Shotlist in client view */
@@ -9273,7 +9353,7 @@ function cvSpRenderDay(p, dia) {
       </div>
     </div>`;
 
-  // Shot cards
+  // Shot cards — 4-column layout matching the editor
   const rows = dia.rows || [];
   const shotsHtml = rows.length ? `
     <div class="cv-sp-section-label">
@@ -9282,11 +9362,12 @@ function cvSpRenderDay(p, dia) {
     </div>
     <div class="cv-sp-shots-grid">
       ${rows.map((row, idx) => {
-        // Image column
+
+        // Frame column
         const imgCol = row.imagen
           ? `<div class="cv-sp-shot-img-col"><img src="${row.imagen}" alt="frame"></div>`
           : `<div class="cv-sp-shot-img-col"><div class="cv-sp-shot-img-empty">
-               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".25" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
              </div></div>`;
 
         // Time
@@ -9297,10 +9378,19 @@ function cvSpRenderDay(p, dia) {
           </span>` : '';
 
         // Plano tag
-        const planoHtml = row.plano
-          ? `<span class="cv-sp-shot-plano-tag">${row.plano}</span>` : '';
+        const planoHtml = row.plano ? `<span class="cv-sp-shot-plano-tag">${row.plano}</span>` : '';
 
-        // Talent badges from castingIds
+        // Location (topbar)
+        const locs = p.localizaciones || [];
+        const linkedLoc = row.locacionId ? locs.find(l => l.id === row.locacionId) : null;
+        const locText = linkedLoc ? linkedLoc.nombre : (row.locacion || '');
+        const locHtml = locText ? `
+          <span class="cv-sp-shot-loc">
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${locText}
+          </span>` : '';
+
+        // Talent badges
         const castBadges = (row.castingIds || []).map(cid => {
           const actor = (p.casting || []).find(a => a.id === cid);
           return actor ? `<span class="cv-sp-talent-tag">
@@ -9309,34 +9399,68 @@ function cvSpRenderDay(p, dia) {
           </span>` : '';
         }).join('');
 
-        // Location
-        const locs = p.localizaciones || [];
-        const linkedLoc = row.locacionId ? locs.find(l => l.id === row.locacionId) : null;
-        const locText = linkedLoc ? linkedLoc.nombre : (row.locacion || '');
-        const locHtml = locText ? `
-          <div class="cv-sp-shot-loc">
-            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            ${locText}
-          </div>` : '';
+        // Referencias panel (collapsible pinterest-style)
+        const refs = row.refImgs || [];
+        const hasRefs = refs.length > 0;
+        const refsBoard = hasRefs ? refs.map(src => {
+          const isVid = /\.(mp4|mov|webm|avi)/i.test(src);
+          if (isVid) {
+            return `<div class="cv-sp-refs-pin cv-sp-refs-pin-vid">
+              <video src="${src}" muted preload="metadata" style="width:100%;display:block;object-fit:cover;max-height:90px;" onclick="event.stopPropagation()"></video>
+              <div class="cv-sp-refs-pin-play">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="#fff"><polygon points="5,3 19,12 5,21"/></svg>
+              </div>
+            </div>`;
+          }
+          return `<div class="cv-sp-refs-pin">
+            <img src="${src}" alt="ref" loading="lazy">
+          </div>`;
+        }).join('') : '';
+
+        const refsBarLabel = hasRefs
+          ? `Referencias <span class="cv-sp-shot-refs-bar-count">(${refs.length})</span>`
+          : `Referencias`;
+
+        const refsPanel = `
+          <div class="cv-sp-shot-refs-bar" onclick="cvSpToggleRefs(this)">
+            <span class="cv-sp-shot-refs-bar-label">${refsBarLabel}</span>
+            <span class="cv-sp-shot-refs-bar-chevron">▾</span>
+          </div>
+          ${hasRefs ? `
+          <div class="cv-sp-shot-refs-panel">
+            <div class="cv-sp-refs-board">${refsBoard}</div>
+          </div>` : ''}`;
 
         return `
           <div class="cv-sp-shot-card">
-            ${imgCol}
-            <div class="cv-sp-shot-info-col">
-              <div class="cv-sp-shot-top-row">
-                <span class="cv-sp-shot-num-badge">${idx + 1}</span>
-                ${timeHtml}
-                ${planoHtml}
-              </div>
-              ${row.descripcion ? `<div class="cv-sp-shot-desc">${row.descripcion}</div>` : ''}
+            <div class="cv-sp-shot-topbar">
+              <span class="cv-sp-shot-num-badge">${idx + 1}</span>
+              ${timeHtml}
+              ${planoHtml}
               ${locHtml}
-              ${castBadges ? `<div class="cv-sp-shot-talent">${castBadges}</div>` : ''}
             </div>
+            <div class="cv-sp-shot-body">
+              ${imgCol}
+              <div class="cv-sp-shot-col">
+                <span class="cv-sp-shot-col-label">Descripción</span>
+                ${row.descripcion ? `<div class="cv-sp-shot-desc">${row.descripcion}</div>` : ''}
+                ${castBadges ? `<div class="cv-sp-shot-talent" style="margin-top:auto">${castBadges}</div>` : ''}
+              </div>
+              <div class="cv-sp-shot-col">
+                <span class="cv-sp-shot-col-label">Props</span>
+                ${row.props ? `<div class="cv-sp-shot-col-val">${row.props}</div>` : ''}
+              </div>
+              <div class="cv-sp-shot-col">
+                <span class="cv-sp-shot-col-label">Vestuario</span>
+                ${row.vestuario ? `<div class="cv-sp-shot-col-val">${row.vestuario}</div>` : ''}
+              </div>
+            </div>
+            ${refsPanel}
           </div>`;
       }).join('')}
     </div>` : `<div class="cv-empty" style="padding:2rem 0;">Sin planos registrados para este día.</div>`;
 
-  // Shotlist
+  // Shotlist (legacy)
   const shots = dia.shotlist || [];
   const shotlistHtml = shots.length ? `
     <div class="cv-sp-shotlist">
@@ -9358,6 +9482,15 @@ function cvSpRenderDay(p, dia) {
     </div>` : '';
 
   return `${metaHtml}${shotsHtml}${shotlistHtml}`;
+}
+
+function cvSpToggleRefs(bar) {
+  const isOpen = bar.classList.contains('open');
+  bar.classList.toggle('open', !isOpen);
+  const panel = bar.nextElementSibling;
+  if (panel && panel.classList.contains('cv-sp-shot-refs-panel')) {
+    panel.classList.toggle('open', !isOpen);
+  }
 }
 
 // ── EQUIPO ────────────────────────────────────
