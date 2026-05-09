@@ -1293,6 +1293,7 @@ input[type=range].scale-slider::-moz-range-thumb {
   display: flex; align-items: center; justify-content: center; opacity: 0;
 }
 .tp-gallery-item:hover .tp-gallery-overlay { background: rgba(0,0,0,.25); opacity: 1; }
+.tp-gallery-item:hover .tp-gal-del-btn { display: flex !important; }
 .tp-gallery-add {
   display: flex; align-items: center; justify-content: center; gap: .4rem;
   padding: 1.5rem; border: 1px dashed rgba(255,255,255,.12); border-radius: .5rem;
@@ -4956,6 +4957,12 @@ function tpEnsureFields(actor) {
   if (!actor.videos)        actor.videos        = [];
   if (!actor.agencia)       actor.agencia       = { representada: false, nombre: '', email: '' };
   if (!actor.detalles)      actor.detalles      = { altura: '', medidas: '', idiomas: '', disponibilidad: '', ubicacion: '' };
+  // Sanear galería: eliminar nulls, vacíos y base64 truncados (< 100 chars pero empieza con data:)
+  actor.gallery = actor.gallery.filter(s => {
+    if (!s) return false;
+    if (s.startsWith('data:') && s.length < 200) return false; // base64 truncado/corrupto
+    return true;
+  });
 }
 
 // ── Convert YouTube / Vimeo URL → embed ──────
@@ -5001,15 +5008,29 @@ function renderTalentProfile(panel) {
   ].filter(Boolean).join('');
 
   // Gallery
+  // Detectar fotos en base64 que no se guardaron bien en Supabase
+  const hasBase64 = actor.gallery.some(s => s.startsWith('data:image'));
+  const base64Warning = hasBase64 ? `
+    <div style="grid-column:1/-1;background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.25);border-radius:.5rem;padding:.75rem 1rem;font-size:.75rem;color:#c8a04a;margin-bottom:.5rem;display:flex;gap:.6rem;align-items:flex-start;">
+      ${icon('warning',16)}
+      <span>Algunas fotos están en formato temporal y pueden no mostrarse correctamente. Elimínalas y vuelve a subirlas para guardarlas en la nube.</span>
+    </div>` : '';
+
   const galleryItems = actor.gallery.map((src, i) => {
     const isVideo = src.startsWith('data:video') || src.includes('.mp4') || src.includes('.webm');
+    const isBase64 = src.startsWith('data:image');
+    const onerr = `this.style.display='none';this.parentNode.querySelector('.tp-gal-broken').style.display='flex'`;
     const media = isVideo
       ? `<video src="${src}" muted loop preload="metadata" style="width:100%;display:block;" onmouseenter="this.play()" onmouseleave="this.pause();this.currentTime=0"></video>`
-      : `<img src="${src}" alt="foto ${i+1}" loading="lazy">`;
+      : `<img src="${src}" alt="" loading="lazy" onerror="${onerr}" style="width:100%;display:block;">`;
     return `
-      <div class="tp-gallery-item" onclick="${isVideo ? '' : `tpLightboxOpen(${i})`}">
+      <div class="tp-gallery-item" onclick="${isVideo ? '' : `tpLightboxOpen(${i})`}" style="position:relative;">
         ${media}
+        <div class="tp-gal-broken" style="display:none;width:100%;min-height:120px;align-items:center;justify-content:center;flex-direction:column;gap:.5rem;color:#3a3a3a;font-size:.72rem;background:#111;border-radius:.45rem;">
+          ${icon('image',28)}<span>Foto no disponible</span>
+        </div>
         <div class="tp-gallery-overlay">${isVideo ? '' : icon('image',20)}</div>
+        <button onclick="event.stopPropagation();tpDeleteGalleryItem(${i})" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:10px;" class="tp-gal-del-btn">✕</button>
       </div>`;
   }).join('');
 
@@ -5092,6 +5113,7 @@ function renderTalentProfile(panel) {
         <!-- LEFT: gallery + videos -->
         <div>
           <div class="tp-section-label">Galería</div>
+          ${base64Warning}
           <div class="tp-gallery">
             ${galleryItems}
             <div class="tp-gallery-add" onclick="document.getElementById('tpGalleryInput').click()">
@@ -5186,6 +5208,16 @@ async function handleTpGalleryUpload(e) {
   e.target.value = '';
   const urls = await sbUploadFiles(files);
   urls.forEach(url => actor.gallery.push(url));
+  saveToLocalStorage();
+  renderTalentProfile(document.getElementById('panelCasting'));
+}
+
+// ── Borrar foto de galería ─────────────────────
+function tpDeleteGalleryItem(idx) {
+  const actor = activeProject.casting.find(a => a.id === tpActiveCastId);
+  if (!actor || !actor.gallery[idx]) return;
+  if (!confirm('¿Eliminar esta foto de la galería?')) return;
+  actor.gallery.splice(idx, 1);
   saveToLocalStorage();
   renderTalentProfile(document.getElementById('panelCasting'));
 }
@@ -7794,23 +7826,29 @@ async function sbUploadFile(file) {
     const errText = await uploadRes.text();
     console.warn(`Storage upload ${uploadRes.status}:`, errText);
 
-    // 400 = bucket no existe o política incorrecta
-    // 401/403 = token inválido
-    // En cualquier caso, fallback a base64 para no perder la foto
-    if (uploadRes.status === 400) {
-      console.warn('Bucket "media" no encontrado o sin políticas. Verifica Supabase Storage.');
+    if (uploadRes.status === 400 || uploadRes.status === 404) {
+      showToast('⚠️ El almacenamiento de archivos no está configurado. Contacta al administrador.', 'error');
+    } else if (uploadRes.status === 401 || uploadRes.status === 403) {
+      showToast('⚠️ Sin permiso para subir archivos. Verifica tu sesión.', 'error');
+    } else {
+      showToast('⚠️ Error al subir el archivo. Inténtalo de nuevo.', 'error');
     }
     throw new Error(`${uploadRes.status}: ${errText}`);
 
   } catch(e) {
-    console.warn('sbUploadFile → fallback base64:', e.message);
+    console.warn('sbUploadFile → error:', e.message);
     setSyncDot('error');
-    // Fallback: guardar como base64 localmente (funciona sin bucket)
-    return new Promise(resolve => {
-      const r = new FileReader();
-      r.onload = ev => resolve(ev.target.result);
-      r.readAsDataURL(file);
-    });
+    // Solo usamos base64 como fallback para archivos pequeños (< 500KB)
+    // para evitar que las cadenas enormes corrompan la base de datos
+    if (file.size < 500 * 1024) {
+      return new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = ev => resolve(ev.target.result);
+        r.readAsDataURL(file);
+      });
+    }
+    showToast('⚠️ No se pudo subir la imagen. Comprueba tu conexión e inténtalo de nuevo.', 'error');
+    return null;
   }
 }
 
@@ -7819,7 +7857,7 @@ async function sbUploadFiles(files) {
   const urls = [];
   for (const f of files) {
     const url = await sbUploadFile(f);
-    urls.push(url);
+    if (url) urls.push(url); // filtrar nulls (subida fallida)
   }
   return urls;
 }
@@ -8437,6 +8475,25 @@ function showSyncStatus(msg, autohideMs) {
   if (msg.includes('✓')) setSyncDot('ok');
   else if (msg.includes('⚠')) setSyncDot('error');
   else setSyncDot('saving');
+}
+
+// Toast de notificación flotante
+function showToast(msg, type = 'info') {
+  const colors = {
+    info:    { bg: 'rgba(255,255,255,.08)', color: '#ccc',    border: 'rgba(255,255,255,.15)' },
+    ok:      { bg: 'rgba(76,175,138,.12)',  color: '#4caf8a', border: 'rgba(76,175,138,.3)'  },
+    error:   { bg: 'rgba(229,115,115,.12)', color: '#e57373', border: 'rgba(229,115,115,.3)' },
+    warning: { bg: 'rgba(255,180,0,.1)',    color: '#c8a04a', border: 'rgba(255,180,0,.25)'  },
+  };
+  const c = colors[type] || colors.info;
+  const el = document.createElement('div');
+  el.style.cssText = `position:fixed;bottom:3.5rem;right:1rem;z-index:10000;font-size:.75rem;
+    padding:.5rem 1rem;border-radius:.5rem;max-width:280px;line-height:1.4;
+    background:${c.bg};color:${c.color};border:1px solid ${c.border};
+    backdrop-filter:blur(8px);transition:opacity .3s;`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
 }
 
 // ── Load: Supabase first, localStorage fallback ─
