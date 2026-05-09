@@ -639,16 +639,41 @@ input[type=range].scale-slider::-moz-range-thumb {
 .sp-shots-grid { display: flex; flex-direction: column; gap: .85rem; }
 
 .sp-shot-card {
-  display: grid; grid-template-columns: 200px 1fr;
+  display: flex; flex-direction: column;
   border: 1px solid rgba(255,255,255,.07); border-radius: .7rem; overflow: hidden;
   background: rgba(255,255,255,.02); transition: border-color .18s;
 }
 .sp-shot-card:hover { border-color: rgba(255,255,255,.14); }
 
-/* Image column — fixed 200px wide, fills card height, 16:9 min */
+/* Fila superior */
+.sp-shot-topbar {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .5rem .75rem; border-bottom: 1px solid rgba(255,255,255,.05);
+  flex-wrap: wrap;
+}
+.sp-shot-topbar-sep { color: rgba(255,255,255,.12); font-size: .8rem; }
+
+/* Cuerpo: frame + columnas */
+.sp-shot-body {
+  display: grid; grid-template-columns: 180px 2fr 1fr 1fr;
+  min-height: 120px;
+}
+.sp-shot-col {
+  padding: .6rem .75rem;
+  border-left: 1px solid rgba(255,255,255,.05);
+  display: flex; flex-direction: column; gap: .35rem;
+}
+.sp-shot-col-desc { } /* más ancha por 2fr */
+.sp-shot-col-label {
+  font-size: .62rem; color: #3a3a3a;
+  text-transform: uppercase; letter-spacing: .07em;
+  flex-shrink: 0;
+}
+
+/* Image column — fixed width, fills card height */
 .sp-shot-img-col {
   position: relative; background: #0d0d0d;
-  width: 200px; min-height: 113px; flex-shrink: 0; align-self: stretch;
+  min-height: 120px; align-self: stretch;
   display: flex; align-items: center; justify-content: center;
 }
 .sp-shot-img {
@@ -2809,10 +2834,10 @@ footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
   .rs-header { flex-direction: column; gap: .75rem; }
 
   /* Shooting plan */
-  .sp-shot-card { grid-template-columns: 1fr; }
-  .sp-shot-img-col { width: 100%; min-height: 180px; }
-  .sp-shot-info-top { flex-wrap: wrap; gap: .4rem; }
-  .sp-shot-time-row { flex-shrink: 0; }
+  .sp-shot-body { grid-template-columns: 1fr; }
+  .sp-shot-img-col { width: 100%; min-height: 160px; }
+  .sp-shot-topbar { gap: .3rem; }
+  .sp-shot-col { border-left: none; border-top: 1px solid rgba(255,255,255,.05); }
 
   /* Localizaciones */
   .sp-loc-card { grid-template-columns: 1fr; }
@@ -4125,47 +4150,76 @@ function spRenderDayContent(dia) {
         </div>`;
     }
 
+    const propsEsc = (row.props||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    const vestuarioEsc = (row.vestuario||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+
     return `
       <div class="sp-shot-card" id="spshot-${row.id}">
-        ${imgCol}
-        <div class="sp-shot-info-col">
-          <div class="sp-shot-info-top">
-            <div class="sp-shot-num-badge">${idx + 1}</div>
-            <div class="sp-shot-time-row">
-              <input type="time" class="sp-shot-time-input" value="${row.hora||''}"
-                onchange="updateRowField('${dia.id}','${row.id}','hora',this.value)" title="Hora inicio">
-              <span class="sp-shot-time-sep">–</span>
-              <input type="time" class="sp-shot-time-input" value="${row.horaFin||''}"
-                onchange="updateRowField('${dia.id}','${row.id}','horaFin',this.value)" title="Hora fin">
-            </div>
-            <select class="sp-shot-plano-select"
-              onchange="updateRowField('${dia.id}','${row.id}','plano',this.value)">
-              ${optionsHtml}
-            </select>
-            <div class="sp-shot-actions">
-              <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" title="Subir" ${idx === 0 ? 'disabled style="opacity:.2"' : ''}>↑</button>
-              <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" title="Bajar" ${idx === (dia.rows||[]).length-1 ? 'disabled style="opacity:.2"' : ''}>↓</button>
-              <button class="sp-shot-action-btn del" onclick="deletePlanRow('${dia.id}','${row.id}')">×</button>
-            </div>
-          </div>
-          <textarea class="sp-shot-desc-input" rows="2"
-            placeholder="Descripción de la toma, movimiento de cámara, acción…"
-            oninput="updateRowField('${dia.id}','${row.id}','descripcion',this.value);this.style.height='auto';this.style.height=this.scrollHeight+'px'"
-            >${descEsc}</textarea>
 
-          <!-- Localización inline -->
+        <!-- Fila superior: num · horas · tipo · localización · acciones -->
+        <div class="sp-shot-topbar">
+          <span class="sp-shot-num-badge">${idx + 1}</span>
+          <div class="sp-shot-time-row">
+            <input type="time" class="sp-shot-time-input" value="${row.hora||''}"
+              onchange="updateRowField('${dia.id}','${row.id}','hora',this.value)" title="Hora inicio">
+            <span class="sp-shot-time-sep">–</span>
+            <input type="time" class="sp-shot-time-input" value="${row.horaFin||''}"
+              onchange="updateRowField('${dia.id}','${row.id}','horaFin',this.value)" title="Hora fin">
+          </div>
+          <select class="sp-shot-plano-select"
+            onchange="updateRowField('${dia.id}','${row.id}','plano',this.value)">
+            ${optionsHtml}
+          </select>
+          <span class="sp-shot-topbar-sep">·</span>
           ${locUiHtml}
-
-          <div class="sp-shot-meta-row">
-            ${castBadges}
-            <button class="sp-shot-add-talent" onclick="spPickCast('${dia.id}','${row.id}')">
-              ${icon('plus',8)} Talent
-            </button>
-            <button class="sp-shot-refs-toggle ${(row.refImgs||[]).length ? 'has-refs' : ''}"
-              onclick="spToggleRefs('${row.id}')" id="spRefsBtn_${row.id}">
-              ${icon('image',8)} Refs ${(row.refImgs||[]).length ? `<span style="opacity:.6">(${row.refImgs.length})</span>` : ''}
-            </button>
+          <div class="sp-shot-actions">
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" title="Subir" ${idx === 0 ? 'disabled style="opacity:.2"' : ''}>↑</button>
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" title="Bajar" ${idx === (dia.rows||[]).length-1 ? 'disabled style="opacity:.2"' : ''}>↓</button>
+            <button class="sp-shot-action-btn del" onclick="deletePlanRow('${dia.id}','${row.id}')">×</button>
           </div>
+        </div>
+
+        <!-- Cuerpo: Frame · Descripción (2fr) · Props (1fr) · Vestuario (1fr) -->
+        <div class="sp-shot-body">
+          ${imgCol}
+
+          <!-- Descripción + talent + refs -->
+          <div class="sp-shot-col sp-shot-col-desc">
+            <div class="sp-shot-col-label">Descripción</div>
+            <textarea class="sp-shot-desc-input" rows="2"
+              placeholder="Descripción de la toma, movimiento de cámara, acción…"
+              oninput="updateRowField('${dia.id}','${row.id}','descripcion',this.value);this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+              >${descEsc}</textarea>
+            <div class="sp-shot-meta-row">
+              ${castBadges}
+              <button class="sp-shot-add-talent" onclick="spPickCast('${dia.id}','${row.id}')">
+                ${icon('plus',8)} Talent
+              </button>
+              <button class="sp-shot-refs-toggle ${(row.refImgs||[]).length ? 'has-refs' : ''}"
+                onclick="spToggleRefs('${row.id}')" id="spRefsBtn_${row.id}">
+                ${icon('image',8)} Refs ${(row.refImgs||[]).length ? `<span style="opacity:.6">(${row.refImgs.length})</span>` : ''}
+              </button>
+            </div>
+          </div>
+
+          <!-- Props -->
+          <div class="sp-shot-col">
+            <div class="sp-shot-col-label">Props</div>
+            <textarea class="sp-shot-desc-input" rows="3"
+              placeholder="Material, atrezzo…"
+              oninput="updateRowField('${dia.id}','${row.id}','props',this.value)"
+              >${propsEsc}</textarea>
+          </div>
+
+          <!-- Vestuario -->
+          <div class="sp-shot-col">
+            <div class="sp-shot-col-label">Vestuario</div>
+            <textarea class="sp-shot-desc-input" rows="3"
+              placeholder="Ropa, accesorios…"
+              oninput="updateRowField('${dia.id}','${row.id}','vestuario',this.value)"
+              >${vestuarioEsc}</textarea>
+          </div>
+        </div>
 
           <!-- Panel de referencias (desplegable) -->
           <div class="sp-shot-refs-panel" id="spRefsPanel_${row.id}">
@@ -4754,7 +4808,6 @@ function spGroupIntoDays(rows, fechaInicio) {
     const desc = [
       r.descripcion,
       r.talent ? `Talent: ${r.talent}` : '',
-      r.props ? `Props: ${r.props}` : ''
     ].filter(Boolean).join('\n');
 
     diaActual.rows.push({
@@ -4764,6 +4817,8 @@ function spGroupIntoDays(rows, fechaInicio) {
       locacion: r.locacion,
       locacionId: null,
       descripcion: desc,
+      props: r.props || '',
+      vestuario: '',
       plano: 'General',
       castingIds: [], refImgs: [], imagen: null
     });
