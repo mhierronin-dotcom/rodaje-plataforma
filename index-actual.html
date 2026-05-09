@@ -514,7 +514,8 @@ input[type=range].scale-slider::-moz-range-thumb {
 .modal-sub { font-size: .8rem; color: #666; margin-bottom: 1.25rem; }
 .module-list { display: flex; flex-direction: column; gap: .6rem; }
 .module-row {
-  display: flex; align-items: center; justify-content: space-between;
+  display: grid; grid-template-columns: 1fr 60px 80px;
+  align-items: center; gap: .5rem;
   padding: .85rem 1rem;
   border: 1px solid rgba(255,255,255,.07);
   border-radius: .5rem; background: rgba(255,255,255,.02);
@@ -3673,7 +3674,7 @@ function openManageModules() {
 
   // Header explicativo
   const hdr = document.createElement('div');
-  hdr.style = 'display:grid;grid-template-columns:1fr 60px 80px;gap:.5rem;padding:.25rem .5rem;font-size:.62rem;color:#444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;';
+  hdr.style = 'display:grid;grid-template-columns:1fr 60px 80px;gap:.5rem;padding:.25rem 1rem;font-size:.62rem;color:#444;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.25rem;';
   hdr.innerHTML = '<span>Sección</span><span style="text-align:center">Activa</span><span style="text-align:center">Cliente</span>';
   list.appendChild(hdr);
 
@@ -3684,7 +3685,7 @@ function openManageModules() {
     const visible  = activeProject.modulesClienteVisible[m.id] !== false; // default visible
     const row = document.createElement('div');
     row.className = 'module-row';
-    row.style = 'grid-template-columns:1fr 60px 80px;';
+    row.style = '';
     row.innerHTML = `
       <div class="module-row-left">
         <span class="module-row-icon">${icon(m.iconKey)}</span>
@@ -3719,7 +3720,7 @@ function openManageModules() {
       const visible = sec.clienteVisible !== false;
       const row = document.createElement('div');
       row.className = 'module-row';
-      row.style = 'grid-template-columns:1fr 60px 80px;';
+      row.style = '';
       row.innerHTML = `
         <div class="module-row-left">
           <span class="module-row-icon">${icon('file')}</span>
