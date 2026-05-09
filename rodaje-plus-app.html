@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rodaje+ Studio - Plataforma de Gestión de Rodajes</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/umd/lucide.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        nav {
+            background-color: #0a0a0a;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .logo-box {
+            width: 32px;
+            height: 32px;
+            border: 1.5px solid #ffffff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .logo span {
+            font-weight: 600;
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .logo span {
+                display: inline;
+            }
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        button {
+            border: none;
+            background: none;
+            color: inherit;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        .role-toggle {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            color: #a0a0a0;
+            background: transparent;
+        }
+
+        .role-toggle:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: #ffffff;
+        }
+
+        /* Main */
+        main {
+            flex: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+            width: 100%;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            padding: 0.5rem 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: #ffffff;
+            font-size: 0.875rem;
+            text-transform: capitalize;
+        }
+
+        .filter-btn:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .filter-btn.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .project-card:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .project-emoji {
+            font-size: 1.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            text-transform: capitalize;
+        }
+
+        .status-active {
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #86efac;
+        }
+
+        .status-closed {
+            border-color: rgba(107, 114, 128, 0.5);
+            color: #d1d5db;
+        }
+
+        .project-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .project-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #a0a0a0;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .project-stats {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #707070;
+        }
+
+        .stat-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .progress-bar {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.25rem;
+            height: 0.375rem;
+            overflow: hidden;
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-fill {
+            background-color: #ffffff;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: #707070;
+            text-align: right;
+        }
+
+        /* Project Detail View */
+        .project-detail {
+            display: none;
+        }
+
+        .project-detail.active {
+            display: block;
+        }
+
+        .back-btn {
+            color: #707070;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .back-btn:hover {
+            color: #ffffff;
+        }
+
+        .project-header-detail {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-title h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-title p {
+            color: #707070;
+            font-size: 0.875rem;
+        }
+
+        .detail-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .detail-btn {
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .detail-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .module-tabs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            background: transparent;
+            color: #a0a0a0;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-btn.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        .module-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .module-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .content-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Planning */
+        .planning-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .planning-date {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .planning-location {
+            color: #707070;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .scene-item {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .scene-title {
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .scene-detail {
+            color: #a0a0a0;
+            font-size: 0.75rem;
+        }
+
+        /* Casting */
+        .casting-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .actor-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .actor-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .actor-photo {
+            font-size: 2rem;
+        }
+
+        .actor-info {
+            flex: 1;
+        }
+
+        .actor-name {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .actor-role {
+            color: #707070;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .actor-status {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border: 1px solid;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
+        .status-confirmed {
+            border-color: rgba(34, 197, 94, 0.5);
+            color: #86efac;
+        }
+
+        .status-hired {
+            border-color: rgba(234, 179, 8, 0.5);
+            color: #fde047;
+        }
+
+        .actor-contact {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 0.75rem;
+            margin-top: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .contact-item {
+            color: #a0a0a0;
+            word-break: break-all;
+        }
+
+        .profile-links {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-link {
+            padding: 0.25rem 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+            border-radius: 0.25rem;
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .profile-link:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        /* Styling */
+        .styling-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .styling-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .styling-header {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .styling-photo {
+            font-size: 2rem;
+        }
+
+        .styling-info {
+            flex: 1;
+        }
+
+        .styling-scene {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .styling-character {
+            color: #707070;
+            font-size: 0.875rem;
+        }
+
+        .styling-section {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.75rem;
+        }
+
+        .styling-label {
+            color: #707070;
+            margin-bottom: 0.25rem;
+        }
+
+        .styling-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .item-badge {
+            padding: 0.125rem 0.375rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.25rem;
+            color: #ffffff;
+            font-size: 0.7rem;
+        }
+
+        /* Team */
+        .team-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .team-member {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .member-title {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .member-role {
+            color: #707070;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .member-dept {
+            color: #606060;
+            font-size: 0.75rem;
+        }
+
+        .member-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            font-size: 0.875rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 0.75rem;
+        }
+
+        .member-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field-label {
+            color: #707070;
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+            color: #ffffff;
+            font-size: 0.875rem;
+        }
+
+        .field-value.salary {
+            font-weight: 600;
+        }
+
+        /* Budget */
+        .budget-summary {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-label {
+            color: #707070;
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .budget-departments {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .dept-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .dept-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .dept-name {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .dept-percent {
+            color: #707070;
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 5rem;
+        }
+
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: #ffffff;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .footer-link {
+            color: #707070;
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            text-align: center;
+            color: #505050;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            main {
+                padding: 1.5rem 1rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .module-tabs {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
+
+            .member-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-container">
+            <button class="logo" onclick="goToDashboard()">
+                <div class="logo-box">RP</div>
+                <span>Rodaje+</span>
+            </button>
+
+            <div class="nav-buttons">
+                <button class="role-toggle" onclick="toggleRole()">
+                    <span id="roleText">👨‍💼 Admin</span>
+                </button>
+                <button style="padding: 0.5rem;">⚙️</button>
+                <button style="padding: 0.5rem;">🚪</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="active">
+            <div class="section-header">
+                <h1>Dashboard</h1>
+                <button class="btn-primary" onclick="createProject()">
+                    ➕ Nuevo Proyecto
+                </button>
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" onclick="filterProjects('todos')">Todos</button>
+                <button class="filter-btn" onclick="filterProjects('activos')">Activos</button>
+                <button class="filter-btn" onclick="filterProjects('cerrados')">Cerrados</button>
+                <button class="filter-btn" onclick="filterProjects('archivo')">Archivo</button>
+            </div>
+
+            <div class="projects-grid" id="projectsGrid"></div>
+        </div>
+
+        <!-- Project Detail View -->
+        <div id="projectDetail" class="project-detail">
+            <a href="#" class="back-btn" onclick="goToDashboard(); return false;">← Volver al Dashboard</a>
+
+            <div class="project-header-detail">
+                <div class="detail-header">
+                    <div class="detail-title">
+                        <h1 id="detailTitle"></h1>
+                        <p id="detailSubtitle"></p>
+                    </div>
+                    <div class="detail-buttons">
+                        <button class="detail-btn" title="Editar">✏️</button>
+                        <button class="detail-btn" title="Compartir">🔗</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="module-tabs" id="moduleTabs"></div>
+
+            <!-- Planning Module -->
+            <div id="planningModule" class="module-content active">
+                <div class="content-title">
+                    📅 Plan de Rodaje
+                </div>
+                <div id="planningContent"></div>
+            </div>
+
+            <!-- Casting Module -->
+            <div id="castingModule" class="module-content">
+                <div class="content-title">
+                    👥 Casting
+                    <button class="btn-primary" onclick="addCastMember()">➕ Agregar</button>
+                </div>
+                <div class="casting-grid" id="castingContent"></div>
+            </div>
+
+            <!-- Styling Module -->
+            <div id="stylingModule" class="module-content">
+                <div class="content-title">
+                    👗 Estilismo
+                    <button class="btn-primary" onclick="addStyling()">➕ Agregar</button>
+                </div>
+                <div class="styling-grid" id="stylingContent"></div>
+            </div>
+
+            <!-- Team Module -->
+            <div id="teamModule" class="module-content">
+                <div class="content-title">
+                    👨‍💼 Equipo
+                    <button class="btn-primary" onclick="addTeamMember()">➕ Agregar</button>
+                </div>
+                <div class="team-list" id="teamContent"></div>
+            </div>
+
+            <!-- Budget Module -->
+            <div id="budgetModule" class="module-content">
+                <div class="content-title">
+                    💰 Presupuesto
+                </div>
+                <div id="budgetContent"></div>
+            </div>
+
+            <!-- Visual Module -->
+            <div id="visualModule" class="module-content">
+                <div class="content-title">
+                    🎨 Visualización
+                </div>
+                <div style="text-align: center; padding: 3rem; color: #707070;">
+                    Módulo de visualización - En desarrollo
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Producto</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Features</a>
+                        <a href="#" class="footer-link">Precios</a>
+                        <a href="#" class="footer-link">Roadmap</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Empresa</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Sobre nosotros</a>
+                        <a href="#" class="footer-link">Blog</a>
+                        <a href="#" class="footer-link">Contacto</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Privacidad</a>
+                        <a href="#" class="footer-link">Términos</a>
+                        <a href="#" class="footer-link">Cookies</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Redes</h4>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">Twitter</a>
+                        <a href="#" class="footer-link">LinkedIn</a>
+                        <a href="#" class="footer-link">Instagram</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                © 2026 Rodaje+ Studio. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Data
+        let currentUser = 'admin';
+        let activeProject = null;
+        let activeModule = 'plan';
+
+        const projects = [
+            {
+                id: 1,
+                nombre: 'Campaña Nike 2026',
+                cliente: 'Nike Inc.',
+                director: 'Carlos Mendez',
+                estado: 'activo',
+                emoji: '📱',
+                presupuesto: { total: 150000, gastado: 87500 },
+                fechaInicio: '2026-04-20',
+                fechaFin: '2026-05-10',
+                cast: 5,
+                crew: 25,
+                dias: 12,
+                planificacion: [
+                    {
+                        dia: 1,
+                        fecha: '2026-04-20',
+                        locacion: 'Estudio Central',
+                        escenas: [
+                            { numero: 1, set: 'Interior Estudio A', actores: ['Ana García', 'Miguel López'], duracion: '2h', storyboard: 'SB-001' },
+                            { numero: 2, set: 'Exterior Edificio', actores: ['Ana García'], duracion: '1.5h', storyboard: 'SB-002' }
+                        ]
+                    },
+                    {
+                        dia: 2,
+                        fecha: '2026-04-21',
+                        locacion: 'Parque Central',
+                        escenas: [
+                            { numero: 3, set: 'Exterior Naturaleza', actores: ['Miguel López'], duracion: '2.5h', storyboard: 'SB-003' }
+                        ]
+                    }
+                ],
+                casting: [
+                    {
+                        id: 1,
+                        nombre: 'Ana García',
+                        tipo: 'Actriz',
+                        estado: 'confirmada',
+                        fotoPerfil: '👩‍🎬',
+                        edad: 28,
+                        contacto: 'ana@email.com',
+                        telefono: '+34 666 777 888',
+                        imdb: 'nm1234567',
+                        instagram: '@anagarcia'
+                    },
+                    {
+                        id: 2,
+                        nombre: 'Miguel López',
+                        tipo: 'Actor',
+                        estado: 'contratado',
+                        fotoPerfil: '👨‍🎬',
+                        edad: 35,
+                        contacto: 'miguel@email.com',
+                        telefono: '+34 666 888 999',
+                        imdb: 'nm7654321',
+                        instagram: '@miguellopezactor'
+                    }
+                ],
+                estilismo: [
+                    {
+                        id: 1,
+                        escena: 1,
+                        personaje: 'Ana',
+                        vestuario: ['Vestido rojo', 'Tacones negros', 'Bolso dorado'],
+                        maquillaje: 'Smokey eyes / Tonos grises',
+                        accesorios: ['Collar de perlas', 'Anillo dorado'],
+                        foto: '👗',
+                        tiempoEstimado: '45 min'
+                    }
+                ],
+                equipo: [
+                    {
+                        id: 1,
+                        nombre: 'Juan Martínez',
+                        cargo: 'Director de Fotografía',
+                        departamento: 'Cámara',
+                        contacto: 'juan@email.com',
+                        telefono: '+34 666 111 222',
+                        tarifa: 2500,
+                        experiencia: '15 años'
+                    },
+                    {
+                        id: 2,
+                        nombre: 'María González',
+                        cargo: 'Directora de Arte',
+                        departamento: 'Dirección',
+                        contacto: 'maria@email.com',
+                        telefono: '+34 666 222 333',
+                        tarifa: 2000,
+                        experiencia: '10 años'
+                    }
+                ],
+                presupuestoDetalle: {
+                    departamentos: [
+                        { nombre: 'Producción', presupuesto: 25000, gastado: 12500 },
+                        { nombre: 'Cámara', presupuesto: 35000, gastado: 22000 },
+                        { nombre: 'Iluminación', presupuesto: 28000, gastado: 18500 },
+                        { nombre: 'Sonido', presupuesto: 15000, gastado: 8000 },
+                        { nombre: 'Arte', presupuesto: 22000, gastado: 16200 },
+                        { nombre: 'Casting', presupuesto: 20000, gastado: 10300 }
+                    ]
+                }
+            },
+            {
+                id: 2,
+                nombre: 'Comercial Bebidas',
+                cliente: 'Coca-Cola España',
+                director: 'Elena Ruiz',
+                estado: 'activo',
+                emoji: '🎬',
+                presupuesto: { total: 85000, gastado: 42300 },
+                fechaInicio: '2026-05-15',
+                fechaFin: '2026-06-02',
+                cast: 8,
+                crew: 18,
+                dias: 8,
+                planificacion: [],
+                casting: [],
+                estilismo: [],
+                equipo: [],
+                presupuestoDetalle: { departamentos: [] }
+            },
+            {
+                id: 3,
+                nombre: 'Video Corporativo',
+                cliente: 'Telefónica',
+                director: 'Juan Pérez',
+                estado: 'cerrado',
+                emoji: '🎥',
+                presupuesto: { total: 45000, gastado: 45000 },
+                fechaInicio: '2026-02-01',
+                fechaFin: '2026-02-28',
+                cast: 3,
+                crew: 12,
+                dias: 5,
+                planificacion: [],
+                casting: [],
+                estilismo: [],
+                equipo: [],
+                presupuestoDetalle: { departamentos: [] }
+            }
+        ];
+
+        // UI Functions
+        function renderProjects(filter = 'todos') {
+            const grid = document.getElementById('projectsGrid');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'todos' ? projects : projects.filter(p => p.estado === filter || (filter === 'archivo' && p.estado === 'cerrado'));
+
+            filtered.forEach(project => {
+                const percentage = (project.presupuesto.gastado / project.presupuesto.total) * 100;
+
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.onclick = () => openProject(project.id);
+
+                card.innerHTML = `
+                    <div class="project-header">
+                        <div class="project-emoji">${project.emoji}</div>
+                        <span class="status-badge status-${project.estado}">${project.estado}</span>
+                    </div>
+                    <h3 class="project-title">${project.nombre}</h3>
+                    <div class="project-info">
+                        <div class="info-item">👤 ${project.cliente}</div>
+                        <div class="info-item">🎬 Dir: ${project.director}</div>
+                        <div class="info-item">📅 ${project.dias} días</div>
+                    </div>
+                    <div class="project-stats">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-label">Cast</div>
+                                <div class="stat-value">${project.cast}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Crew</div>
+                                <div class="stat-value">${project.crew}</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Presupuesto</div>
+                                <div class="stat-value" style="font-size: 1rem;">$${(project.presupuesto.total / 1000).toFixed(0)}K</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="progress-text">$${project.presupuesto.gastado.toLocaleString()} / $${project.presupuesto.total.toLocaleString()}</div>
+                    </div>
+                </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        function filterProjects(status) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderProjects(status);
+        }
+
+        function openProject(projectId) {
+            activeProject = projects.find(p => p.id === projectId);
+            activeModule = 'plan';
+
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('projectDetail').classList.add('active');
+
+            // Update header
+            document.getElementById('detailTitle').textContent = activeProject.nombre;
+            document.getElementById('detailSubtitle').textContent = `${activeProject.cliente} • Director: ${activeProject.director}`;
+
+            // Render module tabs
+            renderModuleTabs();
+
+            // Render content
+            renderModuleContent();
+        }
+
+        function renderModuleTabs() {
+            const tabsContainer = document.getElementById('moduleTabs');
+            tabsContainer.innerHTML = '';
+
+            const modules = [
+                { id: 'plan', label: '📅 Plan' },
+                { id: 'cast', label: '👥 Cast' },
+                { id: 'style', label: '👗 Estilismo' },
+                { id: 'team', label: '👨‍💼 Equipo' },
+                { id: 'budget', label: '💰 Presupuesto' },
+                { id: 'visual', label: '🎨 Visual' }
+            ];
+
+            modules.forEach(mod => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn ${activeModule === mod.id ? 'active' : ''}`;
+                btn.textContent = mod.label;
+                btn.onclick = () => {
+                    activeModule = mod.id;
+                    renderModuleContent();
+                };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        function renderModuleContent() {
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Show active module
+            switch(activeModule) {
+                case 'plan':
+                    document.getElementById('planningModule').classList.add('active');
+                    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                    renderPlanning();
+                    break;
+                case 'cast':
+                    document.getElementById('castingModule').classList.add('active');
+                    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                    renderCasting();
+                    break;
+                case 'style':
+                    document.getElementById('stylingModule').classList.add('active');
+                    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                    renderStyling();
+                    break;
+                case 'team':
+                    document.getElementById('teamModule').classList.add('active');
+                    document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                    renderTeam();
+                    break;
+                case 'budget':
+                    document.getElementById('budgetModule').classList.add('active');
+                    document.querySelectorAll('.tab-btn')[4].classList.add('active');
+                    renderBudget();
+                    break;
+                case 'visual':
+                    document.getElementById('visualModule').classList.add('active');
+                    document.querySelectorAll('.tab-btn')[5].classList.add('active');
+                    break;
+            }
+        }
+
+        function renderPlanning() {
+            const content = document.getElementById('planningContent');
+            content.innerHTML = '';
+
+            if (!activeProject.planificacion.length) {
+                content.innerHTML = '<div style="color: #707070; padding: 2rem; text-align: center;">No hay plan de rodaje aún</div>';
+                return;
+            }
+
+            activeProject.planificacion.forEach(dia => {
+                const item = document.createElement('div');
+                item.className = 'planning-item';
+
+                let scenesHTML = '';
+                dia.escenas.forEach(escena => {
+                    scenesHTML += `
+                        <div class="scene-item">
+                            <div class="scene-title">Escena ${escena.numero} - ${escena.set}</div>
+                            <div class="scene-detail">Cast: ${escena.actores.join(', ')}</div>
+                            <div class="scene-detail">Duración: ${escena.duracion}</div>
+                        </div>
+                    `;
+                });
+
+                item.innerHTML = `
+                    <div class="planning-date">Día ${dia.dia} - ${dia.fecha}</div>
+                    <div class="planning-location">${dia.locacion}</div>
+                    ${scenesHTML}
+                `;
+
+                content.appendChild(item);
+            });
+        }
+
+        function renderCasting() {
+            const content = document.getElementById('castingContent');
+            content.innerHTML = '';
+
+            activeProject.casting.forEach(actor => {
+                const card = document.createElement('div');
+                card.className = 'actor-card';
+                card.innerHTML = `
+                    <div class="actor-header">
+                        <div class="actor-photo">${actor.fotoPerfil}</div>
+                        <div class="actor-info">
+                            <div class="actor-name">${actor.nombre}</div>
+                            <div class="actor-role">${actor.tipo}</div>
+                            <span class="actor-status status-${actor.estado.includes('confirm') ? 'confirmed' : 'hired'}">${actor.estado}</span>
+                        </div>
+                    </div>
+                    <div class="actor-contact">
+                        <div class="contact-item">📧 ${actor.contacto}</div>
+                        <div class="contact-item">📱 ${actor.telefono}</div>
+                        <div class="profile-links">
+                            ${actor.imdb ? `<a href="#" class="profile-link">IMDb</a>` : ''}
+                            ${actor.instagram ? `<a href="#" class="profile-link">Instagram</a>` : ''}
+                        </div>
+                    </div>
+                `;
+                content.appendChild(card);
+            });
+        }
+
+        function renderStyling() {
+            const content = document.getElementById('stylingContent');
+            content.innerHTML = '';
+
+            activeProject.estilismo.forEach(style => {
+                const card = document.createElement('div');
+                card.className = 'styling-card';
+
+                const vestuarioHTML = style.vestuario.map(item => `<div class="item-badge">${item}</div>`).join('');
+                const accesoriosHTML = style.accesorios.map(item => `<div style="color: #a0a0a0; font-size: 0.75rem;">• ${item}</div>`).join('');
+
+                card.innerHTML = `
+                    <div class="styling-header">
+                        <div class="styling-photo">${style.foto}</div>
+                        <div class="styling-info">
+                            <div class="styling-scene">Escena ${style.escena}</div>
+                            <div class="styling-character">${style.personaje}</div>
+                        </div>
+                    </div>
+                    <div class="styling-section">
+                        <div class="styling-label">Vestuario</div>
+                        <div class="styling-items">${vestuarioHTML}</div>
+                    </div>
+                    <div class="styling-section">
+                        <div class="styling-label">Maquillaje</div>
+                        <div style="color: #ffffff; font-size: 0.75rem;">${style.maquillaje}</div>
+                    </div>
+                    <div class="styling-section">
+                        <div class="styling-label">Accesorios</div>
+                        <div class="styling-items">${accesoriosHTML}</div>
+                    </div>
+                    <div class="styling-section">
+                        <div style="color: #707070; font-size: 0.75rem;">⏱️ ${style.tiempoEstimado}</div>
+                    </div>
+                `;
+
+                content.appendChild(card);
+            });
+        }
+
+        function renderTeam() {
+            const content = document.getElementById('teamContent');
+            content.innerHTML = '';
+
+            activeProject.equipo.forEach(member => {
+                const card = document.createElement('div');
+                card.className = 'team-member';
+                card.innerHTML = `
+                    <div class="member-header">
+                        <div>
+                            <div class="member-title">${member.nombre}</div>
+                            <div class="member-role">${member.cargo}</div>
+                            <div class="member-dept">${member.departamento}</div>
+                        </div>
+                        <span class="status-badge status-confirmed">Confirmado</span>
+                    </div>
+                    <div class="member-grid">
+                        <div class="member-field">
+                            <div class="field-label">Contacto</div>
+                            <div class="field-value">${member.contacto}</div>
+                        </div>
+                        <div class="member-field">
+                            <div class="field-label">Teléfono</div>
+                            <div class="field-value">${member.telefono}</div>
+                        </div>
+                        <div class="member-field">
+                            <div class="field-label">Tarifa</div>
+                            <div class="field-value salary">$${member.tarifa.toLocaleString()}</div>
+                        </div>
+                        <div class="member-field">
+                            <div class="field-label">Experiencia</div>
+                            <div class="field-value">${member.experiencia}</div>
+                        </div>
+                    </div>
+                `;
+                content.appendChild(card);
+            });
+        }
+
+        function renderBudget() {
+            const content = document.getElementById('budgetContent');
+            const depts = activeProject.presupuestoDetalle.departamentos;
+
+            if (!depts.length) {
+                content.innerHTML = '<div style="color: #707070; padding: 2rem; text-align: center;">No hay datos de presupuesto</div>';
+                return;
+            }
+
+            const total = depts.reduce((sum, d) => sum + d.presupuesto, 0);
+            const gastado = depts.reduce((sum, d) => sum + d.gastado, 0);
+            const porcentaje = (gastado / total) * 100;
+
+            let summaryHTML = `
+                <div class="budget-summary">
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-label">Total</div>
+                            <div class="summary-value">$${total.toLocaleString()}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Gastado</div>
+                            <div class="summary-value">$${gastado.toLocaleString()}</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Disponible</div>
+                            <div class="summary-value">$${(total - gastado).toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="color: #707070; font-size: 0.875rem; margin-bottom: 0.5rem;">Utilización: ${porcentaje.toFixed(1)}%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${porcentaje}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <h3 style="font-size: 1.125rem; font-weight: 600; color: #ffffff; margin-bottom: 1rem;">Por Departamento</h3>
+                <div class="budget-departments">
+            `;
+
+            depts.forEach(dept => {
+                const deptPorcentaje = (dept.gastado / dept.presupuesto) * 100;
+                summaryHTML += `
+                    <div class="dept-card">
+                        <div class="dept-header">
+                            <div class="dept-name">${dept.nombre}</div>
+                            <div class="dept-percent">${deptPorcentaje.toFixed(0)}%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${deptPorcentaje}%"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #707070; margin-top: 0.5rem;">
+                            <span>$${dept.gastado.toLocaleString()}</span>
+                            <span>$${dept.presupuesto.toLocaleString()}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            summaryHTML += '</div>';
+            content.innerHTML = summaryHTML;
+        }
+
+        function goToDashboard() {
+            activeProject = null;
+            document.getElementById('dashboardView').style.display = 'block';
+            document.getElementById('projectDetail').classList.remove('active');
+            renderProjects();
+        }
+
+        function toggleRole() {
+            currentUser = currentUser === 'admin' ? 'client' : 'admin';
+            document.getElementById('roleText').textContent = currentUser === 'admin' ? '👨‍💼 Admin' : '👁️ Cliente';
+        }
+
+        function createProject() {
+            alert('Función: Crear nuevo proyecto');
+        }
+
+        function addCastMember() {
+            alert('Función: Agregar miembro de casting');
+        }
+
+        function addStyling() {
+            alert('Función: Agregar estilismo');
+        }
+
+        function addTeamMember() {
+            alert('Función: Agregar miembro del equipo');
+        }
+
+        // Initialize
+        renderProjects();
+    </script>
+</body>
+</html>

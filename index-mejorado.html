@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rodaje+ Studio - Mejorado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.2/firebase-storage.js"></script>
+<style>
+/* ─── RESET & BASE ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; }
+body { display: flex; flex-direction: column; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; color: inherit; cursor: pointer; font-family: inherit; transition: opacity .2s; }
+button:hover { opacity: .75; }
+input, textarea, select { font-family: inherit; }
+
+/* ─── MOBILE SHOOTING PLAN STYLES ─── */
+@media (max-width: 768px) {
+  .sp-day-nav {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  .sp-shot-card {
+    grid-template-columns: 1fr !important;
+  }
+  .sp-shot-img-col {
+    width: 100% !important;
+    min-height: 160px !important;
+  }
+  .sp-day-content {
+    padding: 1rem !important;
+  }
+}
+
+/* ─── SHARED DATA & REAL-TIME SYNC ─── */
+.sync-status {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  padding: .5rem 1rem;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: .4rem;
+  font-size: .75rem;
+  color: #10b981;
+  z-index: 50;
+  display: none;
+}
+.sync-status.active { display: block; }
+.sync-status.syncing { color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+
+/* ─── LINK COMPARTIBLE ─── */
+.share-link-section {
+  padding: 1.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: .6rem;
+  margin-bottom: 1.5rem;
+}
+.share-link-label { font-size: .75rem; color: #888; text-transform: uppercase; margin-bottom: .4rem; }
+.share-link-input {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+.share-link-input input {
+  flex: 1;
+  padding: .5rem .75rem;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .4rem;
+  font-size: .8rem;
+  color: #ccc;
+  outline: none;
+}
+.share-link-input input:focus { border-color: rgba(255,255,255,.25); }
+.share-link-btn {
+  padding: .5rem 1rem;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: .4rem;
+  font-size: .8rem;
+  color: #60a5fa;
+  cursor: pointer;
+  transition: all .2s;
+}
+.share-link-btn:hover { background: rgba(59, 130, 246, 0.3); border-color: rgba(59, 130, 246, 0.6); }
+
+/* ─── VISTA CLIENTE MEJORADA ─── */
+.client-view-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+.client-shooting-plan {
+  display: grid;
+  gap: 1.5rem;
+}
+.client-day-card {
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: .75rem;
+  background: rgba(255,255,255,.02);
+  overflow: hidden;
+}
+.client-day-header {
+  padding: 1rem;
+  background: rgba(255,255,255,.03);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.client-day-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: .25rem;
+}
+.client-day-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-size: .8rem;
+  color: #888;
+}
+.client-shots-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+.client-shots-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  min-width: min-content;
+}
+.client-shot-item {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: .6rem;
+  background: rgba(255,255,255,.02);
+  overflow: hidden;
+  min-width: 280px;
+}
+.client-shot-img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  background: rgba(255,255,255,.05);
+}
+.client-shot-body {
+  padding: .75rem;
+}
+.client-shot-meta {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: .5rem;
+  font-size: .75rem;
+}
+.client-shot-meta-item {
+  padding: .2rem .4rem;
+  background: rgba(255,255,255,.05);
+  border-radius: .25rem;
+  color: #888;
+}
+.client-shot-desc {
+  font-size: .8rem;
+  color: #ccc;
+  line-height: 1.4;
+}
+
+/* Scrollbar styling */
+.client-shots-container::-webkit-scrollbar {
+  height: 6px;
+}
+.client-shots-container::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.02);
+}
+.client-shots-container::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.1);
+  border-radius: 3px;
+}
+.client-shots-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,.15);
+}
+</style>
+</head>
+<body>
+
+<div id="appContainer">
+  <!-- Contenido principal -->
+</div>
+
+<!-- Sync status indicator -->
+<div class="sync-status" id="syncStatus">
+  <span id="syncStatusText">Sincronizando...</span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// CONFIG & INIT
+// ══════════════════════════════════════════════
+
+// Detectar si estamos en vista cliente
+const isClientView = window.location.hash.startsWith('#client-');
+const clientProjectId = isClientView ? window.location.hash.replace('#client-', '') : null;
+
+// ══════════════════════════════════════════════
+// FIREBASE CONFIG (Sin credenciales aquí, usar las tuyas)
+// ══════════════════════════════════════════════
+const firebaseConfig = {
+  // TODO: Agregar tus credenciales de Firebase aquí
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com"
+};
+
+// Por ahora usaremos localStorage como fallback
+const useLocalStorage = true;
+
+// ══════════════════════════════════════════════
+// CORE DATA STRUCTURE
+// ══════════════════════════════════════════════
+let projects = [];
+let activeProject = null;
+let activeModuleId = 'shootingPlan';
+
+// ══════════════════════════════════════════════
+// INIT & LOAD DATA
+// ══════════════════════════════════════════════
+function initApp() {
+  loadProjects();
+
+  if (isClientView) {
+    renderClientView();
+  } else {
+    renderAdminView();
+  }
+
+  // Setup auto-sync
+  setupAutoSync();
+}
+
+function loadProjects() {
+  if (useLocalStorage) {
+    const stored = localStorage.getItem('rodaje-projects');
+    projects = stored ? JSON.parse(stored) : getDefaultProjects();
+  }
+}
+
+function saveProjects() {
+  if (useLocalStorage) {
+    localStorage.setItem('rodaje-projects', JSON.stringify(projects));
+  }
+  showSyncStatus();
+}
+
+function getDefaultProjects() {
+  return [
+    {
+      id: 1,
+      nombre: 'Tu Rodaje',
+      cliente: 'Nuevo Cliente',
+      director: 'Tu Nombre',
+      estado: 'activo',
+      fechaInicio: '2026-05-10',
+      fechaFin: '2026-05-15',
+      planificacion: [
+        {
+          id: 'd1',
+          dia: 1,
+          fecha: '2026-05-10',
+          locacion: 'Estudio',
+          rows: [
+            {
+              id: 'r1',
+              hora: '08:00',
+              horaFin: '10:00',
+              plano: 'PG',
+              descripcion: 'Setup y primeras tomas',
+              imagen: null,
+              locacion: 'Estudio'
+            }
+          ]
+        }
+      ],
+      casting: [],
+      equipo: [],
+      presupuesto: { total: 0, gastado: 0 },
+      styling: { boards: [], pins: [] },
+      modules: {
+        shootingPlan: true,
+        casting: true,
+        equipo: true,
+        presupuesto: true,
+        styling: true
+      }
+    }
+  ];
+}
+
+// ══════════════════════════════════════════════
+// ADMIN VIEW
+// ══════════════════════════════════════════════
+function renderAdminView() {
+  const app = document.getElementById('appContainer');
+
+  app.innerHTML = `
+    <div style="padding:2rem;">
+      <h1 style="margin-bottom:2rem;">Rodaje+ Studio</h1>
+
+      <div class="share-link-section">
+        <div class="share-link-label">Link para Cliente</div>
+        <div class="share-link-input">
+          <input type="text" id="shareLink" value="" readonly>
+          <button class="share-link-btn" onclick="copyShareLink()">Copiar</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:2rem;">
+        <h2 style="margin-bottom:1rem;">Proyectos</h2>
+        <div id="projectsList"></div>
+      </div>
+
+      <div id="projectDetail" style="display:none;">
+        <button onclick="closeProject()" style="margin-bottom:1rem;padding:.5rem 1rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:.4rem;">
+          ← Volver
+        </button>
+        <h2 id="projectTitle" style="margin-bottom:1.5rem;"></h2>
+
+        <div style="display:flex;gap:.5rem;margin-bottom:1.5rem;">
+          <button class="module-tab active" onclick="switchModule('shootingPlan')" style="padding:.5rem 1rem;border:1px solid rgba(255,255,255,.2);border-radius:.4rem;cursor:pointer;">📅 Shooting Plan</button>
+          <button class="module-tab" onclick="switchModule('styling')" style="padding:.5rem 1rem;border:1px solid rgba(255,255,255,.2);border-radius:.4rem;cursor:pointer;">👗 Styling</button>
+        </div>
+
+        <div id="shootingPlanModule"></div>
+        <div id="stylingModule" style="display:none;"></div>
+      </div>
+    </div>
+  `;
+
+  renderProjectsList();
+  generateShareLink();
+}
+
+function renderProjectsList() {
+  const list = document.getElementById('projectsList');
+  list.innerHTML = projects.map(p => `
+    <div style="padding:1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:.6rem;margin-bottom:.75rem;cursor:pointer;" onclick="openProject(${p.id})">
+      <div style="font-weight:600;margin-bottom:.25rem;">${p.nombre}</div>
+      <div style="font-size:.8rem;color:#888;">${p.cliente}</div>
+    </div>
+  `).join('');
+}
+
+function openProject(id) {
+  activeProject = projects.find(p => p.id === id);
+  document.getElementById('projectsList').parentElement.style.display = 'none';
+  document.getElementById('projectDetail').style.display = 'block';
+  document.getElementById('projectTitle').textContent = activeProject.nombre;
+  renderShootingPlan();
+}
+
+function closeProject() {
+  activeProject = null;
+  document.getElementById('projectDetail').style.display = 'none';
+  document.getElementById('projectsList').parentElement.style.display = 'block';
+}
+
+function switchModule(moduleId) {
+  activeModuleId = moduleId;
+
+  document.querySelectorAll('.module-tab').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  document.getElementById('shootingPlanModule').style.display = moduleId === 'shootingPlan' ? 'block' : 'none';
+  document.getElementById('stylingModule').style.display = moduleId === 'styling' ? 'block' : 'none';
+
+  if (moduleId === 'shootingPlan') renderShootingPlan();
+  if (moduleId === 'styling') renderStyling();
+}
+
+// ══════════════════════════════════════════════
+// SHOOTING PLAN (ADMIN)
+// ══════════════════════════════════════════════
+function renderShootingPlan() {
+  const container = document.getElementById('shootingPlanModule');
+  if (!activeProject || !activeProject.planificacion) return;
+
+  const html = `
+    <div style="margin-bottom:1.5rem;">
+      <button onclick="addDay()" style="padding:.5rem 1rem;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.3);border-radius:.4rem;cursor:pointer;color:#60a5fa;">
+        + Nuevo Día
+      </button>
+    </div>
+
+    ${activeProject.planificacion.map(dia => `
+      <div style="margin-bottom:2rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid rgba(255,255,255,.1);">
+          <div>
+            <div style="font-size:1.4rem;font-weight:300;">Día ${dia.dia}</div>
+            <input type="date" value="${dia.fecha || ''}" onchange="updateDia(${dia.id}, 'fecha', this.value)" style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);color:#ccc;font-size:.9rem;padding:.25rem;outline:none;" />
+            <input type="text" value="${dia.locacion || ''}" placeholder="Localización…" onchange="updateDia(${dia.id}, 'locacion', this.value)" style="background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.2);color:#ccc;font-size:1rem;margin-left:1rem;padding:.25rem;outline:none;" />
+          </div>
+          <button onclick="deleteDay(${dia.id})" style="padding:.4rem .8rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:.3rem;cursor:pointer;font-size:.8rem;">Eliminar</button>
+        </div>
+
+        <!-- Scrollable shots on mobile -->
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:1rem;">
+          <div style="display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px, 1fr);gap:1rem;min-width:min-content;padding:.5rem 0;">
+            ${dia.rows.map((row, idx) => `
+              <div style="border:1px solid rgba(255,255,255,.08);border-radius:.6rem;padding:1rem;background:rgba(255,255,255,.02);min-width:300px;">
+                <div style="font-weight:600;margin-bottom:.75rem;">Shot ${idx + 1}</div>
+                <div style="margin-bottom:.75rem;">
+                  <input type="time" value="${row.hora || ''}" onchange="updateRow(${dia.id}, '${row.id}', 'hora', this.value)" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);padding:.4rem;border-radius:.3rem;color:#ccc;width:100%;font-size:.9rem;outline:none;margin-bottom:.5rem;" />
+                  <textarea placeholder="Descripción…" onchange="updateRow(${dia.id}, '${row.id}', 'descripcion', this.value)" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);padding:.4rem;border-radius:.3rem;color:#ccc;width:100%;font-size:.85rem;min-height:60px;font-family:inherit;outline:none;resize:none;">${row.descripcion || ''}</textarea>
+                </div>
+                <button onclick="deleteRow(${dia.id}, '${row.id}')" style="padding:.3rem .6rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:.3rem;cursor:pointer;font-size:.75rem;width:100%;">Eliminar</button>
+              </div>
+            `).join('')}
+            <button onclick="addShot(${dia.id})" style="padding:1rem;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:.6rem;min-width:300px;cursor:pointer;color:#666;align-self:start;">+ Shot</button>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+
+  container.innerHTML = html;
+}
+
+function addDay() {
+  const dia = activeProject.planificacion.length + 1;
+  activeProject.planificacion.push({
+    id: 'd' + Date.now(),
+    dia,
+    fecha: new Date().toISOString().split('T')[0],
+    locacion: '',
+    rows: []
+  });
+  saveProjects();
+  renderShootingPlan();
+}
+
+function addShot(diaId) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (!dia) return;
+  dia.rows.push({
+    id: 'r' + Date.now(),
+    hora: '09:00',
+    horaFin: '',
+    plano: 'PG',
+    descripcion: '',
+    imagen: null,
+    locacion: ''
+  });
+  saveProjects();
+  renderShootingPlan();
+}
+
+function updateDia(diaId, field, value) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (dia) dia[field] = value;
+  saveProjects();
+}
+
+function updateRow(diaId, rowId, field, value) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (!dia) return;
+  const row = dia.rows.find(r => r.id === rowId);
+  if (row) row[field] = value;
+  saveProjects();
+}
+
+function deleteDay(diaId) {
+  activeProject.planificacion = activeProject.planificacion.filter(d => d.id !== diaId);
+  saveProjects();
+  renderShootingPlan();
+}
+
+function deleteRow(diaId, rowId) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (dia) dia.rows = dia.rows.filter(r => r.id !== rowId);
+  saveProjects();
+  renderShootingPlan();
+}
+
+// ══════════════════════════════════════════════
+// STYLING (ADMIN)
+// ══════════════════════════════════════════════
+function renderStyling() {
+  const container = document.getElementById('stylingModule');
+  container.innerHTML = `
+    <div style="padding:1rem;background:rgba(255,255,255,.04);border-radius:.6rem;text-align:center;color:#888;">
+      <p>Sección de Styling - Implementación en progreso</p>
+      <p style="font-size:.8rem;margin-top:.5rem;">Drag & drop de imágenes, moodboards, vestuario, maquillaje, accesorios</p>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════
+// CLIENT VIEW (Dinámico)
+// ══════════════════════════════════════════════
+function renderClientView() {
+  const project = projects.find(p => p.id === parseInt(clientProjectId));
+  if (!project) {
+    document.getElementById('appContainer').innerHTML = '<div style="padding:2rem;">Proyecto no encontrado</div>';
+    return;
+  }
+
+  const html = `
+    <div style="background:rgba(255,255,255,.02);border-bottom:1px solid rgba(255,255,255,.1);padding:1rem 1.5rem;sticky:top;z-index:10;">
+      <div style="max-width:1200px;margin:0 auto;">
+        <h1 style="font-size:2rem;font-weight:300;margin-bottom:.25rem;">${project.nombre}</h1>
+        <p style="font-size:.9rem;color:#888;">${project.cliente} · Dir: ${project.director}</p>
+      </div>
+    </div>
+
+    <div class="client-view-container">
+      <div class="client-shooting-plan">
+        ${project.planificacion.map(dia => `
+          <div class="client-day-card">
+            <div class="client-day-header">
+              <div class="client-day-title">Día ${dia.dia}</div>
+              <div class="client-day-meta">
+                <span>${dia.fecha || '—'}</span>
+                <span>•</span>
+                <span>${dia.locacion || 'Sin localización'}</span>
+              </div>
+            </div>
+            <div class="client-shots-container">
+              <div class="client-shots-grid">
+                ${dia.rows.map((row, idx) => `
+                  <div class="client-shot-item">
+                    ${row.imagen ? `<img class="client-shot-img" src="${row.imagen}" alt="Frame ${idx + 1}">` : '<div style="width:100%;height:160px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;color:#333;">Sin imagen</div>'}
+                    <div class="client-shot-body">
+                      <div class="client-shot-meta">
+                        <span class="client-shot-meta-item">#${idx + 1}</span>
+                        <span class="client-shot-meta-item">${row.hora || '—'}</span>
+                        <span class="client-shot-meta-item">${row.plano || 'Plano'}</span>
+                      </div>
+                      <div class="client-shot-desc">${row.descripcion || 'Sin descripción'}</div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('appContainer').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// SHARE LINK & SYNC
+// ══════════════════════════════════════════════
+function generateShareLink() {
+  if (activeProject) {
+    const link = window.location.origin + window.location.pathname + `#client-${activeProject.id}`;
+    document.getElementById('shareLink').value = link;
+  }
+}
+
+function copyShareLink() {
+  const input = document.getElementById('shareLink');
+  input.select();
+  document.execCommand('copy');
+  alert('Link copiado al portapapeles');
+}
+
+function setupAutoSync() {
+  // Auto-save each 30 seconds
+  setInterval(() => {
+    if (activeProject) {
+      saveProjects();
+    }
+  }, 30000);
+}
+
+function showSyncStatus() {
+  const status = document.getElementById('syncStatus');
+  status.classList.add('active', 'syncing');
+  status.textContent = 'Sincronizando...';
+
+  setTimeout(() => {
+    status.classList.remove('syncing');
+    status.textContent = 'Sincronizado ✓';
+    setTimeout(() => status.classList.remove('active'), 2000);
+  }, 500);
+}
+
+// ══════════════════════════════════════════════
+// START APP
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', initApp);
+</script>
+
+</body>
+</html>

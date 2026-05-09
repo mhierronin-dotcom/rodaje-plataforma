@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rodaje+ Studio</title>
+<style>
+/* ─── RESET & BASE ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #fff; }
+body { display: flex; flex-direction: column; }
+a { text-decoration: none; color: inherit; }
+button { border: none; background: none; color: inherit; cursor: pointer; font-family: inherit; transition: opacity .2s; }
+button:hover { opacity: .75; }
+input, textarea, select { font-family: inherit; }
+
+/* ─── SVG ICONS ─── */
+.icon { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.icon svg { stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ─── NAVBAR ─── */
+nav {
+  background: #0a0a0a;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-inner {
+  max-width: 1320px; margin: 0 auto; padding: 0 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; height: 60px;
+}
+.logo {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .9rem; font-weight: 600; letter-spacing: .02em; color: #fff;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  border: 1.5px solid rgba(255,255,255,.7);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; letter-spacing: -.5px;
+}
+.nav-right { display: flex; align-items: center; gap: .75rem; }
+.nav-btn {
+  padding: .35rem .75rem;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: .4rem;
+  font-size: .75rem; color: #888;
+  background: transparent;
+}
+.nav-btn:hover { color: #fff; border-color: rgba(255,255,255,.3); }
+.nav-icon-btn { padding: .4rem; color: #666; }
+.nav-icon-btn:hover { color: #fff; }
+
+/* ─── MAIN ─── */
+main { flex: 1; max-width: 1320px; margin: 0 auto; padding: 2.5rem 1.5rem; width: 100%; }
+
+/* ─── DASHBOARD ─── */
+.dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.75rem; }
+.dash-header h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; }
+.btn-new {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .45rem 1rem;
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: .5rem; font-size: .8rem; color: #ccc;
+  background: rgba(255,255,255,.05);
+}
+.btn-new:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+.filter-bar { display: flex; gap: .4rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+.filter-pill {
+  padding: .35rem .85rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 2rem; font-size: .78rem; color: #666;
+  background: transparent; transition: all .2s;
+}
+.filter-pill:hover { color: #ccc; border-color: rgba(255,255,255,.2); }
+.filter-pill.active { color: #fff; border-color: rgba(255,255,255,.35); background: rgba(255,255,255,.07); }
+
+.projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.25rem; }
+
+.project-card {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: .75rem; padding: 1.4rem;
+  background: rgba(255,255,255,.03);
+  cursor: pointer; transition: all .2s;
+}
+.project-card:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+
+.pc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.pc-icon {
+  width: 38px; height: 38px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: .5rem;
+  display: flex; align-items: center; justify-content: center;
+  color: #888;
+}
+.status-pill {
+  padding: .2rem .55rem;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: .25rem; font-size: .7rem; color: #888;
+}
+.status-pill.active { color: #a0d4a0; border-color: rgba(160,212,160,.3); }
+.status-pill.closed { color: #888; }
+
+.pc-title { font-size: 1rem; font-weight: 600; margin-bottom: .3rem; }
+.pc-meta { display: flex; flex-direction: column; gap: .3rem; font-size: .8rem; color: #666; margin-bottom: 1rem; }
+.pc-meta-row { display: flex; align-items: center; gap: .4rem; }
+
+.pc-stats { border-top: 1px solid rgba(255,255,255,.07); padding-top: .9rem; }
+.pc-stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: .5rem; margin-bottom: .7rem; }
+.pc-stat { text-align: center; }
+.pc-stat-n { font-size: 1.05rem; font-weight: 600; }
+.pc-stat-l { font-size: .7rem; color: #555; }
+
+.progress-bar { background: rgba(255,255,255,.06); border-radius: 2px; height: 3px; overflow: hidden; margin-bottom: .3rem; }
+.progress-fill { background: rgba(255,255,255,.4); height: 100%; transition: width .3s; }
+.progress-label { font-size: .7rem; color: #555; text-align: right; }
+
+/* ─── PROJECT DETAIL ─── */
+.project-detail { display: none; }
+.project-detail.active { display: block; }
+
+.back-link { display: inline-flex; align-items: center; gap: .35rem; font-size: .8rem; color: #555; margin-bottom: 1.2rem; }
+.back-link:hover { color: #ccc; }
+
+.detail-banner {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: .75rem; padding: 1.75rem;
+  background: rgba(255,255,255,.03); margin-bottom: 1.5rem;
+}
+.detail-banner-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.detail-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: .25rem; }
+.detail-sub { font-size: .82rem; color: #666; }
+.detail-actions { display: flex; gap: .5rem; }
+.icon-btn {
+  width: 34px; height: 34px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .4rem;
+  display: flex; align-items: center; justify-content: center;
+  color: #666;
+}
+.icon-btn:hover { color: #fff; border-color: rgba(255,255,255,.25); }
+
+/* ─── MODULE MANAGER BAR ─── */
+.module-bar {
+  display: flex; align-items: center; gap: .4rem;
+  margin-bottom: 1.5rem; flex-wrap: wrap;
+}
+.module-tab {
+  padding: .4rem .9rem;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .4rem; font-size: .8rem; color: #666;
+  background: transparent; transition: all .2s;
+  display: flex; align-items: center; gap: .3rem;
+}
+.module-tab:hover { color: #ccc; border-color: rgba(255,255,255,.2); }
+.module-tab.active { color: #fff; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.08); }
+.module-tab.disabled { opacity: .3; }
+
+.manage-modules-btn {
+  margin-left: auto;
+  padding: .35rem .75rem;
+  border: 1px dashed rgba(255,255,255,.15);
+  border-radius: .4rem; font-size: .75rem; color: #555;
+  display: flex; align-items: center; gap: .3rem;
+}
+.manage-modules-btn:hover { color: #ccc; border-color: rgba(255,255,255,.3); }
+
+/* ─── MODULE PANEL ─── */
+.module-panel { display: none; animation: fadeUp .25s ease; }
+.module-panel.active { display: block; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.panel-title { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: .5rem; }
+.btn-add {
+  display: flex; align-items: center; gap: .35rem;
+  padding: .4rem .85rem; font-size: .78rem;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: .4rem; color: #888;
+  background: rgba(255,255,255,.04);
+}
+.btn-add:hover { color: #fff; border-color: rgba(255,255,255,.25); }
+
+/* ─── MANAGE MODULES MODAL ─── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.7);
+  z-index: 200; display: none; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #141414; border: 1px solid rgba(255,255,255,.1);
+  border-radius: .85rem; padding: 1.75rem; width: 480px; max-width: 96vw;
+}
+.modal-title { font-size: 1rem; font-weight: 600; margin-bottom: .4rem; }
+.modal-sub { font-size: .8rem; color: #666; margin-bottom: 1.25rem; }
+.module-list { display: flex; flex-direction: column; gap: .6rem; }
+.module-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1rem;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: .5rem; background: rgba(255,255,255,.02);
+}
+.module-row-left { display: flex; align-items: center; gap: .75rem; }
+.module-row-icon { color: #555; }
+.module-row-name { font-size: .88rem; font-weight: 500; }
+.module-row-desc { font-size: .75rem; color: #555; }
+
+/* Toggle switch */
+.toggle { position: relative; width: 38px; height: 22px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.1); border-radius: 11px; cursor: pointer;
+  transition: background .2s;
+}
+.toggle-track::after {
+  content: ''; position: absolute;
+  left: 3px; top: 3px; width: 16px; height: 16px;
+  background: #666; border-radius: 50%;
+  transition: transform .2s, background .2s;
+}
+.toggle input:checked + .toggle-track { background: rgba(255,255,255,.25); }
+.toggle input:checked + .toggle-track::after { transform: translateX(16px); background: #fff; }
+
+.modal-footer { margin-top: 1.25rem; display: flex; justify-content: flex-end; }
+.btn-done {
+  padding: .5rem 1.25rem; font-size: .82rem;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: .4rem; color: #fff;
+}
+.btn-done:hover { background: rgba(255,255,255,.18); }
+
+/* ─── SHOOTING PLAN ─── */
+.plan-week {
+  border: 1px solid rgba(255,255,255,.07); border-radius: .6rem;
+  overflow: hidden; margin-bottom: 1rem;
+}
+.plan-week-header {
+  padding: .7rem 1rem; background: rgba(255,255,255,.04);
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; user-select: none;
+}
+.plan-week-title { font-size: .82rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #888; }
+.plan-days { }
+.plan-day {
+  padding: 1rem;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.plan-day-head { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+.plan-day-num {
+  font-size: 1.4rem; font-weight: 300; color: #fff; min-width: 36px;
+}
+.plan-day-info { flex: 1; }
+.plan-day-date { font-size: .78rem; color: #666; }
+.plan-day-loc { font-size: .88rem; font-weight: 500; }
+.plan-chips { display: flex; flex-direction: column; gap: .3rem; }
+.plan-chip {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .4rem .7rem; border-radius: .35rem;
+  font-size: .8rem; font-weight: 500;
+}
+.chip-rodaje   { background: rgba(26,115,232,.2); color: #6fa8f8; border: 1px solid rgba(26,115,232,.25); }
+.chip-scouting { background: rgba(3,155,229,.2); color: #62c9f4; border: 1px solid rgba(3,155,229,.25); }
+.chip-viaje    { background: rgba(230,124,115,.2); color: #f0a09a; border: 1px solid rgba(230,124,115,.25); }
+.chip-hotel    { background: rgba(51,182,121,.2); color: #7dd4a8; border: 1px solid rgba(51,182,121,.25); }
+.chip-familia  { background: rgba(11,128,67,.2); color: #5bbf8a; border: 1px solid rgba(11,128,67,.25); }
+.chip-vuelta   { background: rgba(246,191,38,.15); color: #e8c547; border: 1px solid rgba(246,191,38,.2); }
+.chip-custom   { background: rgba(255,255,255,.06); color: #aaa; border: 1px solid rgba(255,255,255,.1); }
+
+/* ─── CASTING ─── */
+.casting-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.cast-card {
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: .65rem; overflow: hidden;
+  background: rgba(255,255,255,.02);
+  transition: border-color .2s;
+}
+.cast-card:hover { border-color: rgba(255,255,255,.18); }
+.cast-photo {
+  width: 100%; aspect-ratio: 3/4; object-fit: cover;
+  background: rgba(255,255,255,.04);
+  display: flex; align-items: center; justify-content: center;
+  color: #333; font-size: .78rem; overflow: hidden;
+}
+.cast-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cast-photo-placeholder {
+  width: 100%; aspect-ratio: 3/4;
+  background: rgba(255,255,255,.03);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .5rem; color: #444; font-size: .75rem;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  cursor: pointer; transition: background .2s;
+}
+.cast-photo-placeholder:hover { background: rgba(255,255,255,.06); }
+.cast-body { padding: .9rem; }
+.cast-name { font-size: .95rem; font-weight: 600; margin-bottom: .2rem; }
+.cast-role { font-size: .78rem; color: #666; margin-bottom: .6rem; }
+.cast-tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .75rem; }
+.cast-tag {
+  padding: .15rem .5rem; border-radius: 2rem;
+  font-size: .7rem; color: #888;
+  border: 1px solid rgba(255,255,255,.1);
+}
+.cast-links { display: flex; gap: .5rem; }
+.cast-link {
+  display: flex; align-items: center; gap: .3rem;
+  padding: .3rem .6rem; font-size: .72rem; color: #666;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .3rem; transition: all .2s;
+}
+.cast-link:hover { color: #fff; border-color: rgba(255,255,255,.25); }
+.cast-actions { display: flex; gap: .4rem; margin-top: .75rem; padding-top: .75rem; border-top: 1px solid rgba(255,255,255,.06); }
+.cast-edit-btn {
+  flex: 1; padding: .35rem; font-size: .75rem; color: #555;
+  border: 1px solid rgba(255,255,255,.07); border-radius: .3rem;
+  display: flex; align-items: center; justify-content: center; gap: .3rem;
+}
+.cast-edit-btn:hover { color: #ccc; border-color: rgba(255,255,255,.2); }
+
+/* ─── TEAM ─── */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+.team-card {
+  border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
+  padding: 1.1rem; background: rgba(255,255,255,.02);
+}
+.team-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .9rem; }
+.team-name { font-size: .95rem; font-weight: 600; margin-bottom: .15rem; }
+.team-role { font-size: .78rem; color: #666; }
+.team-dept { font-size: .72rem; color: #444; margin-top: .1rem; }
+.team-fields { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; border-top: 1px solid rgba(255,255,255,.06); padding-top: .8rem; }
+.team-field-label { font-size: .7rem; color: #555; margin-bottom: .15rem; }
+.team-field-val { font-size: .82rem; color: #ccc; }
+.team-confirmed { font-size: .7rem; color: #a0d4a0; border: 1px solid rgba(160,212,160,.25); border-radius: .25rem; padding: .15rem .45rem; }
+
+/* ─── TRATAMIENTO (PDF viewer) ─── */
+.pdf-panel { display: flex; flex-direction: column; gap: 1rem; }
+.pdf-drop-zone {
+  border: 1px dashed rgba(255,255,255,.15); border-radius: .65rem;
+  padding: 2.5rem 1.5rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .75rem; color: #555; font-size: .85rem; cursor: pointer;
+  transition: all .2s; text-align: center;
+}
+.pdf-drop-zone:hover { border-color: rgba(255,255,255,.3); color: #ccc; background: rgba(255,255,255,.02); }
+.pdf-drop-zone .drop-icon { color: #444; }
+.pdf-drop-zone p { font-size: .78rem; color: #444; }
+
+.pdf-viewer-wrap {
+  border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
+  overflow: hidden; background: #111;
+}
+.pdf-viewer-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .6rem 1rem; border-bottom: 1px solid rgba(255,255,255,.07);
+  background: rgba(255,255,255,.03);
+}
+.pdf-viewer-name { font-size: .8rem; color: #888; display: flex; align-items: center; gap: .4rem; }
+.pdf-viewer-actions { display: flex; gap: .5rem; }
+.pdf-action-btn {
+  padding: .3rem .65rem; font-size: .73rem; color: #666;
+  border: 1px solid rgba(255,255,255,.1); border-radius: .3rem;
+}
+.pdf-action-btn:hover { color: #ccc; border-color: rgba(255,255,255,.25); }
+.pdf-embed { width: 100%; height: 78vh; border: none; display: block; }
+.pdf-close-btn {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .75rem; color: #555;
+  border: 1px solid rgba(255,255,255,.08); border-radius: .3rem; padding: .3rem .65rem;
+}
+.pdf-close-btn:hover { color: #ccc; }
+
+/* ─── PRESUPUESTO ─── */
+.budget-summary-card {
+  border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
+  padding: 1.4rem; background: rgba(255,255,255,.02); margin-bottom: 1.5rem;
+}
+.budget-totals { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1.25rem; }
+.budget-total-item { }
+.budget-total-label { font-size: .75rem; color: #555; margin-bottom: .2rem; }
+.budget-total-val { font-size: 1.4rem; font-weight: 600; }
+.dept-list { display: flex; flex-direction: column; gap: .75rem; }
+.dept-row {
+  border: 1px solid rgba(255,255,255,.07); border-radius: .5rem;
+  padding: .9rem 1rem; background: rgba(255,255,255,.02);
+}
+.dept-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: .6rem; }
+.dept-row-name { font-size: .88rem; font-weight: 500; }
+.dept-row-pct { font-size: .78rem; color: #555; }
+.dept-row-amounts { display: flex; justify-content: space-between; font-size: .75rem; color: #555; margin-top: .4rem; }
+
+/* ─── VISUAL ─── */
+.visual-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 5rem 2rem; gap: 1rem; color: #444; text-align: center;
+}
+.visual-placeholder p { font-size: .82rem; color: #444; max-width: 300px; }
+
+/* ─── EDIT MODAL (Cast / Team) ─── */
+.edit-modal {
+  background: #141414; border: 1px solid rgba(255,255,255,.1);
+  border-radius: .85rem; padding: 1.75rem; width: 500px; max-width: 96vw;
+  max-height: 90vh; overflow-y: auto;
+}
+.edit-modal-title { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+.field-group { margin-bottom: 1rem; }
+.field-label-text { font-size: .75rem; color: #666; margin-bottom: .35rem; display: block; }
+.field-input {
+  width: 100%; padding: .5rem .75rem;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .4rem; font-size: .85rem; color: #fff;
+  outline: none; transition: border-color .2s;
+}
+.field-input:focus { border-color: rgba(255,255,255,.3); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.photo-upload-area {
+  border: 1px dashed rgba(255,255,255,.15); border-radius: .4rem;
+  padding: 1.25rem; text-align: center; cursor: pointer;
+  font-size: .78rem; color: #555; transition: all .2s;
+}
+.photo-upload-area:hover { border-color: rgba(255,255,255,.3); color: #ccc; }
+.photo-preview { width: 100%; height: 120px; object-fit: cover; border-radius: .35rem; display: block; }
+.modal-actions { display: flex; gap: .5rem; justify-content: flex-end; margin-top: 1.25rem; }
+.btn-cancel {
+  padding: .45rem 1rem; font-size: .8rem; color: #666;
+  border: 1px solid rgba(255,255,255,.1); border-radius: .4rem;
+}
+.btn-save {
+  padding: .45rem 1.1rem; font-size: .8rem; color: #fff;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  border-radius: .4rem;
+}
+.btn-save:hover { background: rgba(255,255,255,.18); }
+.btn-danger {
+  padding: .45rem 1rem; font-size: .8rem; color: #e57373;
+  border: 1px solid rgba(229,115,115,.2); border-radius: .4rem;
+  margin-right: auto;
+}
+.btn-danger:hover { background: rgba(229,115,115,.08); }
+
+/* ─── CALENDARIO (dark) ─── */
+.cal-wrapper {
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: .65rem; padding: 1.25rem;
+}
+.cal-legend {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+  margin-bottom: 1rem;
+}
+.cal-legend-item { display: flex; align-items: center; gap: 5px; font-size: .72rem; color: #666; }
+.cal-legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.cal-hint { font-size: .7rem; color: #444; margin-left: auto; }
+.calendar {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08); border-radius: .5rem; overflow: hidden;
+}
+.cal-header { display: grid; grid-template-columns: 40px repeat(7,1fr); border-bottom: 1px solid rgba(255,255,255,.08); }
+.cal-header-day { padding: 8px 4px; font-size: .7rem; font-weight: 500; color: #555; letter-spacing: .08em; text-transform: uppercase; border-left: 1px solid rgba(255,255,255,.06); text-align: center; }
+.cal-row { display: grid; grid-template-columns: 40px repeat(7,1fr); border-bottom: 1px solid rgba(255,255,255,.06); min-height: 130px; }
+.cal-row:last-child { border-bottom: none; }
+.week-label { display: flex; align-items: center; justify-content: center; font-size: .6rem; font-weight: 500; color: #444; letter-spacing: 1px; text-transform: uppercase; writing-mode: vertical-rl; transform: rotate(180deg); border-right: 1px solid rgba(255,255,255,.06); }
+.day-cell { padding: 6px 5px 6px 6px; border-left: 1px solid rgba(255,255,255,.06); min-height: 130px; }
+.day-cell.empty { background: rgba(0,0,0,.15); }
+.day-num { font-size: 1rem; font-weight: 300; color: #aaa; margin-bottom: 4px; line-height: 1; }
+.day-cell.empty .day-num { color: #2a2a2a; }
+.lugar { display: block; background: rgba(26,40,80,.8); color: #fff; font-size: .68rem; font-weight: 600; padding: 3px 5px; margin-bottom: 4px; border-radius: 3px; border-left: 2px solid #1a73e8; cursor: pointer; transition: opacity .15s; line-height: 1.3; }
+.lugar:hover { opacity: .8; }
+.lugar.destino { border-left-color: #e67c73; }
+.events { display: flex; flex-direction: column; gap: 2px; }
+.cal-chip { display: block; border-radius: 3px; padding: 2px 5px; font-size: .68rem; font-weight: 500; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: opacity .15s; }
+.cal-chip:hover { opacity: .8; }
+.cal-chip.rodaje   { background: rgba(26,115,232,.85); color: #fff; }
+.cal-chip.scouting { background: rgba(3,155,229,.85); color: #fff; }
+.cal-chip.viaje    { background: rgba(230,124,115,.85); color: #fff; }
+.cal-chip.hotel    { background: rgba(51,182,121,.85); color: #fff; }
+.cal-chip.familia  { background: rgba(11,128,67,.85); color: #fff; }
+.cal-chip.vuelta   { background: rgba(246,191,38,.85); color: #1a1a1a; }
+.cal-chip.custom   { background: rgba(255,255,255,.1); color: #ccc; }
+.cal-add-btn { display: block; margin-top: 3px; width: 100%; border: 1px dashed rgba(255,255,255,.1); background: transparent; border-radius: 3px; padding: 2px 5px; font-size: .65rem; color: #444; cursor: pointer; text-align: left; font-family: inherit; }
+.cal-add-btn:hover { border-color: rgba(255,255,255,.25); color: #888; }
+.cal-footer { margin-top: .9rem; font-size: .7rem; color: #333; text-align: right; }
+.cal-save-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; flex-wrap: wrap; gap: .5rem; }
+.cal-save-btn {
+  padding: .35rem .85rem; font-size: .75rem; color: #fff;
+  background: rgba(26,115,232,.7); border: 1px solid rgba(26,115,232,.5);
+  border-radius: .35rem;
+}
+.cal-save-btn:hover { background: rgba(26,115,232,.9); }
+
+/* Calendar popover */
+.cal-overlay { position: fixed; inset: 0; z-index: 300; display: none; }
+.cal-overlay.on { display: block; }
+.cal-popover {
+  position: fixed; background: #181818;
+  border: 1px solid rgba(255,255,255,.12); border-radius: .6rem;
+  box-shadow: 0 8px 40px rgba(0,0,0,.7); z-index: 301;
+  min-width: 260px; padding: 14px; font-size: 12px; display: none;
+}
+.cal-popover h4 { font-size: .68rem; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+.cal-popover input[type=text] { width: 100%; border: 1px solid rgba(255,255,255,.12); border-radius: .35rem; padding: 6px 8px; font-size: .8rem; margin-bottom: 8px; outline: none; background: rgba(255,255,255,.05); color: #fff; font-family: inherit; }
+.cal-popover input[type=text]:focus { border-color: rgba(255,255,255,.3); }
+.cal-type-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+.cal-type-pill { padding: 2px 7px; border-radius: 10px; font-size: .68rem; font-weight: 600; cursor: pointer; border: 2px solid transparent; opacity: .7; }
+.cal-type-pill.on { opacity: 1; border-color: #fff; }
+.cal-color-label { font-size: .68rem; color: #555; margin-bottom: 4px; }
+.cal-color-grid { display: grid; grid-template-columns: repeat(8,1fr); gap: 3px; margin-bottom: 10px; }
+.cal-swatch { width: 24px; height: 24px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: transform .1s; }
+.cal-swatch:hover { transform: scale(1.15); }
+.cal-swatch.on { border-color: #fff; }
+.cal-pop-actions { display: flex; gap: 5px; justify-content: flex-end; }
+.cal-pop-btn { padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.06); font-size: .72rem; cursor: pointer; color: #ccc; font-family: inherit; }
+.cal-pop-btn.primary { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+.cal-pop-btn.danger  { background: #b71c1c; color: #fff; border-color: #b71c1c; }
+
+/* ─── FOOTER ─── */
+footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
+.footer-inner { max-width: 1320px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 2rem; margin-bottom: 2rem; }
+.footer-col h5 { font-size: .8rem; font-weight: 600; margin-bottom: .75rem; color: #ccc; }
+.footer-links { display: flex; flex-direction: column; gap: .4rem; }
+.footer-links a { font-size: .78rem; color: #555; }
+.footer-links a:hover { color: #aaa; }
+.footer-copy { border-top: 1px solid rgba(255,255,255,.06); padding-top: 1.5rem; text-align: center; font-size: .75rem; color: #333; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  main { padding: 1.5rem 1rem; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .casting-grid { grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); }
+  .team-grid { grid-template-columns: 1fr; }
+  .budget-totals { grid-template-columns: 1fr 1fr; }
+  .cal-row { min-height: 90px; }
+  .day-cell { min-height: 90px; }
+  .module-bar { gap: .3rem; }
+  .module-tab { font-size: .73rem; padding: .35rem .65rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══ -->
+<nav>
+  <div class="nav-inner">
+    <button class="logo" onclick="goToDashboard()">
+      <div class="logo-mark">RP</div>
+      <span>Rodaje+</span>
+    </button>
+    <div class="nav-right">
+      <button class="nav-btn" id="roleBtn" onclick="toggleRole()">Admin</button>
+      <button class="nav-icon-btn" title="Ajustes">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      </button>
+      <button class="nav-icon-btn" title="Salir">
+        <span class="icon"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main>
+
+  <!-- ── DASHBOARD ── -->
+  <div id="dashboardView">
+    <div class="dash-header">
+      <h1>Proyectos</h1>
+      <button class="btn-new" onclick="createProject()">
+        <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+        Nuevo proyecto
+      </button>
+    </div>
+    <div class="filter-bar">
+      <button class="filter-pill active" onclick="filterProjects('todos', this)">Todos</button>
+      <button class="filter-pill" onclick="filterProjects('activo', this)">Activos</button>
+      <button class="filter-pill" onclick="filterProjects('cerrado', this)">Cerrados</button>
+      <button class="filter-pill" onclick="filterProjects('archivo', this)">Archivo</button>
+    </div>
+    <div class="projects-grid" id="projectsGrid"></div>
+  </div>
+
+  <!-- ── PROJECT DETAIL ── -->
+  <div id="projectDetail" class="project-detail">
+    <a href="#" class="back-link" onclick="goToDashboard(); return false;">
+      <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></span>
+      Proyectos
+    </a>
+
+    <div class="detail-banner">
+      <div class="detail-banner-top">
+        <div>
+          <div class="detail-title" id="detailTitle"></div>
+          <div class="detail-sub" id="detailSub"></div>
+        </div>
+        <div class="detail-actions">
+          <button class="icon-btn" title="Editar">
+            <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+          </button>
+          <button class="icon-btn" title="Compartir">
+            <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Module tabs bar -->
+    <div class="module-bar" id="moduleBar"></div>
+
+    <!-- Panels -->
+    <div id="panelShootingPlan"  class="module-panel"></div>
+    <div id="panelCasting"       class="module-panel"></div>
+    <div id="panelEquipo"        class="module-panel"></div>
+    <div id="panelTratamiento"   class="module-panel"></div>
+    <div id="panelPresupuesto"   class="module-panel"></div>
+    <div id="panelCalendario"    class="module-panel"></div>
+    <div id="panelVisual"        class="module-panel"></div>
+  </div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-col"><h5>Producto</h5><div class="footer-links"><a href="#">Features</a><a href="#">Precios</a><a href="#">Roadmap</a></div></div>
+      <div class="footer-col"><h5>Empresa</h5><div class="footer-links"><a href="#">Nosotros</a><a href="#">Blog</a><a href="#">Contacto</a></div></div>
+      <div class="footer-col"><h5>Legal</h5><div class="footer-links"><a href="#">Privacidad</a><a href="#">Términos</a><a href="#">Cookies</a></div></div>
+      <div class="footer-col"><h5>Redes</h5><div class="footer-links"><a href="#">Twitter</a><a href="#">LinkedIn</a><a href="#">Instagram</a></div></div>
+    </div>
+    <div class="footer-copy">© 2026 Rodaje+ Studio. Todos los derechos reservados.</div>
+  </div>
+</footer>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- Manage modules modal -->
+<div class="modal-overlay" id="manageModulesModal">
+  <div class="modal">
+    <div class="modal-title">Secciones del proyecto</div>
+    <div class="modal-sub">Activa o desactiva las secciones que necesitas para este proyecto.</div>
+    <div class="module-list" id="moduleList"></div>
+    <div class="modal-footer">
+      <button class="btn-done" onclick="closeManageModules()">Listo</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Cast / Team modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="edit-modal" id="editModalContent"></div>
+</div>
+
+<!-- Calendar overlay + popover -->
+<div class="cal-overlay" id="calOverlay" onclick="calClosePopover()"></div>
+<div class="cal-popover" id="calPopover">
+  <h4 id="calPopTitle">Editar</h4>
+  <input type="text" id="calPopText" placeholder="Texto..." />
+  <div class="cal-type-row" id="calPopTypes"></div>
+  <div class="cal-color-label">Color:</div>
+  <div class="cal-color-grid" id="calPopColors"></div>
+  <div class="cal-pop-actions">
+    <button class="cal-pop-btn danger" id="calPopDelete" onclick="calDeleteItem()">Eliminar</button>
+    <button class="cal-pop-btn" onclick="calClosePopover()">Cancelar</button>
+    <button class="cal-pop-btn primary" onclick="calSaveItem()">Guardar</button>
+  </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="pdfFileInput" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
+<input type="file" id="castPhotoInput" accept="image/*" style="display:none" onchange="handleCastPhotoUpload(event)">
+
+<script>
+/* ══════════════════════════════════════════════
+   SVG ICON HELPER
+══════════════════════════════════════════════ */
+const ICONS = {
+  calendar: `<svg width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  users:    `<svg width="15" height="15" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+  person:   `<svg width="15" height="15" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  file:     `<svg width="15" height="15" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  dollar:   `<svg width="15" height="15" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+  image:    `<svg width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+  globe:    `<svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  map:      `<svg width="15" height="15" viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>`,
+  edit:     `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  trash:    `<svg width="13" height="13" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>`,
+  plus:     `<svg width="13" height="13" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  upload:   `<svg width="28" height="28" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  pdf:      `<svg width="15" height="15" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+  settings2:`<svg width="13" height="13" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>`,
+  instagram:`<svg width="13" height="13" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`,
+  link:     `<svg width="13" height="13" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  camera:   `<svg width="20" height="20" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>`,
+  movie:    `<svg width="20" height="20" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>`,
+  box:      `<svg width="20" height="20" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+};
+const icon = (k, size) => {
+  let svg = ICONS[k] || ICONS.file;
+  if (size) svg = svg.replace(/width="\d+"/, `width="${size}"`).replace(/height="\d+"/, `height="${size}"`);
+  return `<span class="icon">${svg}</span>`;
+};
+
+/* ══════════════════════════════════════════════
+   MODULE DEFINITIONS
+══════════════════════════════════════════════ */
+const MODULE_DEFS = [
+  { id: 'shootingPlan',  label: 'Shooting Plan', iconKey: 'calendar', desc: 'Calendario de días de rodaje y escenas', panelId: 'panelShootingPlan' },
+  { id: 'casting',       label: 'Casting',        iconKey: 'users',    desc: 'Fichas de actores y modelos', panelId: 'panelCasting' },
+  { id: 'equipo',        label: 'Equipo',          iconKey: 'person',   desc: 'Crew técnico y artístico', panelId: 'panelEquipo' },
+  { id: 'tratamiento',   label: 'Tratamiento',     iconKey: 'file',     desc: 'PDF del tratamiento creativo', panelId: 'panelTratamiento' },
+  { id: 'presupuesto',   label: 'Presupuesto',     iconKey: 'dollar',   desc: 'Control de costes por departamento', panelId: 'panelPresupuesto' },
+  { id: 'calendario',    label: 'Calendario',      iconKey: 'map',      desc: 'Vista de calendario interactivo', panelId: 'panelCalendario' },
+  { id: 'visual',        label: 'Visual',          iconKey: 'image',    desc: 'Referencias y moodboard', panelId: 'panelVisual' },
+];
+
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+let currentUser  = 'admin';
+let activeProject = null;
+let activeModuleId = 'shootingPlan';
+
+// Modules enabled per project: stored in project.modules = { id: bool }
+const DEFAULT_MODULES = { shootingPlan: true, casting: true, equipo: true, tratamiento: true, presupuesto: true, calendario: true, visual: false };
+
+const projects = [
+  {
+    id: 1,
+    nombre: 'Campaña Nike 2026',
+    cliente: 'Nike Inc.',
+    director: 'Carlos Mendez',
+    estado: 'activo',
+    iconKey: 'camera',
+    presupuesto: { total: 150000, gastado: 87500 },
+    fechaInicio: '2026-04-20', fechaFin: '2026-05-10',
+    cast: 5, crew: 25, dias: 12,
+    modules: { shootingPlan: true, casting: true, equipo: true, tratamiento: true, presupuesto: true, calendario: true, visual: false },
+    planificacion: [
+      { dia:1, fecha:'2026-04-20', locacion:'Estudio Central', chips:[
+          {id:'p1',text:'Rodaje interior A',type:'rodaje'},{id:'p2',text:'Transfer estudio',type:'viaje'}
+      ]},
+      { dia:2, fecha:'2026-04-21', locacion:'Parque Central', chips:[
+          {id:'p3',text:'Rodaje exterior',type:'rodaje'},{id:'p4',text:'Scouting B',type:'scouting'}
+      ]},
+    ],
+    casting: [
+      { id:1, nombre:'Ana García', rol:'Protagonista', estado:'confirmada', edad:28, contacto:'ana@email.com', telefono:'+34 666 777 888', instagram:'@anagarcia', photo: null, tags:['Actriz','Comercial'] },
+      { id:2, nombre:'Miguel López', rol:'Actor secundario', estado:'contratado', edad:35, contacto:'miguel@email.com', telefono:'+34 666 888 999', instagram:'@miguellopezactor', photo: null, tags:['Actor','Moda'] },
+    ],
+    equipo: [
+      { id:1, nombre:'Juan Martínez', cargo:'Director de Fotografía', dept:'Cámara', contacto:'juan@email.com', telefono:'+34 666 111 222', tarifa:'2.500€/día', exp:'15 años' },
+      { id:2, nombre:'María González', cargo:'Directora de Arte', dept:'Dirección', contacto:'maria@email.com', telefono:'+34 666 222 333', tarifa:'2.000€/día', exp:'10 años' },
+    ],
+    tratamientoPDF: null,
+    presupuestoDetalle: {
+      departamentos: [
+        { nombre:'Producción', presupuesto:25000, gastado:12500 },
+        { nombre:'Cámara',     presupuesto:35000, gastado:22000 },
+        { nombre:'Iluminación',presupuesto:28000, gastado:18500 },
+        { nombre:'Sonido',     presupuesto:15000, gastado:8000  },
+        { nombre:'Arte',       presupuesto:22000, gastado:16200 },
+        { nombre:'Casting',    presupuesto:20000, gastado:10300 },
+      ]
+    }
+  },
+  {
+    id: 2,
+    nombre: 'RIU Marruecos 2025',
+    cliente: 'RIU Hotels & Resorts',
+    director: 'Marc Hierro',
+    estado: 'activo',
+    iconKey: 'globe',
+    presupuesto: { total: 95000, gastado: 51000 },
+    fechaInicio: '2025-05-10', fechaFin: '2025-05-21',
+    cast: 6, crew: 14, dias: 12,
+    modules: { shootingPlan: true, casting: true, equipo: true, tratamiento: true, presupuesto: true, calendario: true, visual: false },
+    planificacion: [],
+    casting: [],
+    equipo: [],
+    tratamientoPDF: null,
+    presupuestoDetalle: { departamentos: [] }
+  },
+  {
+    id: 3,
+    nombre: 'Comercial Bebidas',
+    cliente: 'Coca-Cola España',
+    director: 'Elena Ruiz',
+    estado: 'activo',
+    iconKey: 'movie',
+    presupuesto: { total: 85000, gastado: 42300 },
+    fechaInicio: '2026-05-15', fechaFin: '2026-06-02',
+    cast: 8, crew: 18, dias: 8,
+    modules: { ...DEFAULT_MODULES },
+    planificacion: [], casting: [], equipo: [], tratamientoPDF: null,
+    presupuestoDetalle: { departamentos: [] }
+  },
+  {
+    id: 4,
+    nombre: 'Video Corporativo',
+    cliente: 'Telefónica',
+    director: 'Juan Pérez',
+    estado: 'cerrado',
+    iconKey: 'box',
+    presupuesto: { total: 45000, gastado: 45000 },
+    fechaInicio: '2026-02-01', fechaFin: '2026-02-28',
+    cast: 3, crew: 12, dias: 5,
+    modules: { ...DEFAULT_MODULES },
+    planificacion: [], casting: [], equipo: [], tratamientoPDF: null,
+    presupuestoDetalle: { departamentos: [] }
+  }
+];
+
+/* ══════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════ */
+function renderProjects(filter = 'todos') {
+  const grid = document.getElementById('projectsGrid');
+  grid.innerHTML = '';
+  const list = filter === 'todos' ? projects : projects.filter(p => p.estado === filter || (filter === 'archivo' && p.estado === 'cerrado'));
+  list.forEach(p => {
+    const pct = (p.presupuesto.gastado / p.presupuesto.total) * 100;
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.onclick = () => openProject(p.id);
+    card.innerHTML = `
+      <div class="pc-top">
+        <div class="pc-icon">${icon(p.iconKey, 18)}</div>
+        <span class="status-pill ${p.estado}">${p.estado}</span>
+      </div>
+      <div class="pc-title">${p.nombre}</div>
+      <div class="pc-meta">
+        <div class="pc-meta-row">${icon('person',13)} ${p.cliente}</div>
+        <div class="pc-meta-row">${icon('movie',13)} ${p.director}</div>
+        <div class="pc-meta-row">${icon('calendar',13)} ${p.dias} días · ${p.fechaInicio}</div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stats-row">
+          <div class="pc-stat"><div class="pc-stat-n">${p.cast}</div><div class="pc-stat-l">Cast</div></div>
+          <div class="pc-stat"><div class="pc-stat-n">${p.crew}</div><div class="pc-stat-l">Crew</div></div>
+          <div class="pc-stat"><div class="pc-stat-n">${(p.presupuesto.total/1000).toFixed(0)}K</div><div class="pc-stat-l">Presup.</div></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="progress-label">${p.presupuesto.gastado.toLocaleString('es')}€ / ${p.presupuesto.total.toLocaleString('es')}€</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function filterProjects(f, btn) {
+  document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjects(f);
+}
+
+/* ══════════════════════════════════════════════
+   PROJECT DETAIL
+══════════════════════════════════════════════ */
+function openProject(id) {
+  activeProject = projects.find(p => p.id === id);
+  activeModuleId = Object.keys(activeProject.modules).find(k => activeProject.modules[k]) || 'shootingPlan';
+  document.getElementById('dashboardView').style.display = 'none';
+  document.getElementById('projectDetail').classList.add('active');
+  document.getElementById('detailTitle').textContent = activeProject.nombre;
+  document.getElementById('detailSub').textContent = `${activeProject.cliente} · Dir: ${activeProject.director}`;
+  renderModuleBar();
+  renderActivePanel();
+}
+
+function goToDashboard() {
+  activeProject = null;
+  document.getElementById('dashboardView').style.display = 'block';
+  document.getElementById('projectDetail').classList.remove('active');
+  renderProjects();
+}
+
+/* ══════════════════════════════════════════════
+   MODULE BAR
+══════════════════════════════════════════════ */
+function renderModuleBar() {
+  const bar = document.getElementById('moduleBar');
+  bar.innerHTML = '';
+  MODULE_DEFS.forEach(m => {
+    if (!activeProject.modules[m.id]) return;
+    const btn = document.createElement('button');
+    btn.className = 'module-tab' + (activeModuleId === m.id ? ' active' : '');
+    btn.innerHTML = `${icon(m.iconKey)} ${m.label}`;
+    btn.onclick = () => { activeModuleId = m.id; renderModuleBar(); renderActivePanel(); };
+    bar.appendChild(btn);
+  });
+  // Manage button
+  const mgr = document.createElement('button');
+  mgr.className = 'manage-modules-btn';
+  mgr.innerHTML = `${icon('settings2')} Secciones`;
+  mgr.onclick = openManageModules;
+  bar.appendChild(mgr);
+}
+
+/* ══════════════════════════════════════════════
+   MANAGE MODULES MODAL
+══════════════════════════════════════════════ */
+function openManageModules() {
+  const list = document.getElementById('moduleList');
+  list.innerHTML = '';
+  MODULE_DEFS.forEach(m => {
+    const enabled = !!activeProject.modules[m.id];
+    const row = document.createElement('div');
+    row.className = 'module-row';
+    row.innerHTML = `
+      <div class="module-row-left">
+        <span class="module-row-icon">${icon(m.iconKey)}</span>
+        <div>
+          <div class="module-row-name">${m.label}</div>
+          <div class="module-row-desc">${m.desc}</div>
+        </div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" ${enabled ? 'checked' : ''} onchange="toggleModule('${m.id}', this.checked)">
+        <span class="toggle-track"></span>
+      </label>`;
+    list.appendChild(row);
+  });
+  document.getElementById('manageModulesModal').classList.add('open');
+}
+
+function toggleModule(id, val) {
+  activeProject.modules[id] = val;
+  // If we're disabling the active module, switch to first enabled
+  if (!val && activeModuleId === id) {
+    activeModuleId = Object.keys(activeProject.modules).find(k => activeProject.modules[k]) || 'shootingPlan';
+  }
+}
+
+function closeManageModules() {
+  document.getElementById('manageModulesModal').classList.remove('open');
+  renderModuleBar();
+  renderActivePanel();
+}
+
+/* ══════════════════════════════════════════════
+   PANEL ROUTER
+══════════════════════════════════════════════ */
+function renderActivePanel() {
+  document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+  const def = MODULE_DEFS.find(m => m.id === activeModuleId);
+  if (!def) return;
+  const panel = document.getElementById(def.panelId);
+  panel.classList.add('active');
+
+  switch (activeModuleId) {
+    case 'shootingPlan':  renderShootingPlan(panel); break;
+    case 'casting':       renderCasting(panel);       break;
+    case 'equipo':        renderEquipo(panel);         break;
+    case 'tratamiento':   renderTratamiento(panel);   break;
+    case 'presupuesto':   renderPresupuesto(panel);   break;
+    case 'calendario':    renderCalendario(panel);    break;
+    case 'visual':        renderVisual(panel);         break;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   SHOOTING PLAN
+══════════════════════════════════════════════ */
+function renderShootingPlan(panel) {
+  const p = activeProject;
+  if (!p.planificacion.length) {
+    panel.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">${icon('calendar')} Shooting Plan</div>
+        <button class="btn-add" onclick="addPlanDay()">
+          ${icon('plus')} Añadir día
+        </button>
+      </div>
+      <div style="text-align:center;padding:3rem 1rem;color:#444;font-size:.85rem;">Sin días de rodaje aún.</div>`;
+    return;
+  }
+
+  // Group by week-label (using index / 7)
+  let html = `
+    <div class="panel-header">
+      <div class="panel-title">${icon('calendar')} Shooting Plan</div>
+      <button class="btn-add" onclick="addPlanDay()">${icon('plus')} Añadir día</button>
+    </div>`;
+
+  // Group into weeks of 7
+  const weekSize = 7;
+  const weeks = [];
+  for (let i = 0; i < p.planificacion.length; i += weekSize) weeks.push(p.planificacion.slice(i, i + weekSize));
+  if (!weeks.length) weeks.push(p.planificacion);
+
+  weeks.forEach((week, wi) => {
+    html += `<div class="plan-week">
+      <div class="plan-week-header" onclick="toggleWeek(this)">
+        <span class="plan-week-title">Semana ${wi + 1}</span>
+        <span style="color:#555;font-size:.75rem;">${week.length} día${week.length > 1 ? 's' : ''}</span>
+      </div>
+      <div class="plan-days">`;
+    week.forEach(dia => {
+      const chipsHtml = (dia.chips || []).map(c =>
+        `<div class="plan-chip chip-${c.type}">${icon(c.type === 'rodaje' ? 'movie' : c.type === 'viaje' ? 'map' : 'calendar', 11)} ${c.text}</div>`
+      ).join('');
+      html += `
+        <div class="plan-day">
+          <div class="plan-day-head">
+            <div class="plan-day-num">${dia.dia}</div>
+            <div class="plan-day-info">
+              <div class="plan-day-date">${dia.fecha}</div>
+              <div class="plan-day-loc">${dia.locacion || '—'}</div>
+            </div>
+          </div>
+          <div class="plan-chips">${chipsHtml}</div>
+        </div>`;
+    });
+    html += `</div></div>`;
+  });
+  panel.innerHTML = html;
+}
+
+function toggleWeek(header) {
+  const days = header.nextElementSibling;
+  days.style.display = days.style.display === 'none' ? '' : 'none';
+}
+
+function addPlanDay() { alert('Añadir día de rodaje — próximamente'); }
+
+/* ══════════════════════════════════════════════
+   CASTING
+══════════════════════════════════════════════ */
+let editingCastId = null;
+let pendingCastPhotoData = null;
+
+function renderCasting(panel) {
+  const p = activeProject;
+  let html = `
+    <div class="panel-header">
+      <div class="panel-title">${icon('users')} Casting</div>
+      <button class="btn-add" onclick="openAddCast()">${icon('plus')} Añadir</button>
+    </div>
+    <div class="casting-grid">`;
+
+  if (!p.casting.length) {
+    html += `</div><div style="text-align:center;padding:3rem;color:#444;font-size:.85rem;">Sin miembros de casting.</div>`;
+    panel.innerHTML = html;
+    return;
+  }
+
+  p.casting.forEach(actor => {
+    const photoHtml = actor.photo
+      ? `<div class="cast-photo"><img src="${actor.photo}" alt="${actor.nombre}"></div>`
+      : `<div class="cast-photo-placeholder" onclick="triggerCastPhotoUpload(${actor.id})">
+           ${icon('camera', 24)}
+           <span>Añadir foto</span>
+         </div>`;
+    const tagsHtml = (actor.tags || []).map(t => `<span class="cast-tag">${t}</span>`).join('');
+    const igLink = actor.instagram
+      ? `<a href="https://instagram.com/${actor.instagram.replace('@','')}" target="_blank" class="cast-link" onclick="event.stopPropagation()">
+           ${icon('instagram')} ${actor.instagram}
+         </a>` : '';
+
+    html += `
+      <div class="cast-card">
+        ${photoHtml}
+        <div class="cast-body">
+          <div class="cast-name">${actor.nombre}</div>
+          <div class="cast-role">${actor.rol}</div>
+          <div class="cast-tags">${tagsHtml}
+            <span class="cast-tag" style="color:${actor.estado==='confirmada'?'#a0d4a0':'#e8c547'}">${actor.estado}</span>
+          </div>
+          <div class="cast-links">${igLink}</div>
+          <div class="cast-actions">
+            <button class="cast-edit-btn" onclick="openEditCast(${actor.id})">${icon('edit')} Editar</button>
+            <button class="cast-edit-btn" onclick="deleteCast(${actor.id})" style="color:#e57373">${icon('trash')}</button>
+          </div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  panel.innerHTML = html;
+}
+
+function triggerCastPhotoUpload(castId) {
+  editingCastId = castId;
+  pendingCastPhotoData = null;
+  document.getElementById('castPhotoInput').click();
+}
+
+function handleCastPhotoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const actor = activeProject.casting.find(a => a.id === editingCastId);
+    if (actor) {
+      actor.photo = ev.target.result;
+      renderActivePanel();
+    }
+    // Also update preview if modal is open
+    const preview = document.getElementById('castPhotoPreview');
+    if (preview) { preview.src = ev.target.result; preview.style.display = 'block'; }
+    pendingCastPhotoData = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function openAddCast() {
+  editingCastId = null;
+  pendingCastPhotoData = null;
+  showCastModal(null);
+}
+
+function openEditCast(id) {
+  editingCastId = id;
+  pendingCastPhotoData = null;
+  const actor = activeProject.casting.find(a => a.id === id);
+  showCastModal(actor);
+}
+
+function showCastModal(actor) {
+  const isEdit = !!actor;
+  const content = document.getElementById('editModalContent');
+  content.innerHTML = `
+    <div class="edit-modal-title">
+      ${isEdit ? 'Editar' : 'Nuevo'} miembro de casting
+      <button onclick="closeEditModal()" style="color:#555;font-size:1.2rem;">×</button>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label-text">Foto</label>
+      <div class="photo-upload-area" onclick="triggerCastPhotoInModal()">
+        ${actor && actor.photo ? `<img id="castPhotoPreview" class="photo-preview" src="${actor.photo}">` : `<img id="castPhotoPreview" class="photo-preview" style="display:none"><div>${icon('camera', 22)}</div><div style="margin-top:.35rem">Haz clic para subir foto</div>`}
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label-text">Nombre completo</label>
+        <input class="field-input" id="castNombre" value="${actor ? actor.nombre : ''}" placeholder="Nombre Apellido">
+      </div>
+      <div class="field-group">
+        <label class="field-label-text">Rol / Personaje</label>
+        <input class="field-input" id="castRol" value="${actor ? actor.rol : ''}" placeholder="Protagonista">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label-text">Edad</label>
+        <input class="field-input" id="castEdad" type="number" value="${actor ? actor.edad : ''}" placeholder="28">
+      </div>
+      <div class="field-group">
+        <label class="field-label-text">Estado</label>
+        <select class="field-input" id="castEstado">
+          <option value="pendiente" ${actor && actor.estado==='pendiente'?'selected':''}>Pendiente</option>
+          <option value="confirmada" ${actor && actor.estado==='confirmada'?'selected':''}>Confirmada</option>
+          <option value="contratado" ${actor && actor.estado==='contratado'?'selected':''}>Contratado</option>
+          <option value="descartado" ${actor && actor.estado==='descartado'?'selected':''}>Descartado</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label-text">Email</label>
+        <input class="field-input" id="castEmail" value="${actor ? actor.contacto : ''}" placeholder="email@dominio.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label-text">Teléfono</label>
+        <input class="field-input" id="castTel" value="${actor ? actor.telefono : ''}" placeholder="+34 600 000 000">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label-text">Instagram</label>
+      <input class="field-input" id="castIG" value="${actor ? (actor.instagram || '') : ''}" placeholder="@handle">
+    </div>
+    <div class="field-group">
+      <label class="field-label-text">Etiquetas (separadas por coma)</label>
+      <input class="field-input" id="castTags" value="${actor ? (actor.tags||[]).join(', ') : ''}" placeholder="Actriz, Comercial, Moda">
+    </div>
+    <div class="modal-actions">
+      ${isEdit ? `<button class="btn-danger" onclick="deleteCast(${actor.id}); closeEditModal();">${icon('trash',12)} Eliminar</button>` : ''}
+      <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveCast()">Guardar</button>
+    </div>`;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function triggerCastPhotoInModal() {
+  document.getElementById('castPhotoInput').click();
+}
+
+function saveCast() {
+  const nombre = document.getElementById('castNombre').value.trim();
+  if (!nombre) { alert('Nombre requerido'); return; }
+  const data = {
+    nombre,
+    rol:      document.getElementById('castRol').value.trim(),
+    edad:     parseInt(document.getElementById('castEdad').value) || null,
+    estado:   document.getElementById('castEstado').value,
+    contacto: document.getElementById('castEmail').value.trim(),
+    telefono: document.getElementById('castTel').value.trim(),
+    instagram:document.getElementById('castIG').value.trim(),
+    tags:     document.getElementById('castTags').value.split(',').map(t=>t.trim()).filter(Boolean),
+  };
+  if (pendingCastPhotoData) data.photo = pendingCastPhotoData;
+
+  if (editingCastId) {
+    const i = activeProject.casting.findIndex(a => a.id === editingCastId);
+    if (i >= 0) {
+      data.id = editingCastId;
+      if (!data.photo) data.photo = activeProject.casting[i].photo;
+      activeProject.casting[i] = data;
+    }
+  } else {
+    data.id = Date.now();
+    if (!data.photo) data.photo = null;
+    activeProject.casting.push(data);
+  }
+  closeEditModal();
+  renderActivePanel();
+}
+
+function deleteCast(id) {
+  activeProject.casting = activeProject.casting.filter(a => a.id !== id);
+  renderActivePanel();
+}
+
+/* ══════════════════════════════════════════════
+   EQUIPO
+══════════════════════════════════════════════ */
+let editingEquipoId = null;
+
+function renderEquipo(panel) {
+  const p = activeProject;
+  let html = `
+    <div class="panel-header">
+      <div class="panel-title">${icon('person')} Equipo técnico</div>
+      <button class="btn-add" onclick="openAddEquipo()">${icon('plus')} Añadir</button>
+    </div>
+    <div class="team-grid">`;
+
+  if (!p.equipo.length) {
+    html += `</div><div style="text-align:center;padding:3rem;color:#444;font-size:.85rem;">Sin miembros de equipo.</div>`;
+    panel.innerHTML = html;
+    return;
+  }
+
+  p.equipo.forEach(m => {
+    html += `
+      <div class="team-card">
+        <div class="team-card-top">
+          <div>
+            <div class="team-name">${m.nombre}</div>
+            <div class="team-role">${m.cargo}</div>
+            <div class="team-dept">${m.dept}</div>
+          </div>
+          <div style="display:flex;gap:.35rem;align-items:center;">
+            <span class="team-confirmed">Confirmado</span>
+            <button class="icon-btn" onclick="openEditEquipo(${m.id})" style="width:28px;height:28px;">${icon('edit',12)}</button>
+          </div>
+        </div>
+        <div class="team-fields">
+          <div><div class="team-field-label">Email</div><div class="team-field-val">${m.contacto}</div></div>
+          <div><div class="team-field-label">Teléfono</div><div class="team-field-val">${m.telefono}</div></div>
+          <div><div class="team-field-label">Tarifa</div><div class="team-field-val">${m.tarifa}</div></div>
+          <div><div class="team-field-label">Experiencia</div><div class="team-field-val">${m.exp}</div></div>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  panel.innerHTML = html;
+}
+
+function openAddEquipo() {
+  editingEquipoId = null;
+  showEquipoModal(null);
+}
+
+function openEditEquipo(id) {
+  editingEquipoId = id;
+  const m = activeProject.equipo.find(x => x.id === id);
+  showEquipoModal(m);
+}
+
+function showEquipoModal(m) {
+  const isEdit = !!m;
+  const content = document.getElementById('editModalContent');
+  content.innerHTML = `
+    <div class="edit-modal-title">
+      ${isEdit ? 'Editar' : 'Nuevo'} miembro del equipo
+      <button onclick="closeEditModal()" style="color:#555;font-size:1.2rem;">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label-text">Nombre completo</label>
+        <input class="field-input" id="eqNombre" value="${m ? m.nombre : ''}" placeholder="Nombre Apellido">
+      </div>
+      <div class="field-group">
+        <label class="field-label-text">Cargo</label>
+        <input class="field-input" id="eqCargo" value="${m ? m.cargo : ''}" placeholder="Director de Fotografía">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label-text">Departamento</label>
+        <input class="field-input" id="eqDept" value="${m ? m.dept : ''}" placeholder="Cámara">
+      </div>
+      <div class="field-group">
+        <label class="field-label-text">Tarifa</label>
+        <input class="field-input" id="eqTarifa" value="${m ? m.tarifa : ''}" placeholder="1.500€/día">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label-text">Email</label>
+        <input class="field-input" id="eqEmail" value="${m ? m.contacto : ''}" placeholder="email@dominio.com">
+      </div>
+      <div class="field-group">
+        <label class="field-label-text">Teléfono</label>
+        <input class="field-input" id="eqTel" value="${m ? m.telefono : ''}" placeholder="+34 600 000 000">
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label-text">Experiencia</label>
+      <input class="field-input" id="eqExp" value="${m ? m.exp : ''}" placeholder="10 años">
+    </div>
+    <div class="modal-actions">
+      ${isEdit ? `<button class="btn-danger" onclick="deleteEquipo(${m.id}); closeEditModal();">${icon('trash',12)} Eliminar</button>` : ''}
+      <button class="btn-cancel" onclick="closeEditModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveEquipo()">Guardar</button>
+    </div>`;
+  document.getElementById('editModal').classList.add('open');
+}
+
+function saveEquipo() {
+  const nombre = document.getElementById('eqNombre').value.trim();
+  if (!nombre) { alert('Nombre requerido'); return; }
+  const data = {
+    nombre,
+    cargo:    document.getElementById('eqCargo').value.trim(),
+    dept:     document.getElementById('eqDept').value.trim(),
+    tarifa:   document.getElementById('eqTarifa').value.trim(),
+    contacto: document.getElementById('eqEmail').value.trim(),
+    telefono: document.getElementById('eqTel').value.trim(),
+    exp:      document.getElementById('eqExp').value.trim(),
+  };
+  if (editingEquipoId) {
+    const i = activeProject.equipo.findIndex(x => x.id === editingEquipoId);
+    if (i >= 0) { data.id = editingEquipoId; activeProject.equipo[i] = data; }
+  } else {
+    data.id = Date.now();
+    activeProject.equipo.push(data);
+  }
+  closeEditModal();
+  renderActivePanel();
+}
+
+function deleteEquipo(id) {
+  activeProject.equipo = activeProject.equipo.filter(x => x.id !== id);
+  renderActivePanel();
+}
+
+/* ══════════════════════════════════════════════
+   TRATAMIENTO (PDF Viewer)
+══════════════════════════════════════════════ */
+function renderTratamiento(panel) {
+  const hasPDF = !!activeProject.tratamientoPDF;
+  if (!hasPDF) {
+    panel.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">${icon('file')} Tratamiento</div>
+      </div>
+      <div class="pdf-panel">
+        <div class="pdf-drop-zone" onclick="document.getElementById('pdfFileInput').click()">
+          <span class="drop-icon">${icon('upload', 36)}</span>
+          <div style="font-size:.9rem;color:#888;">Sube el documento de tratamiento</div>
+          <p>PDF hasta 50MB · Haz clic o arrastra el archivo aquí</p>
+        </div>
+      </div>`;
+  } else {
+    panel.innerHTML = `
+      <div class="panel-header">
+        <div class="panel-title">${icon('file')} Tratamiento</div>
+        <div style="display:flex;gap:.5rem;">
+          <button class="btn-add" onclick="document.getElementById('pdfFileInput').click()">${icon('upload')} Cambiar PDF</button>
+          <button class="btn-add" onclick="removePDF()" style="color:#e57373;">${icon('trash')} Eliminar</button>
+        </div>
+      </div>
+      <div class="pdf-panel">
+        <div class="pdf-viewer-wrap">
+          <div class="pdf-viewer-bar">
+            <div class="pdf-viewer-name">${icon('pdf')} ${activeProject.tratamientoNombre || 'Tratamiento.pdf'}</div>
+            <div class="pdf-viewer-actions">
+              <button class="pdf-action-btn" onclick="window.open(activeProject.tratamientoPDF,'_blank')">Abrir en nueva pestaña</button>
+              <a class="pdf-action-btn" href="${activeProject.tratamientoPDF}" download="${activeProject.tratamientoNombre||'tratamiento.pdf'}">Descargar</a>
+            </div>
+          </div>
+          <iframe class="pdf-embed" src="${activeProject.tratamientoPDF}" title="Tratamiento"></iframe>
+        </div>
+      </div>`;
+  }
+
+  // Setup drag & drop on the drop zone if shown
+  if (!hasPDF) {
+    panel.querySelector('.pdf-drop-zone').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.style.borderColor='rgba(255,255,255,.4)'; });
+    panel.querySelector('.pdf-drop-zone').addEventListener('dragleave', e => { e.currentTarget.style.borderColor=''; });
+    panel.querySelector('.pdf-drop-zone').addEventListener('drop', e => {
+      e.preventDefault();
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'application/pdf') loadPDFFile(file);
+    });
+  }
+}
+
+function handlePdfUpload(e) {
+  const file = e.target.files[0];
+  if (file) loadPDFFile(file);
+  e.target.value = '';
+}
+
+function loadPDFFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    activeProject.tratamientoPDF = ev.target.result;
+    activeProject.tratamientoNombre = file.name;
+    renderActivePanel();
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePDF() {
+  activeProject.tratamientoPDF = null;
+  activeProject.tratamientoNombre = null;
+  renderActivePanel();
+}
+
+/* ══════════════════════════════════════════════
+   PRESUPUESTO
+══════════════════════════════════════════════ */
+function renderPresupuesto(panel) {
+  const depts = activeProject.presupuestoDetalle.departamentos;
+  if (!depts.length) {
+    panel.innerHTML = `
+      <div class="panel-header"><div class="panel-title">${icon('dollar')} Presupuesto</div></div>
+      <div style="text-align:center;padding:3rem;color:#444;font-size:.85rem;">Sin datos de presupuesto.</div>`;
+    return;
+  }
+  const total   = depts.reduce((s,d)=>s+d.presupuesto,0);
+  const gastado = depts.reduce((s,d)=>s+d.gastado,0);
+  const pct = (gastado/total)*100;
+
+  let html = `
+    <div class="panel-header"><div class="panel-title">${icon('dollar')} Presupuesto</div></div>
+    <div class="budget-summary-card">
+      <div class="budget-totals">
+        <div class="budget-total-item"><div class="budget-total-label">Total</div><div class="budget-total-val">${total.toLocaleString('es')}€</div></div>
+        <div class="budget-total-item"><div class="budget-total-label">Gastado</div><div class="budget-total-val">${gastado.toLocaleString('es')}€</div></div>
+        <div class="budget-total-item"><div class="budget-total-label">Disponible</div><div class="budget-total-val">${(total-gastado).toLocaleString('es')}€</div></div>
+      </div>
+      <div style="font-size:.75rem;color:#555;margin-bottom:.4rem;">Utilización: ${pct.toFixed(1)}%</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="dept-list">`;
+
+  depts.forEach(d => {
+    const dp = (d.gastado/d.presupuesto)*100;
+    html += `
+      <div class="dept-row">
+        <div class="dept-row-top">
+          <div class="dept-row-name">${d.nombre}</div>
+          <div class="dept-row-pct">${dp.toFixed(0)}%</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${dp}%"></div></div>
+        <div class="dept-row-amounts"><span>${d.gastado.toLocaleString('es')}€ gastado</span><span>${d.presupuesto.toLocaleString('es')}€ total</span></div>
+      </div>`;
+  });
+  html += `</div>`;
+  panel.innerHTML = html;
+}
+
+/* ══════════════════════════════════════════════
+   CALENDARIO
+══════════════════════════════════════════════ */
+const CAL_COLORS = ['#1a73e8','#0d47a1','#039be5','#00838f','#0b8043','#33b679','#558b2f','#8d6e63','#e67c73','#d32f2f','#f6bf26','#f09300','#8e24aa','#6a1b9a','#546e7a','#37474f','#ec407a','#ff7043','#26a69a','#1a1a2e'];
+const CAL_TYPES = [
+  {key:'rodaje',label:'Rodaje',bg:'#1a73e8',tc:'#fff'},{key:'scouting',label:'Scouting',bg:'#039be5',tc:'#fff'},
+  {key:'viaje',label:'Viaje',bg:'#e67c73',tc:'#fff'},{key:'hotel',label:'Hotel',bg:'#33b679',tc:'#fff'},
+  {key:'familia',label:'Familia',bg:'#0b8043',tc:'#fff'},{key:'vuelta',label:'Vuelta',bg:'#f6bf26',tc:'#1a1a1a'},
+  {key:'custom',label:'Custom',bg:'#546e7a',tc:'#fff'},
+];
+let calIdC = 200;
+const calUid = () => 'cal' + (calIdC++);
+
+let CAL_DATA = {
+  weeks: [
+    { label:'SEMANA 1', days:[{num:5},{num:6},{num:7},{num:8},{num:9},{num:10},{num:10,active:true,lugar:{text:'RIU Tikida Palmeraie — Llegada',destino:false},chips:[{id:'c1',text:'Vuelo → Marrakech',type:'viaje'},{id:'c2',text:'Transfer aeropuerto',type:'viaje'}]}]},
+    { label:'SEMANA 2', days:[
+      {num:11,active:true,lugar:{text:'RIU Tikida Palmeraie — Scouting',destino:false},chips:[{id:'c3',text:'Localizar Marrakech',type:'scouting'},{id:'c4',text:'Localizar hotel',type:'scouting'},{id:'c5',text:'Fitting modelos',type:'scouting'},{id:'c6',text:'Briefing equipo',type:'rodaje'}]},
+      {num:12,active:true,lugar:{text:'RIU Tikida Palmeraie — Rodaje hotel',destino:false},chips:[{id:'c7',text:'Rodaje hotel',type:'rodaje'},{id:'c8',text:'Familia local 1',type:'familia'}]},
+      {num:13,active:true,lugar:{text:'RIU Tikida Palmeraie — Rodaje hotel',destino:false},chips:[{id:'c9',text:'Rodaje hotel',type:'rodaje'},{id:'c10',text:'Familia local 1',type:'familia'}]},
+      {num:14,active:true,lugar:{text:'Marrakech — Rodaje destino',destino:true},chips:[{id:'c11',text:'Rodaje destino',type:'rodaje'},{id:'c12',text:'Familia 1 + Internacional',type:'familia'}]},
+      {num:15,active:true,lugar:{text:'Agadir / Taghazout — Scouting',destino:false},chips:[{id:'c13',text:'Transfer → Agadir / Taghazout',type:'viaje'},{id:'c14',text:'Localizar RIU Palace Tikida Agadir',type:'scouting'},{id:'c15',text:'Localizar RIU Palace Tikida Taghazout',type:'scouting'}]},
+      {num:16,active:true,lugar:{text:'RIU Palace Tikida Taghazout — Rodaje hotel',destino:false},chips:[{id:'c16',text:'Rodaje hotel',type:'rodaje'},{id:'c17',text:'Pareja internacional',type:'familia'}]},
+      {num:17,active:true,lugar:{text:'RIU Palace Tikida Taghazout — Rodaje hotel',destino:false},chips:[{id:'c18',text:'Rodaje hotel',type:'rodaje'},{id:'c19',text:'Pareja internacional',type:'familia'}]},
+    ]},
+    { label:'SEMANA 3', days:[
+      {num:18,active:true,lugar:{text:'Taghazout / Agadir — Rodaje destino',destino:true},chips:[{id:'c20',text:'Rodaje destino · Dunas',type:'rodaje'},{id:'c21',text:'Paradise Valley',type:'rodaje'},{id:'c22',text:'Pareja internacional',type:'familia'},{id:'c23',text:'Familia local 2',type:'familia'}]},
+      {num:19,active:true,lugar:{text:'RIU Palace Tikida Agadir — Rodaje hotel',destino:false},chips:[{id:'c24',text:'Rodaje hotel',type:'rodaje'},{id:'c25',text:'Familia local 2',type:'familia'}]},
+      {num:20,active:true,lugar:{text:'RIU Palace Tikida Agadir — Rodaje hotel',destino:false},chips:[{id:'c26',text:'Rodaje hotel',type:'rodaje'},{id:'c27',text:'Familia local 2',type:'familia'}]},
+      {num:21,active:true,lugar:{text:'Agadir → Marrakech — Fin rodaje',destino:true},chips:[{id:'c28',text:'Transfer Agadir → Marrakech',type:'viaje'},{id:'c29',text:'Vuelta a España',type:'vuelta'}]},
+      {num:22},{num:23},{num:24},
+    ]},
+  ]
+};
+try { const s = localStorage.getItem('rp-cal'); if(s) CAL_DATA = JSON.parse(s); } catch(e){}
+
+function renderCalendario(panel) {
+  panel.innerHTML = `
+    <div class="panel-header">
+      <div class="panel-title">${icon('map')} Calendario · RIU Marruecos</div>
+      <button class="cal-save-btn" onclick="calSaveData(this)">Guardar</button>
+    </div>
+    <div class="cal-wrapper">
+      <div class="cal-legend">
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(26,40,80,.9);outline:2px solid #1a73e8;outline-offset:-2px"></div>Hotel</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:rgba(26,40,80,.9);outline:2px solid #e67c73;outline-offset:-2px"></div>Destino</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#1a73e8"></div>Rodaje</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#039be5"></div>Scouting</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#e67c73"></div>Viaje</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#33b679"></div>Alojamiento</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#0b8043"></div>Cast</div>
+        <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#f6bf26"></div>Vuelta</div>
+        <span class="cal-hint">Click para editar · + para añadir</span>
+      </div>
+      <div class="calendar" id="calGrid">
+        <div class="cal-header">
+          <div></div>
+          <div class="cal-header-day">LUN</div><div class="cal-header-day">MAR</div>
+          <div class="cal-header-day">MIÉ</div><div class="cal-header-day">JUE</div>
+          <div class="cal-header-day">VIE</div><div class="cal-header-day">SÁB</div>
+          <div class="cal-header-day">DOM</div>
+        </div>
+        <div id="calBody"></div>
+      </div>
+      <div class="cal-footer">
+        Marrakech · Agadir · Taghazout — Producción RIU Marruecos · 10–21 Mayo 2025
+      </div>
+    </div>`;
+  calRender();
+}
+
+function calRender() {
+  const body = document.getElementById('calBody');
+  if (!body) return;
+  body.innerHTML = '';
+  CAL_DATA.weeks.forEach((week, wi) => {
+    const row = document.createElement('div'); row.className = 'cal-row';
+    const wl = document.createElement('div'); wl.className = 'week-label'; wl.textContent = week.label;
+    row.appendChild(wl);
+    week.days.forEach((day, di) => {
+      const cell = document.createElement('div');
+      cell.className = 'day-cell ' + (day.active ? 'active' : 'empty');
+      const num = document.createElement('div'); num.className = 'day-num'; num.textContent = day.num;
+      cell.appendChild(num);
+      if (day.active) {
+        if (day.lugar) {
+          const l = document.createElement('span');
+          l.className = 'lugar' + (day.lugar.destino ? ' destino' : '');
+          if (day.lugar.color) l.style.background = day.lugar.color;
+          l.textContent = day.lugar.text;
+          l.onclick = e => { e.stopPropagation(); calOpenLugar(wi, di); };
+          cell.appendChild(l);
+        }
+        const ev = document.createElement('div'); ev.className = 'events';
+        (day.chips||[]).forEach(chip => {
+          const el = document.createElement('span');
+          el.className = 'cal-chip ' + (chip.type||'custom');
+          if (chip.color) el.style.background = chip.color;
+          el.textContent = chip.text;
+          el.onclick = e => { e.stopPropagation(); calOpenChip(wi, di, chip.id); };
+          ev.appendChild(el);
+        });
+        const addBtn = document.createElement('button');
+        addBtn.className = 'cal-add-btn'; addBtn.textContent = '+ Añadir';
+        addBtn.onclick = e => { e.stopPropagation(); calOpenNewChip(wi, di); };
+        ev.appendChild(addBtn);
+        cell.appendChild(ev);
+      }
+      row.appendChild(cell);
+    });
+    body.appendChild(row);
+  });
+}
+
+let calPopMode=null, calPopWi=null, calPopDi=null, calPopId=null, calSelColor=null, calSelType='rodaje';
+
+function calBuildPopover(title, text, type, color, showDelete, isLugar, isDestino) {
+  document.getElementById('calPopTitle').textContent = title;
+  document.getElementById('calPopText').value = text||'';
+  document.getElementById('calPopDelete').style.display = showDelete ? 'inline-block' : 'none';
+  calSelType = type||'rodaje'; calSelColor = color||null;
+  const tr = document.getElementById('calPopTypes'); tr.innerHTML = '';
+  if (isLugar) {
+    [{label:'Hotel',destino:false,bc:'#1a73e8'},{label:'Destino',destino:true,bc:'#e67c73'}].forEach(opt => {
+      const p2 = document.createElement('span');
+      p2.className = 'cal-type-pill'+(opt.destino===isDestino?' on':'');
+      p2.style.cssText = `background:rgba(26,40,80,.9);color:#fff;border-color:${opt.bc};`;
+      p2.textContent = opt.label;
+      p2.onclick = () => { CAL_DATA.weeks[calPopWi].days[calPopDi].lugar.destino = opt.destino; tr.querySelectorAll('.cal-type-pill').forEach(x=>x.classList.remove('on')); p2.classList.add('on'); };
+      tr.appendChild(p2);
+    });
+  } else {
+    CAL_TYPES.forEach(t => {
+      const p2 = document.createElement('span');
+      p2.className = 'cal-type-pill'+(t.key===calSelType?' on':'');
+      p2.style.cssText = `background:${t.bg};color:${t.tc};`;
+      p2.textContent = t.label;
+      p2.onclick = () => { calSelType=t.key; calSelColor=null; tr.querySelectorAll('.cal-type-pill').forEach(x=>x.classList.remove('on')); p2.classList.add('on'); document.querySelectorAll('#calPopColors .cal-swatch').forEach(x=>x.classList.remove('on')); };
+      tr.appendChild(p2);
+    });
+  }
+  const cr = document.getElementById('calPopColors'); cr.innerHTML = '';
+  CAL_COLORS.forEach(c => {
+    const s = document.createElement('div');
+    s.className = 'cal-swatch'+(c===calSelColor?' on':''); s.style.background = c;
+    s.onclick = () => { calSelColor=c; calSelType='custom'; document.querySelectorAll('#calPopColors .cal-swatch').forEach(x=>x.classList.remove('on')); s.classList.add('on'); if(!isLugar) tr.querySelectorAll('.cal-type-pill').forEach(x=>x.classList.remove('on')); };
+    cr.appendChild(s);
+  });
+  const pop = document.getElementById('calPopover'); pop.style.display = 'block';
+  document.getElementById('calOverlay').classList.add('on');
+  requestAnimationFrame(() => {
+    const vw=window.innerWidth, vh=window.innerHeight;
+    pop.style.left = Math.max(8,(vw-pop.offsetWidth)/2)+'px';
+    pop.style.top  = Math.max(8,(vh-pop.offsetHeight)/2)+'px';
+    document.getElementById('calPopText').focus();
+  });
+}
+
+function calOpenLugar(wi,di){ const l=CAL_DATA.weeks[wi].days[di].lugar; calPopMode='lugar';calPopWi=wi;calPopDi=di; calBuildPopover('Editar lugar',l.text,null,l.color,false,true,l.destino); }
+function calOpenChip(wi,di,id){ const c=(CAL_DATA.weeks[wi].days[di].chips||[]).find(x=>x.id===id); if(!c)return; calPopMode='chip';calPopWi=wi;calPopDi=di;calPopId=id; calBuildPopover('Editar etiqueta',c.text,c.type,c.color,true,false,false); }
+function calOpenNewChip(wi,di){ calPopMode='newChip';calPopWi=wi;calPopDi=di; calBuildPopover('Nueva etiqueta','','rodaje',null,false,false,false); }
+
+function calSaveItem(){
+  const text=document.getElementById('calPopText').value.trim(); if(!text){calClosePopover();return;}
+  if(calPopMode==='lugar'){ const l=CAL_DATA.weeks[calPopWi].days[calPopDi].lugar; l.text=text; l.color=calSelColor||null; }
+  else if(calPopMode==='chip'){ const c=(CAL_DATA.weeks[calPopWi].days[calPopDi].chips||[]).find(x=>x.id===calPopId); if(c){c.text=text;c.type=calSelType;c.color=calSelColor||null;} }
+  else if(calPopMode==='newChip'){ if(!CAL_DATA.weeks[calPopWi].days[calPopDi].chips)CAL_DATA.weeks[calPopWi].days[calPopDi].chips=[]; CAL_DATA.weeks[calPopWi].days[calPopDi].chips.push({id:calUid(),text,type:calSelType,color:calSelColor||null}); }
+  calClosePopover(); calRender();
+}
+function calDeleteItem(){
+  if(calPopMode==='chip') CAL_DATA.weeks[calPopWi].days[calPopDi].chips=CAL_DATA.weeks[calPopWi].days[calPopDi].chips.filter(x=>x.id!==calPopId);
+  calClosePopover(); calRender();
+}
+function calClosePopover(){ document.getElementById('calPopover').style.display='none'; document.getElementById('calOverlay').classList.remove('on'); }
+function calSaveData(btn){
+  try{ localStorage.setItem('rp-cal',JSON.stringify(CAL_DATA)); if(btn){btn.textContent='✓ Guardado';setTimeout(()=>btn.textContent='Guardar',1600);} }catch(e){alert('Error al guardar');}
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('calPopover').style.display!=='none')calSaveItem(); if(e.key==='Escape')calClosePopover(); });
+
+/* ══════════════════════════════════════════════
+   VISUAL
+══════════════════════════════════════════════ */
+function renderVisual(panel) {
+  panel.innerHTML = `
+    <div class="panel-header"><div class="panel-title">${icon('image')} Visual / Moodboard</div></div>
+    <div class="visual-placeholder">
+      ${icon('image', 36)}
+      <p>Módulo de visualización y referencias en desarrollo.</p>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   SHARED MODAL HELPERS
+══════════════════════════════════════════════ */
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  pendingCastPhotoData = null;
+  editingCastId = null;
+  editingEquipoId = null;
+}
+
+// Close modal on overlay click
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+document.getElementById('manageModulesModal').addEventListener('click', function(e) {
+  if (e.target === this) closeManageModules();
+});
+
+/* ══════════════════════════════════════════════
+   MISC
+══════════════════════════════════════════════ */
+function toggleRole() {
+  currentUser = currentUser === 'admin' ? 'client' : 'admin';
+  document.getElementById('roleBtn').textContent = currentUser === 'admin' ? 'Admin' : 'Cliente';
+}
+function createProject() { alert('Nuevo proyecto — próximamente'); }
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+renderProjects();
+</script>
+</body>
+</html>

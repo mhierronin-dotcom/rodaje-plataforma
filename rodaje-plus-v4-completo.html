@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rodaje+ Studio - Gestión de Producciones</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: #18181b; overflow-x: hidden; }
+
+        /* ════════════════════════════════
+           VARIABLES — Mismo estilo Mapa Interactivo
+        ════════════════════════════════ */
+        :root {
+            --accent: #2563EB;
+            --accent-light: #DBEAFE;
+            --accent-hover: #1D4ED8;
+            --accent-soft: #EFF6FF;
+            --black: #0F172A;
+            --gray-900: #1E293B;
+            --gray-700: #334155;
+            --gray-500: #64748B;
+            --gray-300: #CBD5E1;
+            --gray-100: #ECEEE8;
+            --gray-50: #F2F3EE;
+            --white: #F5F5F0;
+            --bg: #F5F5F0;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-full: 9999px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.10);
+            --shadow-xl: 0 20px 48px rgba(0,0,0,0.12);
+        }
+
+        /* ════════════════════════════════
+           NAVEGACIÓN — Perk-style sticky bar
+        ════════════════════════════════ */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 72px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 48px;
+            background: rgba(245,245,240,0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--gray-100);
+            z-index: 100;
+        }
+        .logo {
+            font-size: 20px; font-weight: 900; letter-spacing: -0.5px;
+            display: flex; align-items: center; gap: 10px;
+            color: var(--black);
+        }
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; font-weight: 800;
+        }
+        .nav-center {
+            display: flex; gap: 8px; list-style: none;
+            background: var(--gray-50);
+            border-radius: var(--radius-full);
+            padding: 4px;
+        }
+        .nav-center a {
+            font-size: 14px; font-weight: 500; color: var(--gray-500);
+            text-decoration: none; transition: all 0.2s; cursor: pointer;
+            padding: 8px 20px;
+            border-radius: var(--radius-full);
+        }
+        .nav-center a:hover { color: var(--black); background: var(--white); }
+        .nav-center a.active { color: var(--black); background: var(--white); box-shadow: var(--shadow-sm); font-weight: 600; }
+        .nav-actions {
+            display: flex; gap: 12px; align-items: center;
+        }
+        .btn-nav-outline {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 600;
+            padding: 10px 24px;
+            border: 1.5px solid var(--gray-300);
+            background: none; color: var(--black);
+            cursor: pointer; transition: all 0.2s;
+            border-radius: var(--radius-full);
+        }
+        .btn-nav-outline:hover { border-color: var(--black); }
+        .btn-nav-filled {
+            font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 600;
+            padding: 10px 24px;
+            border: none;
+            background: var(--black); color: var(--white);
+            cursor: pointer; transition: all 0.2s;
+            border-radius: var(--radius-full);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-nav-filled:hover { background: #000; }
+
+        /* ════════════════════════════════
+           VISTAS
+        ════════════════════════════════ */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* ════════════════════════════════
+           HERO — Perk massive headline
+        ════════════════════════════════ */
+        .hero {
+            padding: 160px 48px 100px;
+            min-height: 100vh;
+            background: var(--bg);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -5%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            left: 10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(37,99,235,0.04) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            font-size: clamp(56px, 9vw, 110px);
+            font-weight: 500;
+            line-height: 0.95;
+            letter-spacing: -2.5px;
+            color: var(--black);
+            margin-bottom: 32px;
+        }
+        .hero h1 .accent-word {
+            color: var(--accent);
+        }
+        .hero-subtitle {
+            font-size: 20px;
+            color: var(--gray-500);
+            margin-bottom: 48px;
+            max-width: 560px;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+        .hero-cta {
+            display: flex; gap: 16px; flex-wrap: wrap;
+        }
+        .btn-primary {
+            padding: 16px 36px;
+            background: var(--accent);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            border: none; cursor: pointer;
+            transition: all 0.2s;
+            border-radius: var(--radius-full);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-secondary {
+            padding: 16px 36px;
+            background: none;
+            color: var(--black);
+            border: 1.5px solid var(--gray-300);
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: var(--radius-full);
+        }
+        .btn-secondary:hover { border-color: var(--black); }
+
+        /* Floating badges — Perk-style */
+        .hero-badges {
+            display: flex;
+            gap: 12px;
+            margin-top: 64px;
+            flex-wrap: wrap;
+        }
+        .hero-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--white);
+            padding: 10px 18px;
+            border-radius: var(--radius-full);
+            font-size: 13px; font-weight: 500;
+            color: var(--gray-700);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-100);
+        }
+        .hero-badge-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* ════════════════════════════════
+           SECCIÓN DE PROYECTOS
+        ════════════════════════════════ */
+        .projects-section {
+            padding: 100px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 48px;
+        }
+        .section-title {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            font-size: 40px; font-weight: 500;
+            letter-spacing: -1px; color: var(--black);
+        }
+        .section-subtitle {
+            font-size: 15px; color: var(--gray-500); font-weight: 400;
+        }
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .project-card {
+            border: 1px solid var(--gray-100);
+            padding: 28px;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 380px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .project-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+        .project-emoji {
+            margin-bottom: 16px;
+            width: 64px; height: 64px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--accent-soft);
+            border-radius: var(--radius-md);
+            font-size: 32px;
+        }
+        .project-badge {
+            display: inline-block;
+            font-size: 11px; font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 12px;
+            padding: 4px 12px;
+            background: var(--accent-light);
+            border-radius: var(--radius-full);
+            width: fit-content;
+        }
+        .project-name {
+            font-size: 20px; font-weight: 800;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+            color: var(--black);
+        }
+        .project-client {
+            font-size: 13px; color: var(--gray-500);
+            margin-bottom: 20px;
+        }
+        .project-info {
+            display: flex; gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+        .project-info-item {
+            display: flex; align-items: center; gap: 4px;
+            color: var(--gray-500);
+            background: var(--gray-50);
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 12px; font-weight: 500;
+        }
+        .project-actions {
+            display: flex; gap: 8px;
+        }
+        .btn-small {
+            flex: 1;
+            padding: 10px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px; font-weight: 600;
+            border: 1.5px solid var(--gray-200, #e2e8f0);
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: var(--radius-full);
+            color: var(--gray-700);
+        }
+        .btn-small:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-small.filled {
+            background: var(--accent); color: #fff; border-color: var(--accent);
+        }
+        .btn-small.filled:hover { background: var(--accent-hover); }
+
+        .project-card-add {
+            border: 2px dashed var(--gray-300);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--gray-500);
+            transition: all 0.2s;
+            border-radius: var(--radius-lg);
+        }
+        .project-card-add:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+        }
+        .project-card-add-icon {
+            width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 300;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+        }
+
+        /* ════════════════════════════════
+           CARACTERÍSTICAS
+        ════════════════════════════════ */
+        .features-section {
+            padding: 100px 48px;
+            background: var(--black);
+            color: var(--white);
+        }
+        .features-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .features-title {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            font-size: 48px;
+            font-weight: 500;
+            letter-spacing: -1.5px;
+            margin-bottom: 64px;
+            line-height: 1.05;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+        .feature-card {
+            padding: 32px;
+            background: rgba(255,255,255,0.05);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+        .feature-icon {
+            width: 48px; height: 48px;
+            background: var(--accent);
+            border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        .feature-name {
+            font-size: 18px; font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            font-size: 14px;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.6;
+        }
+
+        /* ════════════════════════════════
+           MÓDULOS DETALLE
+        ════════════════════════════════ */
+        .modules-section {
+            padding: 100px 48px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+        .module-item {
+            padding: 32px;
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-100);
+        }
+        .module-item h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--black);
+        }
+        .module-item p {
+            font-size: 14px;
+            color: var(--gray-500);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .module-features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .module-feature {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            font-size: 13px;
+            color: var(--gray-700);
+        }
+        .module-feature::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ════════════════════════════════
+           FOOTER
+        ════════════════════════════════ */
+        footer {
+            padding: 80px 48px;
+            text-align: center;
+            background: var(--black);
+            color: var(--white);
+        }
+        .footer-headline {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 500;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+            line-height: 1.0;
+        }
+        .footer-sub {
+            font-size: 15px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 32px;
+        }
+        .footer-links {
+            display: flex; gap: 24px; justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 48px;
+        }
+        .footer-links a {
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 13px; font-weight: 500;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: #fff; }
+        .footer-copy {
+            font-size: 12px;
+            color: rgba(255,255,255,0.25);
+        }
+
+        /* ════════════════════════════════
+           RESPONSIVE
+        ════════════════════════════════ */
+        @media (max-width: 1024px) {
+            nav { padding: 0 24px; }
+            .hero { padding: 120px 24px 80px; }
+            .projects-section { padding: 80px 24px; }
+            .features-section { padding: 80px 24px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .modules-section { padding: 80px 24px; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            nav { padding: 0 16px; height: 64px; }
+            .nav-center { display: none; }
+            .hero h1 { font-size: clamp(36px, 10vw, 56px); letter-spacing: -1.5px; }
+            .hero-cta { flex-direction: column; }
+            .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .features-title { font-size: 32px; }
+            .hero-badges { flex-direction: column; }
+            .footer-headline { font-size: 28px; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAV — Perk-style -->
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">RP</div>
+            <span>Rodaje<strong style="color: var(--accent);">+</strong></span>
+        </div>
+        <ul class="nav-center">
+            <li><a class="active" onclick="scrollToSection('proyectos')">Proyectos</a></li>
+            <li><a onclick="scrollToSection('modulos')">Módulos</a></li>
+            <li><a onclick="scrollToSection('features')">Características</a></li>
+            <li><a onclick="alert('Documentación - Coming soon!')">Docs</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="btn-nav-outline" onclick="alert('Login - Coming soon!')">Iniciar sesión</button>
+            <button class="btn-nav-filled" onclick="scrollToSection('proyectos')">
+                Empieza ya
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- HERO VIEW -->
+    <div class="view active" id="hero-view">
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Gestión completa de <span class="accent-word">rodajes</span> en un lugar</h1>
+                <p class="hero-subtitle">
+                    Planifica rodajes, gestiona casting, presupuesto, equipo y estilismo. Una plataforma diseñada para productoras, agencias y estudios audiovisuales.
+                </p>
+                <div class="hero-cta">
+                    <button class="btn-primary" onclick="scrollToSection('proyectos')">
+                        Ver proyectos
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                    <button class="btn-secondary" onclick="scrollToSection('modulos')">Descubre los módulos</button>
+                </div>
+                <div class="hero-badges">
+                    <div class="hero-badge"><div class="hero-badge-dot"></div> Planificación</div>
+                    <div class="hero-badge"><div class="hero-badge-dot"></div> Casting</div>
+                    <div class="hero-badge"><div class="hero-badge-dot"></div> Equipo</div>
+                    <div class="hero-badge"><div class="hero-badge-dot"></div> Presupuesto</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section class="projects-section" id="proyectos">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Mis Proyectos</h2>
+                    <p class="section-subtitle">Gestiona todos tus rodajes activos, cerrados y archivados</p>
+                </div>
+            </div>
+
+            <div class="projects-grid">
+                <!-- Proyecto 1 -->
+                <div class="project-card">
+                    <div>
+                        <div class="project-emoji">🎬</div>
+                        <div class="project-badge">EN PRODUCCIÓN</div>
+                        <h3 class="project-name">Campaña Nike 2026</h3>
+                        <p class="project-client">Nike Inc.</p>
+                        <div class="project-info">
+                            <div class="project-info-item">📅 20/04 - 15/05</div>
+                            <div class="project-info-item">👥 12 personas</div>
+                            <div class="project-info-item">💰 $95K/$150K</div>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn-small">Ver detalles</button>
+                        <button class="btn-small filled">Abrir</button>
+                    </div>
+                </div>
+
+                <!-- Proyecto 2 -->
+                <div class="project-card">
+                    <div>
+                        <div class="project-emoji">🎥</div>
+                        <div class="project-badge">PLANEACIÓN</div>
+                        <h3 class="project-name">Comercial Bebidas</h3>
+                        <p class="project-client">Coca-Cola LATAM</p>
+                        <div class="project-info">
+                            <div class="project-info-item">📅 01/06 - 10/06</div>
+                            <div class="project-info-item">👥 15 personas</div>
+                            <div class="project-info-item">💰 $15K/$200K</div>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn-small">Ver detalles</button>
+                        <button class="btn-small filled">Abrir</button>
+                    </div>
+                </div>
+
+                <!-- Proyecto 3 -->
+                <div class="project-card">
+                    <div>
+                        <div class="project-emoji">🎞️</div>
+                        <div class="project-badge">CERRADO</div>
+                        <h3 class="project-name">Video Corporativo</h3>
+                        <p class="project-client">TechFlow Inc.</p>
+                        <div class="project-info">
+                            <div class="project-info-item">📅 01/05 - 20/05</div>
+                            <div class="project-info-item">👥 8 personas</div>
+                            <div class="project-info-item">💰 $45K/$80K</div>
+                        </div>
+                    </div>
+                    <div class="project-actions">
+                        <button class="btn-small">Ver detalles</button>
+                        <button class="btn-small filled">Abrir</button>
+                    </div>
+                </div>
+
+                <!-- Añadir proyecto -->
+                <div class="project-card project-card-add">
+                    <div class="project-card-add-icon">+</div>
+                    <div style="font-weight: 600; font-size: 14px;">Nuevo Proyecto</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Módulos Section -->
+        <section class="modules-section" id="modulos">
+            <div>
+                <h2 class="section-title">6 Módulos Potentes</h2>
+                <p class="section-subtitle">Todo lo que necesitas para gestionar un rodaje profesional</p>
+            </div>
+
+            <div class="module-grid">
+                <!-- Dashboard -->
+                <div class="module-item">
+                    <h3>🏠 Dashboard de Proyectos</h3>
+                    <p>Vista centralizada de todos tus rodajes con información resumida, filtros por estado y acciones rápidas.</p>
+                    <div class="module-features">
+                        <div class="module-feature">Filtros por estado (Activo, Cerrado, Archivo)</div>
+                        <div class="module-feature">Cards visuales con presupuesto</div>
+                        <div class="module-feature">Acciones rápidas (crear, editar, cerrar)</div>
+                        <div class="module-feature">Vista de progreso en tiempo real</div>
+                    </div>
+                </div>
+
+                <!-- Planificación -->
+                <div class="module-item">
+                    <h3>📅 Planificación - Plan de Rodaje</h3>
+                    <p>Plan interactivo por día inspirado en shooting plans profesionales, con escenas, horarios y filtros.</p>
+                    <div class="module-features">
+                        <div class="module-feature">Organización por día y sets</div>
+                        <div class="module-feature">Filtros interactivos (guión, storyboard, planos)</div>
+                        <div class="module-feature">Timeline visual y horarios</div>
+                        <div class="module-feature">Asignación de cast y equipo por escena</div>
+                    </div>
+                </div>
+
+                <!-- Casting -->
+                <div class="module-item">
+                    <h3>👥 Casting</h3>
+                    <p>Fichas profesionales de actores y modelos con fotos, contacto y links a perfiles externos.</p>
+                    <div class="module-features">
+                        <div class="module-feature">Foto de perfil + galería completa</div>
+                        <div class="module-feature">Links a IMDb, Portfolio, Reel</div>
+                        <div class="module-feature">Gestión de contratación (confirmado, audición)</div>
+                        <div class="module-feature">Notas especiales y disponibilidad</div>
+                    </div>
+                </div>
+
+                <!-- Estilismo -->
+                <div class="module-item">
+                    <h3>🎨 Estilismo</h3>
+                    <p>Organización completa del look visual: vestuario, maquillaje, accesorios por escena y personaje.</p>
+                    <div class="module-features">
+                        <div class="module-feature">Vestuario (proveedor, talla, estado)</div>
+                        <div class="module-feature">Maquillaje y peinado con tiempos</div>
+                        <div class="module-feature">Accesorios y efectos especiales</div>
+                        <div class="module-feature">Fotos de referencia y matching</div>
+                    </div>
+                </div>
+
+                <!-- Equipo -->
+                <div class="module-item">
+                    <h3>💼 Equipo del Rodaje</h3>
+                    <p>Gestión flexible de todos los roles: 90+ cargos predefinidos + crear personalizados, contacto, documentación.</p>
+                    <div class="module-features">
+                        <div class="module-feature">Cargos predefinidos (Director, DOP, Gaffer)</div>
+                        <div class="module-feature">Crear cargos personalizados</div>
+                        <div class="module-feature">Organigrama visual y jerarquía</div>
+                        <div class="module-feature">Contacto, tarifa y documentación por miembro</div>
+                    </div>
+                </div>
+
+                <!-- Presupuesto -->
+                <div class="module-item">
+                    <h3>💰 Presupuesto</h3>
+                    <p>Control financiero completo con desglose por categorías, gráficos visuales y seguimiento de gastos.</p>
+                    <div class="module-features">
+                        <div class="module-feature">Desglose por departamento</div>
+                        <div class="module-feature">Gráficos y visualización de datos</div>
+                        <div class="module-feature">Control de gasto vs presupuesto</div>
+                        <div class="module-feature">Alertas automáticas de sobrecostos</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section" id="features">
+            <div class="features-inner">
+                <h2 class="features-title">Características que te encantarán</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">✨</div>
+                        <h3 class="feature-name">Plan Profesional</h3>
+                        <p class="feature-desc">Basado en estructura real de shooting plans, con todas las secciones que necesitas.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎮</div>
+                        <h3 class="feature-name">Interactivo</h3>
+                        <p class="feature-desc">Filtros mostrar/ocultar secciones según lo que necesites ver en cada momento.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3 class="feature-name">Diseño Moderno</h3>
+                        <p class="feature-desc">Interfaz limpia, profesional y 100% responsive en desktop, tablet y móvil.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3 class="feature-name">Colaborativo</h3>
+                        <p class="feature-desc">Diseñado para productoras, agencias y equipos audiovisuales. Comparte con clientes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3 class="feature-name">Flexible</h3>
+                        <p class="feature-desc">Cargos personalizables, vistas adaptables y relaciones inteligentes entre módulos.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3 class="feature-name">Visual</h3>
+                        <p class="feature-desc">Gráficos, timeline, cards visuales y datos en tiempo real de tus rodajes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <h2 class="footer-headline">¿Listo para profesionalizar tus rodajes?</h2>
+        <p class="footer-sub">Empieza hoy mismo con Rodaje+ Studio</p>
+        <div class="footer-links">
+            <a href="#" onclick="scrollToSection('proyectos')">Ver Proyectos</a>
+            <a href="#" onclick="scrollToSection('modulos')">Conocer Módulos</a>
+            <a href="#">Documentación</a>
+            <a href="#">Contactar</a>
+        </div>
+        <p class="footer-copy">© 2026 Rodaje+ Studio. Gestión profesional de producciones audiovisuales.</p>
+    </footer>
+
+    <script>
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Nav active state on scroll
+        window.addEventListener('scroll', () => {
+            const navLinks = document.querySelectorAll('.nav-center a');
+            navLinks.forEach(link => link.classList.remove('active'));
+
+            if (window.scrollY < 200) {
+                navLinks[0].classList.add('active');
+            } else if (window.scrollY < 1500) {
+                navLinks[1].classList.add('active');
+            } else {
+                navLinks[2].classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

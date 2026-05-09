@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rodaje+ Studio - Arquitectura de la Plataforma</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f9fafb;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: #3b82f6;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .header-nav button {
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            color: #6b7280;
+            cursor: pointer;
+            transition: color 0.2s;
+            padding: 0.5rem 1rem;
+        }
+
+        .header-nav button:hover {
+            color: #1f2937;
+        }
+
+        .header-nav button.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            color: #1f2937;
+        }
+
+        .tab-button.active {
+            color: #1f2937;
+            border-bottom-color: #1f2937;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 32px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+        }
+
+        .card h2 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        /* Grid de módulos */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .module-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .module-card:hover {
+            box-shadow: 0 8px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .module-card.active {
+            border-color: #3b82f6;
+            background: #f0f9ff;
+        }
+
+        .module-icon {
+            font-size: 32px;
+            margin-bottom: 0.5rem;
+        }
+
+        .module-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .module-card p {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        /* Features list */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f3f4f6;
+            border-radius: 16px;
+        }
+
+        .feature-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .feature-text {
+            font-size: 14px;
+            color: #374151;
+        }
+
+        /* Especificaciones */
+        .spec {
+            background: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+        }
+
+        .spec h4 {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .spec p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Relaciones */
+        .relations {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .relation-tree {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            color: #374151;
+            line-height: 1.8;
+        }
+
+        /* Toggle sections */
+        .toggle-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-header {
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 1.5rem;
+            border-radius: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .toggle-header:hover {
+            background: #f9fafb;
+        }
+
+        .toggle-header h4 {
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .toggle-arrow {
+            transition: transform 0.3s;
+        }
+
+        .toggle-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .toggle-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .toggle-content.open {
+            max-height: 2000px;
+        }
+
+        .toggle-content-inner {
+            padding: 1.5rem;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 0.75rem;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            padding: 2rem;
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-nav {
+                gap: 1rem;
+                width: 100%;
+            }
+
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            header {
+                position: static;
+            }
+
+            .tab-content {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="logo">rodaje<span>+</span></div>
+            <div class="header-nav">
+                <button class="nav-btn active" onclick="scrollToSection('visao')">Visión</button>
+                <button class="nav-btn" onclick="scrollToSection('modulos')">Módulos</button>
+                <button class="nav-btn" onclick="scrollToSection('relaciones')">Relaciones</button>
+                <button class="nav-btn" onclick="scrollToSection('specs')">Especificaciones</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="card" id="visao">
+            <h2>🎬 Rodaje+ Studio v3.0</h2>
+            <p style="font-size: 18px; color: #374151; margin-bottom: 0;">Arquitectura Completa de la Plataforma</p>
+            <p style="color: #6b7280; margin-top: 1rem;">Plataforma profesional de gestión de rodajes diseñada para productoras, agencias y estudios con 6 apartados principales y relaciones inteligentes entre módulos.</p>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'overview')">📊 Visión General</button>
+            <button class="tab-button" onclick="openTab(event, 'dashboard')">🏠 Dashboard</button>
+            <button class="tab-button" onclick="openTab(event, 'planning')">📅 Planificación</button>
+            <button class="tab-button" onclick="openTab(event, 'casting')">👥 Casting</button>
+            <button class="tab-button" onclick="openTab(event, 'styling')">🎨 Estilismo</button>
+            <button class="tab-button" onclick="openTab(event, 'team')">💼 Equipo</button>
+            <button class="tab-button" onclick="openTab(event, 'relations')">🔗 Relaciones</button>
+        </div>
+
+        <!-- TAB 1: Overview -->
+        <div id="overview" class="tab-content active">
+            <div class="card" id="modulos">
+                <h2>6️⃣ Apartados Principales</h2>
+
+                <div class="modules-grid">
+                    <div class="module-card" onclick="openTab(null, 'dashboard'); this.parentElement.parentElement.parentElement.parentElement.scroll(0,0);">
+                        <div class="module-icon">🏠</div>
+                        <h3>Dashboard de Proyectos</h3>
+                        <p>Vista general, filtros por estado, información resumida</p>
+                    </div>
+
+                    <div class="module-card" onclick="openTab(null, 'planning'); this.parentElement.parentElement.parentElement.parentElement.scroll(0,0);">
+                        <div class="module-icon">📅</div>
+                        <h3>Planificación</h3>
+                        <p>Plan de rodaje por día, escenas, horarios interactivos</p>
+                    </div>
+
+                    <div class="module-card" onclick="openTab(null, 'casting'); this.parentElement.parentElement.parentElement.parentElement.scroll(0,0);">
+                        <div class="module-icon">👥</div>
+                        <h3>Casting</h3>
+                        <p>Fichas de actores con fotos, links, perfiles</p>
+                    </div>
+
+                    <div class="module-card" onclick="openTab(null, 'styling'); this.parentElement.parentElement.parentElement.parentElement.scroll(0,0);">
+                        <div class="module-icon">🎨</div>
+                        <h3>Estilismo</h3>
+                        <p>Vestuario, maquillaje, accesorios por escena</p>
+                    </div>
+
+                    <div class="module-card" onclick="openTab(null, 'team'); this.parentElement.parentElement.parentElement.parentElement.scroll(0,0);">
+                        <div class="module-icon">💼</div>
+                        <h3>Equipo del Rodaje</h3>
+                        <p>Cargos flexibles, contacto, documentación, organigrama</p>
+                    </div>
+
+                    <div class="module-card">
+                        <div class="module-icon">💰</div>
+                        <h3>Presupuesto</h3>
+                        <p>Desglose, gráficos visuales, control de gasto</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Características -->
+            <div class="card">
+                <h2>✨ Características Únicas</h2>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Plan de Rodaje Real</strong><br>Basado en estructura profesional de shooting plan</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Filtros Interactivos</strong><br>Mostrar/ocultar secciones según necesidad</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Cargos Flexibles</strong><br>90+ predefinidos + crear personalizados</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Fichas Profesionales</strong><br>Actores con fotos, links a IMDb, portafolios</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Relaciones Inteligentes</strong><br>Todo conectado: escenas, cast, estilismo, equipo</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Estética Perk+</strong><br>Tipografía bold, colores azul/gris, respirable</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Dashboard -->
+        <div id="dashboard" class="tab-content">
+            <div class="card">
+                <h2>🏠 Dashboard de Proyectos</h2>
+                <p>Punto de entrada principal a la plataforma. Vista centralizada de todos los rodajes con control visual del estado.</p>
+
+                <h3>Funcionalidades Principales</h3>
+                <div class="spec">
+                    <h4>📊 Vista General de Rodajes</h4>
+                    <p>Cards visuales por proyecto mostrando: cliente, director, presupuesto, progreso, estado, fechas clave.</p>
+                </div>
+
+                <div class="spec">
+                    <h4>🔍 Filtros Avanzados</h4>
+                    <p>Filtrar por estado (Activos, Cerrados, Archivo), cliente, fecha, director, búsqueda por nombre.</p>
+                </div>
+
+                <div class="spec">
+                    <h4>⚡ Acciones Rápidas</h4>
+                    <p>Crear nuevo rodaje, editar, marcar como cerrado/archivado, ver detalles, duplicar proyecto.</p>
+                </div>
+
+                <div class="spec">
+                    <h4>📈 Información Resumida</h4>
+                    <p>En cada card: cliente, director, presupuesto total/gastado con barra de progreso visual, fechas de producción.</p>
+                </div>
+
+                <h3>Estados de Proyecto</h3>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🟢</div>
+                        <div class="feature-text"><strong>Activo</strong> - Proyecto en desarrollo o en producción</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔵</div>
+                        <div class="feature-text"><strong>Cerrado</strong> - Proyecto finalizado, en post-producción</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🟡</div>
+                        <div class="feature-text"><strong>Archivo</strong> - Proyecto completado, archivado para referencia</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: Planning -->
+        <div id="planning" class="tab-content">
+            <div class="card">
+                <h2>📅 Planificación - Plan de Rodaje</h2>
+                <p>El corazón de la plataforma. Plan interactivo y visual por día, inspirado en shooting plans profesionales reales.</p>
+
+                <h3>Estructura Principal</h3>
+                <div class="spec">
+                    <h4>📆 Organización por Día</h4>
+                    <p>Cada día de rodaje se divide en sets/locaciones con múltiples escenas agrupadas con horarios y duraciones.</p>
+                </div>
+
+                <div class="spec">
+                    <h4>🎬 Escenas Detalladas</h4>
+                    <p>Cada escena incluye: número, nombre, descripción de guión, horarios (inicio/fin), duración, cast asignado.</p>
+                </div>
+
+                <h3>Filtros Interactivos Mostrar/Ocultar</h3>
+                <div class="features" style="margin-bottom: 2rem;">
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">📋</div>
+                        <div class="feature-text"><strong>Guión</strong> - Descripción de la acción</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">🖼️</div>
+                        <div class="feature-text"><strong>Storyboard</strong> - Imágenes de referencia</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">🎥</div>
+                        <div class="feature-text"><strong>Planos</strong> - Técnica de cámara y lentes</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-text"><strong>Estilismo</strong> - Vestuario y maquillaje</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">🎭</div>
+                        <div class="feature-text"><strong>Dirección de Arte</strong> - Decoración y set</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">⏱️</div>
+                        <div class="feature-text"><strong>Horarios</strong> - Timeline y duraciones</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">👥</div>
+                        <div class="feature-text"><strong>Cast</strong> - Actores asignados</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">📦</div>
+                        <div class="feature-text"><strong>Producte</strong> - Props y objetos</div>
+                    </div>
+                    <div class="feature" style="background: #fef3c7; border-left-color: #f59e0b;">
+                        <div class="feature-icon">📸</div>
+                        <div class="feature-text"><strong>Referencias</strong> - Links y documentos</div>
+                    </div>
+                </div>
+
+                <h3>Vistas Disponibles</h3>
+                <div class="spec">
+                    <h4>📊 Vista Expandida</h4>
+                    <p>Detalle completo de cada escena con todas las secciones desplegadas.</p>
+                </div>
+                <div class="spec">
+                    <h4>📋 Vista Comprimida (Timeline)</h4>
+                    <p>Timeline visual del día con horarios, resumen de escenas, expandibles.</p>
+                </div>
+                <div class="spec">
+                    <h4>📈 Vista Gantt</h4>
+                    <p>Gráfico de barras por tiempo para visualizar distribución horaria.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: Casting -->
+        <div id="casting" class="tab-content">
+            <div class="card">
+                <h2>👥 Casting</h2>
+                <p>Gestión profesional de actores y modelos con fichas completas, fotos y links a perfiles reales.</p>
+
+                <h3>Ficha Completa de Actor</h3>
+                <div class="spec">
+                    <h4>📷 Fotos y Galería</h4>
+                    <p>Foto de perfil + galería completa de fotos para referencia visual.</p>
+                </div>
+                <div class="spec">
+                    <h4>👤 Datos Personales</h4>
+                    <p>Edad, altura, peso, color de ojos, nacionalidad, idiomas, características físicas.</p>
+                </div>
+                <div class="spec">
+                    <h4>📱 Contacto</h4>
+                    <p>Teléfono, email, Instagram, agencia de representación (si aplica).</p>
+                </div>
+                <div class="spec">
+                    <h4>🔗 Perfiles / Links Externos</h4>
+                    <p>IMDb, Portfolio web, Reel/Showreel (Vimeo), LinkedIn, Instagram profesional.</p>
+                </div>
+
+                <h3>Gestión de Contratación</h3>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🟢</div>
+                        <div class="feature-text"><strong>Confirmado</strong> - Actor/modelo contratado</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🟡</div>
+                        <div class="feature-text"><strong>En Audición</strong> - Evaluando candidatos</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔴</div>
+                        <div class="feature-text"><strong>Rechazado</strong> - No seleccionado</div>
+                    </div>
+                </div>
+
+                <h3>Información Contractual</h3>
+                <div class="spec">
+                    <h4>💰 Tarifa y Fechas</h4>
+                    <p>Costo por día, fechas de participación, disponibilidad para reshoots.</p>
+                </div>
+                <div class="spec">
+                    <h4>📋 Documentación</h4>
+                    <p>Contrato firmado, DNI, NIF, documentación laboral, seguros.</p>
+                </div>
+                <div class="spec">
+                    <h4>🎬 Escenas Asignadas</h4>
+                    <p>Listado de escenas en las que aparece el actor.</p>
+                </div>
+                <div class="spec">
+                    <h4>📝 Notas Especiales</h4>
+                    <p>Alergias a maquillaje, disponibilidad especial, transporte requerido, dieta.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: Styling -->
+        <div id="styling" class="tab-content">
+            <div class="card">
+                <h2>🎨 Estilismo</h2>
+                <p>Organización completa del look visual: vestuario, maquillaje, accesorios por escena.</p>
+
+                <h3>Categorías de Estilismo</h3>
+                <div class="spec">
+                    <h4>👗 Vestuario</h4>
+                    <p>Prendas por escena/personaje, marca, talla, color, material, proveedor, estado (confeccionado/prestado/comprado).</p>
+                </div>
+                <div class="spec">
+                    <h4>💄 Maquillaje</h4>
+                    <p>Tipo de maquillaje, productos específicos, tiempo estimado, cambios por escena, fotos antes/después.</p>
+                </div>
+                <div class="spec">
+                    <h4>✨ Accesorios</h4>
+                    <p>Joyas, cinturones, bolsos, gafas, relojes, asignación por personaje.</p>
+                </div>
+                <div class="spec">
+                    <h4>💇 Peinado</h4>
+                    <p>Estilo, cambios principales, productos usados, tiempo de preparación.</p>
+                </div>
+                <div class="spec">
+                    <h4>🎭 Efectos Especiales</h4>
+                    <p>Heridas, cicatrices, prótesis, sangre, líquidos especiales, consideraciones de seguridad.</p>
+                </div>
+
+                <h3>Información Complementaria</h3>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">📸</div>
+                        <div class="feature-text"><strong>Fotos de Referencia</strong> - Imágenes de inspiración</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔗</div>
+                        <div class="feature-text"><strong>Proveedores</strong> - Links y contacto</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📝</div>
+                        <div class="feature-text"><strong>Notas</strong> - Cuidados especiales, matching con día anterior</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: Team -->
+        <div id="team" class="tab-content">
+            <div class="card">
+                <h2>💼 Equipo del Rodaje (Cargos)</h2>
+                <p>Gestión profesional del equipo humano con cargos flexibles, contacto, documentación y organigrama.</p>
+
+                <h3>Cargos Predefinidos (90+ Posiciones)</h3>
+
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleContent(this)">
+                        <h4>🎬 DIRECCIÓN (5+)</h4>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="toggle-content">
+                        <div class="toggle-content-inner">
+                            <div class="feature">
+                                <div class="feature-icon">🎬</div>
+                                <div class="feature-text">Director</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">📹</div>
+                                <div class="feature-text">AD (1ª, 2ª, 3ª Asistente)</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">📋</div>
+                                <div class="feature-text">Script Supervisor</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🎥</div>
+                                <div class="feature-text">Realizador</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleContent(this)">
+                        <h4>📸 FOTOGRAFÍA (8+)</h4>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="toggle-content">
+                        <div class="toggle-content-inner">
+                            <div class="feature">
+                                <div class="feature-icon">📸</div>
+                                <div class="feature-text">DOP / Cinematógrafo</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🎥</div>
+                                <div class="feature-text">Operador de Cámara</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🔧</div>
+                                <div class="feature-text">Focus Puller (1ª AC, 2ª AC)</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">💾</div>
+                                <div class="feature-text">DIT (Data Manager)</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">📹</div>
+                                <div class="feature-text">Cámara B Operator</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleContent(this)">
+                        <h4>💡 ILUMINACIÓN (6+)</h4>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="toggle-content">
+                        <div class="toggle-content-inner">
+                            <div class="feature">
+                                <div class="feature-icon">💡</div>
+                                <div class="feature-text">Gaffer (Jefe Eléctrico)</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">⚡</div>
+                                <div class="feature-text">Best Boy (2º Eléctrico)</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🔌</div>
+                                <div class="feature-text">Electricista (1, 2, 3...)</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🎬</div>
+                                <div class="feature-text">Técnico de Grip</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleContent(this)">
+                        <h4>🎧 SONIDO (3+)</h4>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="toggle-content">
+                        <div class="toggle-content-inner">
+                            <div class="feature">
+                                <div class="feature-icon">🎧</div>
+                                <div class="feature-text">Sonidista Jefe</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🎤</div>
+                                <div class="feature-text">Micrófono Boom</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🔊</div>
+                                <div class="feature-text">Técnico de Sonido Digital</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleContent(this)">
+                        <h4>🎨 ARTE (4+)</h4>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="toggle-content">
+                        <div class="toggle-content-inner">
+                            <div class="feature">
+                                <div class="feature-icon">🎨</div>
+                                <div class="feature-text">Director de Arte</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🪴</div>
+                                <div class="feature-text">Set Decorator</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">📦</div>
+                                <div class="feature-text">Utilero</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">🏛️</div>
+                                <div class="feature-text">Props Master</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleContent(this)">
+                        <h4>👗 ESTILISMO (4+)</h4>
+                        <span class="toggle-arrow">▼</span>
+                    </div>
+                    <div class="toggle-content">
+                        <div class="toggle-content-inner">
+                            <div class="feature">
+                                <div class="feature-icon">👗</div>
+                                <div class="feature-text">Vestuarista</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">💄</div>
+                                <div class="feature-text">Maquillador</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">💇</div>
+                                <div class="feature-text">Peluquero</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">✨</div>
+                                <div class="feature-text">Ayudante Estilismo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Información por Miembro</h3>
+                <div class="spec">
+                    <h4>📱 Contacto</h4>
+                    <p>Teléfono, email, empresa/agencia, perfiles profesionales.</p>
+                </div>
+                <div class="spec">
+                    <h4>💰 Datos Contractuales</h4>
+                    <p>Tarifa por día, fechas de participación, contrato firmado, documentación (DNI, NIF, seguro).</p>
+                </div>
+                <div class="spec">
+                    <h4>💼 Información Profesional</h4>
+                    <p>Experiencia, especialidad, portafolio, IMDB, referencias previas.</p>
+                </div>
+                <div class="spec">
+                    <h4>📋 Responsabilidades</h4>
+                    <p>Definición clara de tareas y autoridad en el set.</p>
+                </div>
+                <div class="spec">
+                    <h4>📝 Notas Especiales</h4>
+                    <p>Requerimientos especiales, alojamiento, disponibilidad para reshoots.</p>
+                </div>
+
+                <h3>Características de Cargos</h3>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Cargos Predefinidos</strong> - 90+ posiciones estándar</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Crear Personalizados</strong> - Añade cualquier cargo</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Jerarquía</strong> - Define relaciones y estructura</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✅</div>
+                        <div class="feature-text"><strong>Organigrama Visual</strong> - Ve la estructura gráficamente</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 7: Relations -->
+        <div id="relations" class="tab-content">
+            <div class="card" id="relaciones">
+                <h2>🔗 Relaciones Entre Módulos</h2>
+                <p>Cómo los diferentes apartados se conectan y trabajan juntos de forma inteligente.</p>
+
+                <h3>Flujo de Relaciones</h3>
+                <div class="relation-tree">
+DASHBOARD (Home)
+├─ Seleccionar Proyecto
+│
+└─ PROYECTO ESPECÍFICO
+   ├─ 📅 PLANIFICACIÓN
+   │  ├─ Define escenas por día
+   │  ├─ Establece horarios y tiempos
+   │  ├─ Agrupa locaciones/sets
+   │  └─ Asigna CAST y EQUIPO por escena
+   │
+   ├─ 👥 CASTING
+   │  ├─ Fichas de actores/modelos
+   │  ├─ Fotos y perfiles
+   │  └─ Se asignan a escenas en PLANIFICACIÓN
+   │
+   ├─ 🎨 ESTILISMO
+   │  ├─ Vestuario por escena
+   │  ├─ Maquillaje y accesorios
+   │  └─ Se asigna a CAST en PLANIFICACIÓN
+   │
+   ├─ 💼 EQUIPO
+   │  ├─ Directorio de personas
+   │  ├─ Contacto y documentación
+   │  └─ Se asignan a SETS/escenas en PLANIFICACIÓN
+   │
+   └─ 💰 PRESUPUESTO
+      ├─ Suma costos de EQUIPO (tarifa × días)
+      ├─ Suma costos de CASTING (tarifa × días)
+      ├─ Suma costos de ESTILISMO (proveedores)
+      └─ Control global financiero
+                </div>
+
+                <h3>Flujos de Datos Principales</h3>
+                <div class="spec">
+                    <h4>Planificación → Casting</h4>
+                    <p>Las escenas definidas en planificación asignan actores del módulo de casting.</p>
+                </div>
+                <div class="spec">
+                    <h4>Planificación → Estilismo</h4>
+                    <p>Cada escena asignada a un actor trae consigo el look estilístico definido para ese personaje en esa escena.</p>
+                </div>
+                <div class="spec">
+                    <h4>Planificación → Equipo</h4>
+                    <p>Las escenas y sets requieren departamentos específicos (cámara, iluminación, etc) que se asignan del equipo disponible.</p>
+                </div>
+                <div class="spec">
+                    <h4>Todos → Presupuesto</h4>
+                    <p>Casting (tarifa/día × días), Equipo (tarifa/día × días), Estilismo (costos proveedores) se suman automáticamente.</p>
+                </div>
+            </div>
+
+            <!-- Specifications -->
+            <div class="card" id="specs">
+                <h2>📊 Especificaciones Técnicas</h2>
+
+                <h3>Estructura de Datos Principal (JSON)</h3>
+                <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 12px; overflow-x: auto; font-family: 'Courier New', monospace; font-size: 12px; color: #374151;">
+                    <pre>{
+  "proyecto": {
+    "id": 1,
+    "nombre": "Campaña Nike 2026",
+    "cliente": "Nike Inc.",
+    "estado": "activo",
+    "fechaInicio": "2026-04-20",
+    "fechaFin": "2026-05-15",
+
+    "planificacion": {
+      "dias": [
+        {
+          "numero": 1,
+          "fecha": "2026-04-20",
+          "escenas": [
+            {
+              "numero": 2,
+              "nombre": "Reacción del personaje",
+              "horaInicio": "09:30",
+              "horaFin": "10:45",
+              "castAsignado": ["id_actor_1"],
+              "equipoRequerido": ["director", "dop", "gaffer"],
+              "estilismoRef": "id_estilo_1"
+            }
+          ]
+        }
+      ]
+    },
+
+    "casting": [
+      {
+        "id": 1,
+        "nombre": "Guilligan Estudiante",
+        "rol": "Personaje Principal",
+        "fotos": { "perfil": "url", "galeria": ["url1", "url2"] },
+        "perfiles": { "imdb": "url", "portfolio": "url" },
+        "estado": "confirmado",
+        "tarifa": 500,
+        "fechas": ["2026-04-20", "2026-05-15"]
+      }
+    ],
+
+    "equipo": [
+      {
+        "id": 1,
+        "nombre": "María García",
+        "cargo": "Director",
+        "tarifa": 800,
+        "fechasParticipacion": ["2026-04-20", "2026-05-15"]
+      }
+    ],
+
+    "estilismo": {
+      "byEscena": [
+        {
+          "escena": 2,
+          "personaje": "Guilligan",
+          "vestuario": [...],
+          "maquillaje": "Natural",
+          "accesorios": [...]
+        }
+      ]
+    },
+
+    "presupuesto": {
+      "total": 150000,
+      "gastado": 95000
+    }
+  }
+}
+                    </pre>
+                </div>
+
+                <h3>Capacidades del Sistema</h3>
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">📱</div>
+                        <div class="feature-text"><strong>100% Responsive</strong> - Desktop, tablet y móvil</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-text"><strong>Estética Perk+</strong> - Tipografía bold, colores azul/gris</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-text"><strong>Rendimiento</strong> - Sin imágenes pesadas, solo SVG Lucide</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🔐</div>
+                        <div class="feature-text"><strong>Escalabilidad</strong> - Arquitectura modular y extensible</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>Rodaje+ Studio v3.0</strong> | Arquitectura Completa de Plataforma de Gestión de Rodajes</p>
+        <p>Versión: 3.0 | Fecha: Abril 2026 | Estado: Especificación Completa</p>
+        <p style="margin-top: 1rem; opacity: 0.7;">Diseñado para productoras, agencias y estudios audiovisuales</p>
+    </footer>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tabbuttons;
+
+            // Hide all tab contents
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+
+            // Remove active class from all buttons
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].classList.remove("active");
+            }
+
+            // Show the current tab and mark the button as active
+            document.getElementById(tabName).classList.add("active");
+            if (evt) {
+                evt.currentTarget.classList.add("active");
+            }
+        }
+
+        function toggleContent(element) {
+            const arrow = element.querySelector('.toggle-arrow');
+            const content = element.nextElementSibling;
+
+            arrow.classList.toggle('open');
+            content.classList.toggle('open');
+        }
+
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize with first tab active
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.tab-button');
+            if (buttons.length > 0) {
+                buttons[0].classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
