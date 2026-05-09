@@ -3137,6 +3137,24 @@ footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
   </div>
 </div>
 
+<!-- Import Shooting Plan modal -->
+<div class="modal-overlay" id="spImportModal">
+  <div class="modal" style="width:580px;">
+    <div class="modal-title">Importar Shooting Plan</div>
+    <div class="modal-sub">Pega tu tabla (de Excel, Numbers o cualquier fuente). La primera columna debe ser la hora, la segunda la localización, la tercera el talent y la cuarta la descripción. Los días se separan cuando la hora vuelve a ser más temprana.</div>
+    <textarea id="spImportTextarea" style="width:100%;height:200px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:.5rem;padding:.75rem;color:#fff;font-size:.78rem;font-family:inherit;resize:vertical;outline:none;margin-bottom:.75rem;" placeholder="Pega aquí el contenido de la tabla..."></textarea>
+    <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.75rem;">
+      <label style="font-size:.75rem;color:#666;">Fecha primer día:</label>
+      <input type="date" id="spImportFecha" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:.4rem;padding:.3rem .6rem;color:#fff;font-size:.78rem;outline:none;">
+    </div>
+    <div id="spImportPreview" style="font-size:.72rem;color:#555;margin-bottom:.75rem;"></div>
+    <div class="modal-footer" style="gap:.5rem;">
+      <button class="btn-done" style="background:transparent;color:#666;border:1px solid rgba(255,255,255,.1);" onclick="document.getElementById('spImportModal').classList.remove('open')">Cancelar</button>
+      <button class="btn-done" onclick="spImportExecute()">Importar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Cast / Team modal -->
 <div class="modal-overlay" id="editModal">
   <div class="edit-modal" id="editModalContent"></div>
@@ -4015,6 +4033,7 @@ function renderShootingPlan(panel) {
     <div class="sp-day-nav">
       ${dayTabs}
       <button class="sp-add-day-tab" onclick="addPlanDay()">${icon('plus',11)} Nuevo día</button>
+      <button class="sp-add-day-tab" onclick="spOpenImportModal()" style="border-color:rgba(255,255,255,.2);color:#888;">${icon('upload',11)} Importar tabla</button>
     </div>
     <div class="sp-day-content" id="spDayContent">
       ${dayContent}
@@ -4665,6 +4684,109 @@ function spMoveRow(diaId, rowId, dir) {
   dia.rows[newIdx] = tmp;
   saveToLocalStorage();
   renderShootingPlan(document.getElementById('panelShootingPlan'));
+}
+
+// ── Importar tabla Shooting Plan ─────────────────
+function spOpenImportModal() {
+  document.getElementById('spImportModal').classList.add('open');
+  // Fecha sugerida: mañana
+  const d = new Date(); d.setDate(d.getDate()+1);
+  document.getElementById('spImportFecha').value = d.toISOString().split('T')[0];
+  document.getElementById('spImportPreview').textContent = '';
+  document.getElementById('spImportTextarea').value = '';
+}
+
+function spParseImportTable(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^[\|\-\s]+$/));
+  const rows = [];
+  for (const line of lines) {
+    // Separar por tabulador o por | (formato markdown)
+    let cols = line.includes('\t') ? line.split('\t') : line.split('|').map(c => c.trim()).filter(c => c);
+    if (cols.length < 2) continue;
+    // Ignorar fila de cabecera
+    if (cols[0].toLowerCase().includes('hora') || cols[0].toLowerCase().includes('time')) continue;
+    rows.push({
+      hora: cols[0] || '',
+      locacion: cols[1] || '',
+      talent: cols[2] || '',
+      descripcion: cols[3] || '',
+      props: cols[4] || ''
+    });
+  }
+  return rows;
+}
+
+function spGroupIntoDays(rows, fechaInicio) {
+  const dias = [];
+  let diaActual = null;
+  let lastHoraNum = -1;
+  let diaNum = 1;
+  let fechaBase = fechaInicio ? new Date(fechaInicio) : new Date();
+
+  for (const r of rows) {
+    // Extraer hora numérica para detectar cambio de día
+    const horaMatch = r.hora.match(/(\d{1,2}):(\d{2})/);
+    const horaNum = horaMatch ? parseInt(horaMatch[1]) * 60 + parseInt(horaMatch[2]) : -1;
+    const isPendiente = r.hora.toLowerCase().includes('pendiente') || r.hora.toLowerCase().includes('noche');
+
+    // Nuevo día si la hora retrocede significativamente (>3h) o es la primera fila
+    if (!diaActual || (horaNum >= 0 && lastHoraNum >= 0 && horaNum < lastHoraNum - 180)) {
+      const fecha = new Date(fechaBase);
+      fecha.setDate(fechaBase.getDate() + (diaNum - 1));
+      diaActual = {
+        id: 'd' + Date.now() + diaNum,
+        dia: diaNum,
+        fecha: fecha.toISOString().split('T')[0],
+        locacion: '',
+        locacionId: null, castingIds: [], rows: [], shotlist: [], slOpen: false
+      };
+      dias.push(diaActual);
+      diaNum++;
+    }
+
+    if (!isPendiente && horaNum >= 0) lastHoraNum = horaNum;
+
+    // Extraer horas inicio/fin
+    const horasMatch = r.hora.match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
+    const horaInicio = horasMatch ? horasMatch[1] : '';
+    const horaFin = horasMatch ? horasMatch[2] : '';
+
+    const desc = [
+      r.descripcion,
+      r.talent ? `Talent: ${r.talent}` : '',
+      r.props ? `Props: ${r.props}` : ''
+    ].filter(Boolean).join('\n');
+
+    diaActual.rows.push({
+      id: 'r' + Date.now() + Math.random().toString(36).slice(2,6),
+      hora: horaInicio,
+      horaFin: horaFin,
+      locacion: r.locacion,
+      locacionId: null,
+      descripcion: desc,
+      plano: 'General',
+      castingIds: [], refImgs: [], imagen: null
+    });
+
+    // Localización del día = primera localización del día
+    if (!diaActual.locacion && r.locacion) diaActual.locacion = r.locacion;
+  }
+  return dias;
+}
+
+function spImportExecute() {
+  const text = document.getElementById('spImportTextarea').value.trim();
+  if (!text) { alert('Pega primero el contenido de la tabla.'); return; }
+  const fecha = document.getElementById('spImportFecha').value;
+  const rows = spParseImportTable(text);
+  if (!rows.length) { alert('No se encontraron filas válidas. Comprueba el formato.'); return; }
+  const dias = spGroupIntoDays(rows, fecha);
+  if (!confirm(`¿Importar ${dias.length} días con ${rows.length} planos? Esto reemplazará la planificación actual.`)) return;
+  activeProject.planificacion = dias;
+  saveToLocalStorage();
+  document.getElementById('spImportModal').classList.remove('open');
+  renderShootingPlan(document.getElementById('panelShootingPlan'));
+  showToast(`✓ Importados ${dias.length} días · ${rows.length} planos`, 'ok');
 }
 
 function addPlanDay() {
