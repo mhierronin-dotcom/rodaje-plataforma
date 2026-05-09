@@ -2833,11 +2833,11 @@ footer { border-top: 1px solid rgba(255,255,255,.07); margin-top: 4rem; }
   .rs-project-name { font-size: 1.2rem; }
   .rs-header { flex-direction: column; gap: .75rem; }
 
-  /* Shooting plan */
-  .sp-shot-body { grid-template-columns: 1fr; }
-  .sp-shot-img-col { width: 100%; min-height: 160px; }
-  .sp-shot-topbar { gap: .3rem; }
-  .sp-shot-col { border-left: none; border-top: 1px solid rgba(255,255,255,.05); }
+  /* Shooting plan — scroll horizontal en móvil */
+  .sp-shot-card { min-width: 700px; }
+  .sp-shots-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sp-shot-topbar { flex-wrap: nowrap; overflow-x: auto; }
+  .sp-shot-img-col { min-height: 120px; }
 
   /* Localizaciones */
   .sp-loc-card { grid-template-columns: 1fr; }
@@ -4257,11 +4257,13 @@ function spRenderDayContent(dia) {
         <span>Planos del día</span>
         <span style="color:#333;font-size:.6rem;">${(dia.rows||[]).length} plano${(dia.rows||[]).length!==1?'s':''}</span>
       </div>
-      <div class="sp-shots-grid">
-        ${shotsHtml}
-        <button class="sp-add-shot-btn" onclick="addPlanRow('${dia.id}')">
-          ${icon('plus',13)} Añadir plano
-        </button>
+      <div class="sp-shots-wrap">
+        <div class="sp-shots-grid">
+          ${shotsHtml}
+          <button class="sp-add-shot-btn" onclick="addPlanRow('${dia.id}')">
+            ${icon('plus',13)} Añadir plano
+          </button>
+        </div>
       </div>
     </div>
 
