@@ -4124,6 +4124,8 @@ function spRenderDayContent(dia) {
               ${optionsHtml}
             </select>
             <div class="sp-shot-actions">
+              <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" title="Subir" ${idx === 0 ? 'disabled style="opacity:.2"' : ''}>↑</button>
+              <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" title="Bajar" ${idx === (dia.rows||[]).length-1 ? 'disabled style="opacity:.2"' : ''}>↓</button>
               <button class="sp-shot-action-btn del" onclick="deletePlanRow('${dia.id}','${row.id}')">×</button>
             </div>
           </div>
@@ -4646,6 +4648,21 @@ function addPlanRow(diaId) {
 function deletePlanRow(diaId, rowId) {
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (dia) dia.rows = (dia.rows || []).filter(r => r.id !== rowId);
+  saveToLocalStorage();
+  renderShootingPlan(document.getElementById('panelShootingPlan'));
+}
+
+function spMoveRow(diaId, rowId, dir) {
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (!dia || !dia.rows) return;
+  const idx = dia.rows.findIndex(r => r.id === rowId);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= dia.rows.length) return;
+  // Intercambiar
+  const tmp = dia.rows[idx];
+  dia.rows[idx] = dia.rows[newIdx];
+  dia.rows[newIdx] = tmp;
   saveToLocalStorage();
   renderShootingPlan(document.getElementById('panelShootingPlan'));
 }
