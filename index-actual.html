@@ -2428,16 +2428,18 @@ input[type=range].scale-slider::-moz-range-thumb {
 /* Image column */
 .cv-sp-shot-img-col {
   background: rgba(255,255,255,.04);
-  display: flex; align-items: center; justify-content: center;
+  position: relative;
   overflow: hidden;
+  min-height: 127px;
 }
 .cv-sp-shot-img-col img {
+  position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .cv-sp-shot-img-empty {
   display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%; min-height: 110px; color: #252525;
-  font-size: .65rem;
+  position: absolute; inset: 0;
+  color: #252525; font-size: .65rem;
 }
 /* Data columns */
 .cv-sp-shot-col {
@@ -2547,7 +2549,6 @@ input[type=range].scale-slider::-moz-range-thumb {
   .cv-sp-shot-topbar { flex-wrap: nowrap; }
   .cv-sp-shot-body { grid-template-columns: 184px 2fr 1fr 1fr; min-height: 160px; }
   .cv-sp-shot-img-col { min-height: 160px; }
-  .cv-sp-shot-img-col img { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* Subrows en mobile */
   .cv-sp-subrow { margin-left: 1rem; }
   /* Referencias: mantener 2 columnas masonry en móvil */
@@ -2586,7 +2587,6 @@ input[type=range].scale-slider::-moz-range-thumb {
 
 /* Mobile tweaks */
 @media (max-width: 480px) {
-  .cv-sp-shot-img-col { width: 80px; }
   .cv-sp-day-tab { min-width: 60px; padding: .45rem .65rem; }
   .cv-sp-day-meta-num { font-size: 1.5rem; }
 }
