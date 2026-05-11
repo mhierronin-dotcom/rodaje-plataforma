@@ -655,8 +655,8 @@ input[type=range].scale-slider::-moz-range-thumb {
 
 /* Cuerpo: frame + columnas */
 .sp-shot-body {
-  display: grid; grid-template-columns: 180px 2fr 1fr 1fr;
-  min-height: 120px;
+  display: grid; grid-template-columns: 207px 2fr 1fr 1fr;
+  min-height: 138px;
 }
 .sp-shot-col {
   padding: .6rem .75rem;
@@ -673,7 +673,7 @@ input[type=range].scale-slider::-moz-range-thumb {
 /* Image column — fixed width, fills card height */
 .sp-shot-img-col {
   position: relative; background: #0d0d0d;
-  min-height: 120px; align-self: stretch;
+  min-height: 138px; align-self: stretch;
   display: flex; align-items: center; justify-content: center;
 }
 .sp-shot-img {
@@ -849,8 +849,8 @@ input[type=range].scale-slider::-moz-range-thumb {
   font-weight: 500; letter-spacing: .02em;
 }
 .sp-subrow-body {
-  display: grid; grid-template-columns: 140px 2fr 1fr 1fr;
-  min-height: 90px; padding-left: 1.1rem;
+  display: grid; grid-template-columns: 207px 2fr 1fr 1fr;
+  min-height: 138px;
 }
 .sp-add-subrow-btn {
   display: flex; align-items: center; gap: .3rem;
@@ -2425,8 +2425,8 @@ input[type=range].scale-slider::-moz-range-thumb {
 
 /* Body: 4 columns like editor */
 .cv-sp-shot-body {
-  display: grid; grid-template-columns: 160px 2fr 1fr 1fr;
-  min-height: 110px;
+  display: grid; grid-template-columns: 184px 2fr 1fr 1fr;
+  min-height: 127px;
 }
 /* Image column */
 .cv-sp-shot-img-col {
@@ -2552,7 +2552,7 @@ input[type=range].scale-slider::-moz-range-thumb {
   .cv-sp-shots-grid { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .cv-sp-shot-card { min-width: 680px; }
   .cv-sp-shot-topbar { flex-wrap: nowrap; }
-  .cv-sp-shot-body { grid-template-columns: 140px 2fr 1fr 1fr; }
+  .cv-sp-shot-body { grid-template-columns: 161px 2fr 1fr 1fr; }
   /* Referencias: mantener 2 columnas masonry en móvil */
   .cv-sp-refs-board { columns: 2; column-gap: .45rem; }
 }
@@ -5093,13 +5093,13 @@ function spRenderSubRow(dia, row, sub, subIdx, parentIdx) {
   }).join('');
 
   const imgCol = sub.imagen
-    ? `<div class="sp-shot-img-col" style="min-height:80px">
+    ? `<div class="sp-shot-img-col" style="min-height:138px">
          <img class="sp-shot-img" src="${sub.imagen}" alt="frame">
          <div class="sp-shot-img-overlay">
            <button class="sp-shot-img-del" onclick="spRemoveSubImg('${dia.id}','${row.id}','${sub.id}')">Quitar</button>
          </div>
        </div>`
-    : `<div class="sp-shot-img-col" style="min-height:80px">
+    : `<div class="sp-shot-img-col" style="min-height:138px">
          <button class="sp-shot-img-add" onclick="spTriggerSubImg('${dia.id}','${row.id}','${sub.id}')">
            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
            <span>Frame</span>
@@ -9808,7 +9808,7 @@ function cvSpRenderDay(p, dia) {
                 ${sub.hora ? `<span class="cv-sp-shot-time">${sub.hora}${sub.horaFin ? `<span class="cv-sp-shot-time-sep">–</span>${sub.horaFin}` : ''}</span>` : ''}
                 ${sub.plano ? `<span class="cv-sp-shot-plano-tag">${sub.plano}</span>` : ''}
               </div>
-              <div class="cv-sp-shot-body" style="grid-template-columns:120px 2fr 1fr 1fr;min-height:80px;">
+              <div class="cv-sp-shot-body" style="grid-template-columns:184px 2fr 1fr 1fr;min-height:127px;">
                 ${subImgCol}
                 <div class="cv-sp-shot-col">
                   <span class="cv-sp-shot-col-label">Descripción</span>
