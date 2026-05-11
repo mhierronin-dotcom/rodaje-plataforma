@@ -832,15 +832,12 @@ input[type=range].scale-slider::-moz-range-thumb {
   border-top: 1px solid rgba(255,255,255,.04);
   background: rgba(255,255,255,.012);
   position: relative;
-}
-.sp-subrow::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 2px; background: rgba(255,255,255,.08);
+  border-left: 2px solid rgba(255,255,255,.07);
+  margin-left: 2rem;
 }
 .sp-subrow-topbar {
   display: flex; align-items: center; gap: .45rem;
-  padding: .38rem .75rem .38rem 1.1rem;
+  padding: .38rem .75rem .38rem .75rem;
   border-bottom: 1px solid rgba(255,255,255,.04);
   background: rgba(255,255,255,.01);
 }
@@ -2529,16 +2526,12 @@ input[type=range].scale-slider::-moz-range-thumb {
   display: flex; flex-direction: column;
   border-top: 1px solid rgba(255,255,255,.04);
   background: rgba(255,255,255,.012);
-  position: relative;
-}
-.cv-sp-subrow::before {
-  content: '';
-  position: absolute; left: 0; top: 0; bottom: 0;
-  width: 2px; background: rgba(255,255,255,.07);
+  border-left: 2px solid rgba(255,255,255,.07);
+  margin-left: 2rem;
 }
 .cv-sp-subrow-topbar {
   display: flex; align-items: center; gap: .45rem;
-  padding: .35rem .75rem .35rem 1rem;
+  padding: .35rem .75rem .35rem .75rem;
   border-bottom: 1px solid rgba(255,255,255,.04);
   background: rgba(255,255,255,.01);
 }
@@ -9808,7 +9801,7 @@ function cvSpRenderDay(p, dia) {
                 ${sub.hora ? `<span class="cv-sp-shot-time">${sub.hora}${sub.horaFin ? `<span class="cv-sp-shot-time-sep">–</span>${sub.horaFin}` : ''}</span>` : ''}
                 ${sub.plano ? `<span class="cv-sp-shot-plano-tag">${sub.plano}</span>` : ''}
               </div>
-              <div class="cv-sp-shot-body" style="grid-template-columns:184px 2fr 1fr 1fr;min-height:127px;">
+              <div class="cv-sp-shot-body" style="grid-template-columns:184px 2fr 1fr 1fr;min-height:127px;border-left:none;">
                 ${subImgCol}
                 <div class="cv-sp-shot-col">
                   <span class="cv-sp-shot-col-label">Descripción</span>
