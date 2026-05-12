@@ -4391,13 +4391,15 @@ function spTimeSelect(val, diaId, rowId, field) {
     `<option value="${String(m).padStart(2,'0')}" ${selM===m?'selected':''}>${String(m).padStart(2,'0')}</option>`
   ).join('');
 
+  // Guardar siempre que haya al menos hora; si falta minuto usar "00"
   const onChange = `(function(el){
     var hEl=document.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
     var mEl=document.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
-    if(hEl&&mEl&&hEl.value&&mEl.value){
-      updateRowField('${diaId}','${rowId}','${field}',hEl.value+':'+mEl.value);
-    } else if(hEl&&mEl&&!hEl.value&&!mEl.value){
+    if(!hEl||!mEl) return;
+    if(!hEl.value && !mEl.value){
       updateRowField('${diaId}','${rowId}','${field}','');
+    } else if(hEl.value) {
+      updateRowField('${diaId}','${rowId}','${field}',hEl.value+':'+(mEl.value||'00'));
     }
   })(this)`;
 
@@ -4415,13 +4417,13 @@ function spTimeSelectSub(val, diaId, rowId, subId, field) {
   const mOpts = `<option value="">--</option>` + mins.map(m =>
     `<option value="${String(m).padStart(2,'0')}" ${selM===m?'selected':''}>${String(m).padStart(2,'0')}</option>`).join('');
   const onChange = `(function(el){
-    var bar=el.closest('.sp-subrow-topbar');
-    var hEl=bar.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_h"]');
-    var mEl=bar.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_m"]');
-    if(hEl&&mEl&&hEl.value&&mEl.value){
-      updateSubRowField('${diaId}','${rowId}','${subId}','${field}',hEl.value+':'+mEl.value);
-    } else if(hEl&&mEl&&!hEl.value&&!mEl.value){
+    var hEl=document.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_h"]');
+    var mEl=document.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_m"]');
+    if(!hEl||!mEl) return;
+    if(!hEl.value && !mEl.value){
       updateSubRowField('${diaId}','${rowId}','${subId}','${field}','');
+    } else if(hEl.value) {
+      updateSubRowField('${diaId}','${rowId}','${subId}','${field}',hEl.value+':'+(mEl.value||'00'));
     }
   })(this)`;
   return `<select class="sp-shot-time-input" data-stf="${diaId}_${rowId}_${subId}_${field}_h" onchange="${onChange}" title="Hora">${hOpts}</select><span class="sp-time-colon">:</span><select class="sp-shot-time-input" data-stf="${diaId}_${rowId}_${subId}_${field}_m" onchange="${onChange}" title="Minutos">${mOpts}</select>`;
@@ -5302,9 +5304,8 @@ function spFlushTimeInputs() {
     // Regular row
     const row = (dia.rows || []).find(r => r.id === rowId);
     if (row) {
-      if (hVal && mVal) row[field] = hVal + ':' + mVal;
-      else if (!hVal && !mVal) row[field] = '';
-      // If only one is set, keep whatever was already saved — don't overwrite
+      if (!hVal && !mVal) row[field] = '';
+      else if (hVal) row[field] = hVal + ':' + (mVal || '00');
     }
   });
   // Also flush subrow time selects (use data-stf)
@@ -5327,8 +5328,8 @@ function spFlushTimeInputs() {
     if (!row) return;
     const sub = (row.subrows || []).find(s => s.id === subId);
     if (sub) {
-      if (hVal && mVal) sub[field] = hVal + ':' + mVal;
-      else if (!hVal && !mVal) sub[field] = '';
+      if (!hVal && !mVal) sub[field] = '';
+      else if (hVal) sub[field] = hVal + ':' + (mVal || '00');
     }
   });
   saveToLocalStorage();
