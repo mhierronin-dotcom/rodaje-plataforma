@@ -645,6 +645,41 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .sp-shot-card:hover { border-color: rgba(255,255,255,.14); }
 
+/* ── Break / pausa rows ── */
+.sp-break-card {
+  display: flex; align-items: center; gap: .75rem;
+  border: 1px solid rgba(255,180,50,.18); border-radius: .7rem; overflow: hidden;
+  background: rgba(255,165,0,.055); padding: .55rem .85rem;
+  transition: border-color .18s;
+}
+.sp-break-card:hover { border-color: rgba(255,180,50,.32); }
+.sp-break-icon {
+  font-size: 1.05rem; flex-shrink: 0; opacity: .75;
+}
+.sp-break-label-input {
+  background: transparent; border: none; outline: none;
+  font-family: inherit; font-size: .82rem; font-weight: 600;
+  color: rgba(255,180,50,.9); letter-spacing: .02em; flex-shrink: 0;
+  min-width: 60px; max-width: 160px; width: auto;
+}
+.sp-break-label-input::placeholder { color: rgba(255,180,50,.35); }
+.sp-break-sep { color: rgba(255,180,50,.2); flex-shrink: 0; }
+.sp-break-note-input {
+  background: transparent; border: none; outline: none;
+  font-family: inherit; font-size: .77rem; color: rgba(255,255,255,.45);
+  flex: 1; min-width: 0;
+}
+.sp-break-note-input::placeholder { color: rgba(255,255,255,.2); }
+.sp-break-time-wrap { display: flex; align-items: center; gap: .3rem; margin-left: auto; flex-shrink: 0; }
+.sp-break-actions { display: flex; align-items: center; gap: .25rem; flex-shrink: 0; }
+.sp-break-del-btn {
+  background: transparent; border: none; color: rgba(255,100,100,.4);
+  font-size: .8rem; cursor: pointer; padding: .1rem .3rem;
+  border-radius: .3rem; transition: color .15s, background .15s;
+  font-family: inherit;
+}
+.sp-break-del-btn:hover { color: rgba(255,100,100,.85); background: rgba(255,100,100,.08); }
+
 /* Fila superior */
 .sp-shot-topbar {
   display: flex; align-items: center; gap: .45rem;
@@ -2389,6 +2424,24 @@ input[type=range].scale-slider::-moz-range-thumb {
   display: flex; flex-direction: column;
   border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
   overflow: hidden; background: rgba(255,255,255,.02);
+}
+
+/* Break card — vista cliente */
+.cv-sp-break-card {
+  display: flex; align-items: center; gap: .65rem;
+  border: 1px solid rgba(255,180,50,.18); border-radius: .65rem;
+  background: rgba(255,165,0,.05); padding: .5rem .85rem;
+}
+.cv-sp-break-icon { font-size: 1rem; opacity: .75; flex-shrink: 0; }
+.cv-sp-break-label {
+  font-size: .82rem; font-weight: 600;
+  color: rgba(255,180,50,.9); letter-spacing: .02em; flex-shrink: 0;
+}
+.cv-sp-break-sep { color: rgba(255,180,50,.2); flex-shrink: 0; }
+.cv-sp-break-note { font-size: .77rem; color: rgba(255,255,255,.45); flex: 1; }
+.cv-sp-break-time {
+  font-size: .75rem; color: rgba(255,180,50,.6);
+  font-weight: 500; letter-spacing: .03em; margin-left: auto; flex-shrink: 0;
 }
 
 /* Top bar */
@@ -4339,9 +4392,8 @@ function spTimeSelect(val, diaId, rowId, field) {
   ).join('');
 
   const onChange = `(function(el){
-    var card=el.closest('.sp-shot-topbar');
-    var hEl=card.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
-    var mEl=card.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
+    var hEl=document.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
+    var mEl=document.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
     if(hEl&&mEl&&hEl.value&&mEl.value){
       updateRowField('${diaId}','${rowId}','${field}',hEl.value+':'+mEl.value);
     } else if(hEl&&mEl&&!hEl.value&&!mEl.value){
@@ -4394,6 +4446,37 @@ function spRenderDayContent(dia) {
 
   // ── Shot cards ──
   const shotsHtml = (dia.rows || []).map((row, idx) => {
+    // ── Break row ──
+    if (row.type === 'break') {
+      const breakIcons = { 'Comida': '🍽️', 'Cena': '🌙', 'Desayuno': '☀️', 'Break': '☕', 'Pausa': '⏸️' };
+      const bi = breakIcons[row.breakLabel] || '☕';
+      return `
+        <div class="sp-break-card" id="spshot-${row.id}">
+          <span class="sp-break-icon">${bi}</span>
+          <input class="sp-break-label-input" value="${(row.breakLabel||'Break').replace(/"/g,'&quot;')}"
+            placeholder="Comida, Cena…" list="sp-break-list-${row.id}"
+            oninput="updateRowField('${dia.id}','${row.id}','breakLabel',this.value);this.size=Math.max(5,this.value.length||5)"
+            size="${Math.max(5,(row.breakLabel||'Break').length)}">
+          <datalist id="sp-break-list-${row.id}">
+            <option value="Desayuno"><option value="Comida"><option value="Cena"><option value="Break"><option value="Pausa">
+          </datalist>
+          <span class="sp-break-sep">·</span>
+          <input class="sp-break-note-input" value="${(row.descripcion||'').replace(/"/g,'&quot;')}"
+            placeholder="Nota opcional (lugar, duración…)"
+            oninput="updateRowField('${dia.id}','${row.id}','descripcion',this.value)">
+          <div class="sp-break-time-wrap">
+            ${spTimeSelect(row.hora||'', dia.id, row.id, 'hora')}
+            <span class="sp-shot-time-sep">–</span>
+            ${spTimeSelect(row.horaFin||'', dia.id, row.id, 'horaFin')}
+          </div>
+          <div class="sp-break-actions">
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" title="Subir" ${idx===0?'disabled style="opacity:.2"':''}>↑</button>
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" title="Bajar" ${idx===(dia.rows||[]).length-1?'disabled style="opacity:.2"':''}>↓</button>
+            <button class="sp-break-del-btn" onclick="deletePlanRow('${dia.id}','${row.id}')">×</button>
+          </div>
+        </div>`;
+    }
+
     const optionsHtml = PLANO_TYPES.map(t => `<option ${t === row.plano ? 'selected' : ''}>${t}</option>`).join('');
     const castBadges = (row.castingIds || []).map(cid => {
       const actor = activeProject.casting.find(a => a.id === cid);
@@ -4585,9 +4668,14 @@ function spRenderDayContent(dia) {
       <div class="sp-shots-wrap">
         <div class="sp-shots-grid">
           ${shotsHtml}
-          <button class="sp-add-shot-btn" onclick="addPlanRow('${dia.id}')">
-            ${icon('plus',13)} Añadir plano
-          </button>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+            <button class="sp-add-shot-btn" onclick="addPlanRow('${dia.id}')">
+              ${icon('plus',13)} Añadir plano
+            </button>
+            <button class="sp-add-shot-btn" style="border-color:rgba(255,165,0,.25);color:rgba(255,180,50,.7);" onclick="addBreakRow('${dia.id}')">
+              ☕ Break / Comida
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -5046,6 +5134,7 @@ function updateSubRowField(diaId, rowId, subId, field, val) {
 }
 
 function addSubRow(diaId, rowId) {
+  spFlushTimeInputs();
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia) return;
   const row = (dia.rows || []).find(r => r.id === rowId);
@@ -5189,11 +5278,78 @@ function spRenderSubRow(dia, row, sub, subIdx, parentIdx) {
     </div>`;
 }
 
+// Flush any partially-entered time selects from the DOM into the data model
+// before a full re-render (prevents losing hora/horaFin when only one select is set)
+function spFlushTimeInputs() {
+  const panel = document.getElementById('panelShootingPlan');
+  if (!panel) return;
+  // All time select pairs share data-tf="diaId_rowId_field_h/m"
+  panel.querySelectorAll('[data-tf]').forEach(el => {
+    const tf = el.getAttribute('data-tf');
+    if (!tf || !tf.endsWith('_h')) return; // only process hour selects
+    const base = tf.slice(0, -2); // e.g. "diaId_rowId_hora"
+    const parts = base.split('_');
+    if (parts.length < 3) return;
+    const field = parts[parts.length - 1];
+    const rowId = parts[parts.length - 2];
+    const diaId = parts.slice(0, parts.length - 2).join('_');
+    const mEl = panel.querySelector(`[data-tf="${base}_m"]`);
+    if (!mEl) return;
+    const hVal = el.value; const mVal = mEl.value;
+    const dia = activeProject.planificacion.find(d => d.id === diaId);
+    if (!dia) return;
+    // Check if it's a subrow (data-stf) — handled separately
+    // Regular row
+    const row = (dia.rows || []).find(r => r.id === rowId);
+    if (row) {
+      if (hVal && mVal) row[field] = hVal + ':' + mVal;
+      else if (!hVal && !mVal) row[field] = '';
+      // If only one is set, keep whatever was already saved — don't overwrite
+    }
+  });
+  // Also flush subrow time selects (use data-stf)
+  panel.querySelectorAll('[data-stf]').forEach(el => {
+    const stf = el.getAttribute('data-stf');
+    if (!stf || !stf.endsWith('_h')) return;
+    const base = stf.slice(0, -2);
+    const parts = base.split('_');
+    if (parts.length < 4) return;
+    const field = parts[parts.length - 1];
+    const subId = parts[parts.length - 2];
+    const rowId = parts[parts.length - 3];
+    const diaId = parts.slice(0, parts.length - 3).join('_');
+    const mEl = panel.querySelector(`[data-stf="${base}_m"]`);
+    if (!mEl) return;
+    const hVal = el.value; const mVal = mEl.value;
+    const dia = activeProject.planificacion.find(d => d.id === diaId);
+    if (!dia) return;
+    const row = (dia.rows || []).find(r => r.id === rowId);
+    if (!row) return;
+    const sub = (row.subrows || []).find(s => s.id === subId);
+    if (sub) {
+      if (hVal && mVal) sub[field] = hVal + ':' + mVal;
+      else if (!hVal && !mVal) sub[field] = '';
+    }
+  });
+  saveToLocalStorage();
+}
+
 function addPlanRow(diaId) {
+  spFlushTimeInputs();
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia) return;
   if (!dia.rows) dia.rows = [];
-  dia.rows.push({ id: 'r' + Date.now(), hora: '', horaFin: '', plano: 'PP', descripcion: '', imagen: null, castingIds: [] });
+  dia.rows.push({ id: 'r' + Date.now(), hora: '', horaFin: '', plano: 'PP', descripcion: '', imagen: null, castingIds: [], subrows: [], refImgs: [], props: '', vestuario: '' });
+  saveToLocalStorage();
+  renderShootingPlan(document.getElementById('panelShootingPlan'));
+}
+
+function addBreakRow(diaId) {
+  spFlushTimeInputs();
+  const dia = activeProject.planificacion.find(d => d.id === diaId);
+  if (!dia) return;
+  if (!dia.rows) dia.rows = [];
+  dia.rows.push({ id: 'r' + Date.now(), type: 'break', breakLabel: 'Comida', hora: '', horaFin: '', descripcion: '' });
   saveToLocalStorage();
   renderShootingPlan(document.getElementById('panelShootingPlan'));
 }
@@ -5206,6 +5362,7 @@ function deletePlanRow(diaId, rowId) {
 }
 
 function spMoveRow(diaId, rowId, dir) {
+  spFlushTimeInputs();
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia || !dia.rows) return;
   const idx = dia.rows.findIndex(r => r.id === rowId);
@@ -9698,13 +9855,27 @@ function cvSpRenderDay(p, dia) {
 
   // Shot cards — 4-column layout matching the editor
   const rows = dia.rows || [];
+  const shotRows = rows.filter(r => r.type !== 'break');
   const shotsHtml = rows.length ? `
     <div class="cv-sp-section-label">
       <span>Planos del día</span>
-      <span>${rows.length} plano${rows.length !== 1 ? 's' : ''}</span>
+      <span>${shotRows.length} plano${shotRows.length !== 1 ? 's' : ''}</span>
     </div>
     <div class="cv-sp-shots-grid">
       ${rows.map((row, idx) => {
+
+        // ── Break row en vista cliente ──
+        if (row.type === 'break') {
+          const breakIcons = { 'Comida': '🍽️', 'Cena': '🌙', 'Desayuno': '☀️', 'Break': '☕', 'Pausa': '⏸️' };
+          const bi = breakIcons[row.breakLabel] || '☕';
+          const timeStr = row.hora ? `${row.hora}${row.horaFin ? '–'+row.horaFin : ''}` : '';
+          return `<div class="cv-sp-break-card">
+            <span class="cv-sp-break-icon">${bi}</span>
+            <span class="cv-sp-break-label">${row.breakLabel || 'Break'}</span>
+            ${row.descripcion ? `<span class="cv-sp-break-sep">·</span><span class="cv-sp-break-note">${row.descripcion}</span>` : ''}
+            ${timeStr ? `<span class="cv-sp-break-time">${timeStr}</span>` : ''}
+          </div>`;
+        }
 
         // Frame column
         const imgCol = row.imagen
