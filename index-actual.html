@@ -688,6 +688,49 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .sp-break-del-btn:hover { color: rgba(255,100,100,.85); background: rgba(255,100,100,.08); }
 
+/* ── Color tag — pastilla discreta en cada fila ── */
+.sp-color-tag-wrap { position: relative; flex-shrink: 0; }
+.sp-color-tag {
+  width: 10px; height: 10px; border-radius: 50%;
+  cursor: pointer; flex-shrink: 0; border: 1.5px solid rgba(0,0,0,.25);
+  transition: transform .12s, box-shadow .12s;
+  background: var(--row-color, transparent);
+  /* Sin color: pequeño círculo gris apagado */
+}
+.sp-color-tag.no-color {
+  background: transparent;
+  border: 1.5px dashed rgba(255,255,255,.18);
+}
+.sp-color-tag:hover { transform: scale(1.35); box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+
+/* Popover de colores */
+.sp-color-popover {
+  display: none; position: absolute; top: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a; border: 1px solid rgba(255,255,255,.12);
+  border-radius: .55rem; padding: .5rem .55rem;
+  z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.6);
+  flex-direction: column; gap: .35rem; min-width: 110px;
+}
+.sp-color-popover.open { display: flex; }
+.sp-color-popover-row { display: flex; gap: .3rem; align-items: center; }
+.sp-color-opt {
+  width: 16px; height: 16px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: transform .12s, border-color .12s;
+  flex-shrink: 0;
+}
+.sp-color-opt:hover { transform: scale(1.2); }
+.sp-color-opt.selected { border-color: #fff; }
+.sp-color-opt.no-color-opt {
+  background: transparent !important;
+  border: 1.5px dashed rgba(255,255,255,.3);
+  position: relative;
+}
+.sp-color-opt.no-color-opt::after {
+  content: ''; position: absolute; inset: 2px;
+  background: linear-gradient(135deg, transparent 45%, rgba(255,80,80,.6) 45%, rgba(255,80,80,.6) 55%, transparent 55%);
+}
+
 /* Fila superior */
 .sp-shot-topbar {
   display: flex; align-items: center; gap: .45rem;
@@ -695,6 +738,10 @@ input[type=range].scale-slider::-moz-range-thumb {
   flex-wrap: wrap;
 }
 .sp-shot-topbar-sep { color: rgba(255,255,255,.12); font-size: .8rem; }
+
+/* Shot card con color de fila */
+.sp-shot-card[data-row-color] { border-left: 3px solid var(--row-color); }
+.sp-shot-card[data-row-color=""] { border-left: 1px solid rgba(255,255,255,.07); }
 
 /* Cuerpo: frame + columnas */
 .sp-shot-body {
@@ -2438,6 +2485,8 @@ input[type=range].scale-slider::-moz-range-thumb {
   border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
   overflow: hidden; background: rgba(255,255,255,.02);
 }
+/* Color de fila en vista cliente */
+.cv-sp-shot-card[data-row-color] { border-left: 3px solid var(--row-color); }
 
 /* Break card — vista cliente */
 .cv-sp-break-card {
@@ -4433,16 +4482,11 @@ function spRenderDayContent(dia) {
   const shotsHtml = (dia.rows || []).map((row, idx) => {
     // ── Fila genérica (break/comida/transfer/etc.) ──
     if (row.type === 'break') {
-      const BK_COLORS = ['#f5a623','#7ed321','#4a90d9','#bd10e0','#e05c5c','#888888'];
-      const bkColor = row.breakColor || BK_COLORS[0];
-      const colorDots = BK_COLORS.map(c => `
-        <span class="sp-break-color-dot ${c===bkColor?'active':''}"
-          style="background:${c}"
-          onclick="updateRowField('${dia.id}','${row.id}','breakColor','${c}');renderShootingPlan(document.getElementById('panelShootingPlan'))"
-          title="${c}"></span>`).join('');
+      const bkColor = row.rowColor || row.breakColor || '#f5a623';
+      const bkStyle = `--bk-color:${bkColor}`;
       return `
-        <div class="sp-break-card" id="spshot-${row.id}" style="--bk-color:${bkColor}">
-          <div class="sp-break-colors">${colorDots}</div>
+        <div class="sp-break-card" id="spshot-${row.id}" style="${bkStyle}">
+          ${spColorTagHtml(bkColor, dia.id, row.id)}
           <input class="sp-break-label-input" value="${(row.breakLabel||'').replace(/"/g,'&quot;')}"
             placeholder="Comida, Transfer, Break…"
             oninput="updateRowField('${dia.id}','${row.id}','breakLabel',this.value)">
@@ -4527,11 +4571,14 @@ function spRenderDayContent(dia) {
     const propsEsc = (row.props||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     const vestuarioEsc = (row.vestuario||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
+    const rowColor = row.rowColor || '';
+    const rowColorStyle = rowColor ? `style="--row-color:${rowColor};border-left:3px solid ${rowColor}"` : '';
     return `
-      <div class="sp-shot-card" id="spshot-${row.id}">
+      <div class="sp-shot-card" id="spshot-${row.id}" data-row-color="${rowColor}" ${rowColorStyle}>
 
         <!-- Fila superior: num · horas · tipo · localización · acciones -->
         <div class="sp-shot-topbar">
+          ${spColorTagHtml(rowColor, dia.id, row.id)}
           <span class="sp-shot-num-badge">${idx + 1}</span>
           <div class="sp-shot-time-row">
             ${spTimeSelect(row.hora||'', dia.id, row.id, 'hora')}
@@ -5278,6 +5325,82 @@ function spRenderSubRow(dia, row, sub, subIdx, parentIdx) {
 
 // Con input[type=time] nativo el flush ya no es necesario — cada cambio guarda directamente
 function spFlushTimeInputs() { /* no-op: inputs nativos guardan en onchange */ }
+
+/* ── Color tag popover ── */
+const SP_ROW_COLORS = [
+  { v: '',        label: 'Sin color' },
+  { v: '#f5a623', label: 'Naranja'  },
+  { v: '#e05c5c', label: 'Rojo'     },
+  { v: '#7ed321', label: 'Verde'    },
+  { v: '#4a90d9', label: 'Azul'     },
+  { v: '#bd10e0', label: 'Morado'   },
+  { v: '#50e3c2', label: 'Menta'    },
+  { v: '#f8e71c', label: 'Amarillo' },
+  { v: '#b8b8b8', label: 'Gris'     },
+];
+
+function spColorTagHtml(rowColor, diaId, rowId) {
+  const c = rowColor || '';
+  const noColor = !c;
+  const opts = SP_ROW_COLORS.map(o => `
+    <span class="sp-color-opt ${o.v===''?'no-color-opt':''} ${o.v===c?'selected':''}"
+      style="${o.v ? 'background:'+o.v : ''}"
+      title="${o.label}"
+      onclick="spSetRowColor('${diaId}','${rowId}','${o.v}')"></span>`).join('');
+  return `
+    <div class="sp-color-tag-wrap" id="sp-ctw-${rowId}">
+      <span class="sp-color-tag ${noColor?'no-color':''}"
+        style="${c ? '--row-color:'+c : ''}"
+        onclick="spToggleColorPop('${rowId}')"
+        title="Color de fila"></span>
+      <div class="sp-color-popover" id="sp-cpop-${rowId}">
+        <div class="sp-color-popover-row">${opts.slice(0, SP_ROW_COLORS.length)}</div>
+      </div>
+    </div>`;
+}
+
+function spToggleColorPop(rowId) {
+  // Cierra todos los demás
+  document.querySelectorAll('.sp-color-popover.open').forEach(el => {
+    if (el.id !== 'sp-cpop-' + rowId) el.classList.remove('open');
+  });
+  const pop = document.getElementById('sp-cpop-' + rowId);
+  if (pop) pop.classList.toggle('open');
+}
+
+function spSetRowColor(diaId, rowId, color) {
+  updateRowField(diaId, rowId, 'rowColor', color);
+  // Actualizar el DOM directamente sin full re-render
+  const card = document.getElementById('spshot-' + rowId);
+  if (card) {
+    card.style.setProperty('--row-color', color);
+    card.style.setProperty('--bk-color', color); // también para filas libres
+    card.setAttribute('data-row-color', color);
+    if (color) card.style.borderLeft = '3px solid ' + color;
+    else card.style.borderLeft = '';
+  }
+  const tag = card ? card.querySelector('.sp-color-tag') : null;
+  if (tag) {
+    tag.style.setProperty('--row-color', color);
+    tag.classList.toggle('no-color', !color);
+  }
+  // Actualizar selected en el popover
+  const pop = document.getElementById('sp-cpop-' + rowId);
+  if (pop) {
+    pop.querySelectorAll('.sp-color-opt').forEach(el => {
+      const elColor = el.style.background || '';
+      el.classList.toggle('selected', elColor === color || (!elColor && !color));
+    });
+    pop.classList.remove('open');
+  }
+}
+
+// Cerrar popovers al hacer clic fuera
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.sp-color-tag-wrap')) {
+    document.querySelectorAll('.sp-color-popover.open').forEach(el => el.classList.remove('open'));
+  }
+});
 
 function addPlanRow(diaId) {
   spFlushTimeInputs();
@@ -9816,7 +9939,7 @@ function cvSpRenderDay(p, dia) {
 
         // ── Break row en vista cliente ──
         if (row.type === 'break') {
-          const bkColor = row.breakColor || '#888888';
+          const bkColor = row.rowColor || row.breakColor || '#f5a623';
           const timeStr = row.hora ? `${row.hora}${row.horaFin ? '–'+row.horaFin : ''}` : '';
           return `<div class="cv-sp-break-card" style="--bk-color:${bkColor}">
             <span class="cv-sp-break-label">${row.breakLabel || '—'}</span>
@@ -9944,9 +10067,12 @@ function cvSpRenderDay(p, dia) {
             </div>`;
         }).join('');
 
+        const cvRowColor = row.rowColor || '';
+        const cvColorStyle = cvRowColor ? `style="--row-color:${cvRowColor};border-left:3px solid ${cvRowColor}"` : '';
         return `
-          <div class="cv-sp-shot-card">
+          <div class="cv-sp-shot-card" data-row-color="${cvRowColor}" ${cvColorStyle}>
             <div class="cv-sp-shot-topbar">
+              ${cvRowColor ? `<span style="width:8px;height:8px;border-radius:50%;background:${cvRowColor};flex-shrink:0;display:inline-block;"></span>` : ''}
               <span class="cv-sp-shot-num-badge">${idx + 1}</span>
               ${timeHtml}
               ${planoHtml}

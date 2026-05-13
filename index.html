@@ -645,40 +645,91 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .sp-shot-card:hover { border-color: rgba(255,255,255,.14); }
 
-/* ── Break / pausa rows ── */
+/* ── Filas genéricas (break/comida/transfer/etc.) ── */
 .sp-break-card {
-  display: flex; align-items: center; gap: .75rem;
-  border: 1px solid rgba(255,180,50,.18); border-radius: .7rem; overflow: hidden;
-  background: rgba(255,165,0,.055); padding: .55rem .85rem;
-  transition: border-color .18s;
+  display: flex; align-items: center; gap: .6rem;
+  border-radius: .7rem; padding: .5rem .75rem;
+  border-left: 3px solid var(--bk-color, #888);
+  background: color-mix(in srgb, var(--bk-color, #888) 8%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--bk-color, #888) 14%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--bk-color, #888) 14%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--bk-color, #888) 14%, transparent);
+  transition: background .15s;
 }
-.sp-break-card:hover { border-color: rgba(255,180,50,.32); }
-.sp-break-icon {
-  font-size: 1.05rem; flex-shrink: 0; opacity: .75;
+/* Selector de colores */
+.sp-break-colors { display: flex; align-items: center; gap: .3rem; flex-shrink: 0; }
+.sp-break-color-dot {
+  width: 11px; height: 11px; border-radius: 50%; cursor: pointer;
+  border: 1.5px solid transparent; transition: border-color .12s, transform .12s;
+  flex-shrink: 0;
 }
+.sp-break-color-dot:hover { transform: scale(1.25); }
+.sp-break-color-dot.active { border-color: #fff; transform: scale(1.15); }
 .sp-break-label-input {
   background: transparent; border: none; outline: none;
   font-family: inherit; font-size: .82rem; font-weight: 600;
-  color: rgba(255,180,50,.9); letter-spacing: .02em; flex-shrink: 0;
-  min-width: 60px; max-width: 160px; width: auto;
+  color: var(--bk-color, #aaa); letter-spacing: .02em; flex-shrink: 0;
+  min-width: 40px; max-width: 200px;
 }
-.sp-break-label-input::placeholder { color: rgba(255,180,50,.35); }
-.sp-break-sep { color: rgba(255,180,50,.2); flex-shrink: 0; }
+.sp-break-label-input::placeholder { color: color-mix(in srgb, var(--bk-color,#888) 40%, transparent); }
+.sp-break-sep { color: rgba(255,255,255,.15); flex-shrink: 0; font-size: .7rem; }
 .sp-break-note-input {
   background: transparent; border: none; outline: none;
-  font-family: inherit; font-size: .77rem; color: rgba(255,255,255,.45);
+  font-family: inherit; font-size: .77rem; color: rgba(255,255,255,.4);
   flex: 1; min-width: 0;
 }
-.sp-break-note-input::placeholder { color: rgba(255,255,255,.2); }
+.sp-break-note-input::placeholder { color: rgba(255,255,255,.18); }
 .sp-break-time-wrap { display: flex; align-items: center; gap: .3rem; margin-left: auto; flex-shrink: 0; }
-.sp-break-actions { display: flex; align-items: center; gap: .25rem; flex-shrink: 0; }
+.sp-break-actions { display: flex; align-items: center; gap: .2rem; flex-shrink: 0; }
 .sp-break-del-btn {
-  background: transparent; border: none; color: rgba(255,100,100,.4);
+  background: transparent; border: none; color: rgba(255,100,100,.35);
   font-size: .8rem; cursor: pointer; padding: .1rem .3rem;
-  border-radius: .3rem; transition: color .15s, background .15s;
-  font-family: inherit;
+  border-radius: .3rem; transition: color .15s, background .15s; font-family: inherit;
 }
 .sp-break-del-btn:hover { color: rgba(255,100,100,.85); background: rgba(255,100,100,.08); }
+
+/* ── Color tag — pastilla discreta en cada fila ── */
+.sp-color-tag-wrap { position: relative; flex-shrink: 0; }
+.sp-color-tag {
+  width: 10px; height: 10px; border-radius: 50%;
+  cursor: pointer; flex-shrink: 0; border: 1.5px solid rgba(0,0,0,.25);
+  transition: transform .12s, box-shadow .12s;
+  background: var(--row-color, transparent);
+  /* Sin color: pequeño círculo gris apagado */
+}
+.sp-color-tag.no-color {
+  background: transparent;
+  border: 1.5px dashed rgba(255,255,255,.18);
+}
+.sp-color-tag:hover { transform: scale(1.35); box-shadow: 0 0 0 3px rgba(255,255,255,.08); }
+
+/* Popover de colores */
+.sp-color-popover {
+  display: none; position: absolute; top: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a; border: 1px solid rgba(255,255,255,.12);
+  border-radius: .55rem; padding: .5rem .55rem;
+  z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.6);
+  flex-direction: column; gap: .35rem; min-width: 110px;
+}
+.sp-color-popover.open { display: flex; }
+.sp-color-popover-row { display: flex; gap: .3rem; align-items: center; }
+.sp-color-opt {
+  width: 16px; height: 16px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: transform .12s, border-color .12s;
+  flex-shrink: 0;
+}
+.sp-color-opt:hover { transform: scale(1.2); }
+.sp-color-opt.selected { border-color: #fff; }
+.sp-color-opt.no-color-opt {
+  background: transparent !important;
+  border: 1.5px dashed rgba(255,255,255,.3);
+  position: relative;
+}
+.sp-color-opt.no-color-opt::after {
+  content: ''; position: absolute; inset: 2px;
+  background: linear-gradient(135deg, transparent 45%, rgba(255,80,80,.6) 45%, rgba(255,80,80,.6) 55%, transparent 55%);
+}
 
 /* Fila superior */
 .sp-shot-topbar {
@@ -687,6 +738,10 @@ input[type=range].scale-slider::-moz-range-thumb {
   flex-wrap: wrap;
 }
 .sp-shot-topbar-sep { color: rgba(255,255,255,.12); font-size: .8rem; }
+
+/* Shot card con color de fila */
+.sp-shot-card[data-row-color] { border-left: 3px solid var(--row-color); }
+.sp-shot-card[data-row-color=""] { border-left: 1px solid rgba(255,255,255,.07); }
 
 /* Cuerpo: frame + columnas */
 .sp-shot-body {
@@ -2430,23 +2485,28 @@ input[type=range].scale-slider::-moz-range-thumb {
   border: 1px solid rgba(255,255,255,.08); border-radius: .65rem;
   overflow: hidden; background: rgba(255,255,255,.02);
 }
+/* Color de fila en vista cliente */
+.cv-sp-shot-card[data-row-color] { border-left: 3px solid var(--row-color); }
 
 /* Break card — vista cliente */
 .cv-sp-break-card {
   display: flex; align-items: center; gap: .65rem;
-  border: 1px solid rgba(255,180,50,.18); border-radius: .65rem;
-  background: rgba(255,165,0,.05); padding: .5rem .85rem;
+  border-radius: .65rem; padding: .48rem .85rem;
+  border-left: 3px solid var(--bk-color, #888);
+  background: color-mix(in srgb, var(--bk-color, #888) 7%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--bk-color, #888) 12%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--bk-color, #888) 12%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--bk-color, #888) 12%, transparent);
 }
-.cv-sp-break-icon { font-size: 1rem; opacity: .75; flex-shrink: 0; }
 .cv-sp-break-label {
   font-size: .82rem; font-weight: 600;
-  color: rgba(255,180,50,.9); letter-spacing: .02em; flex-shrink: 0;
+  color: var(--bk-color, #aaa); letter-spacing: .02em; flex-shrink: 0;
 }
-.cv-sp-break-sep { color: rgba(255,180,50,.2); flex-shrink: 0; }
-.cv-sp-break-note { font-size: .77rem; color: rgba(255,255,255,.45); flex: 1; }
+.cv-sp-break-sep { color: rgba(255,255,255,.15); flex-shrink: 0; font-size: .7rem; }
+.cv-sp-break-note { font-size: .77rem; color: rgba(255,255,255,.4); flex: 1; }
 .cv-sp-break-time {
-  font-size: .75rem; color: rgba(255,180,50,.6);
-  font-weight: 500; letter-spacing: .03em; margin-left: auto; flex-shrink: 0;
+  font-size: .75rem; color: var(--bk-color, #aaa);
+  opacity: .7; font-weight: 500; margin-left: auto; flex-shrink: 0;
 }
 
 /* Top bar */
@@ -4420,32 +4480,28 @@ function spRenderDayContent(dia) {
 
   // ── Shot cards ──
   const shotsHtml = (dia.rows || []).map((row, idx) => {
-    // ── Break row ──
+    // ── Fila genérica (break/comida/transfer/etc.) ──
     if (row.type === 'break') {
-      const breakIcons = { 'Comida': '🍽️', 'Cena': '🌙', 'Desayuno': '☀️', 'Break': '☕', 'Pausa': '⏸️' };
-      const bi = breakIcons[row.breakLabel] || '☕';
+      const bkColor = row.rowColor || row.breakColor || '#f5a623';
+      const bkStyle = `--bk-color:${bkColor}`;
       return `
-        <div class="sp-break-card" id="spshot-${row.id}">
-          <span class="sp-break-icon">${bi}</span>
-          <input class="sp-break-label-input" value="${(row.breakLabel||'Break').replace(/"/g,'&quot;')}"
-            placeholder="Comida, Cena…" list="sp-break-list-${row.id}"
-            oninput="updateRowField('${dia.id}','${row.id}','breakLabel',this.value);this.size=Math.max(5,this.value.length||5)"
-            size="${Math.max(5,(row.breakLabel||'Break').length)}">
-          <datalist id="sp-break-list-${row.id}">
-            <option value="Desayuno"><option value="Comida"><option value="Cena"><option value="Break"><option value="Pausa">
-          </datalist>
+        <div class="sp-break-card" id="spshot-${row.id}" style="${bkStyle}">
+          ${spColorTagHtml(bkColor, dia.id, row.id)}
+          <input class="sp-break-label-input" value="${(row.breakLabel||'').replace(/"/g,'&quot;')}"
+            placeholder="Comida, Transfer, Break…"
+            oninput="updateRowField('${dia.id}','${row.id}','breakLabel',this.value)">
           <span class="sp-break-sep">·</span>
           <input class="sp-break-note-input" value="${(row.descripcion||'').replace(/"/g,'&quot;')}"
-            placeholder="Nota opcional (lugar, duración…)"
+            placeholder="Nota…"
             oninput="updateRowField('${dia.id}','${row.id}','descripcion',this.value)">
           <div class="sp-break-time-wrap">
             ${spTimeSelect(row.hora||'', dia.id, row.id, 'hora')}
-            <span class="sp-shot-time-sep">–</span>
+            <span class="sp-shot-time-sep" style="color:#444">–</span>
             ${spTimeSelect(row.horaFin||'', dia.id, row.id, 'horaFin')}
           </div>
           <div class="sp-break-actions">
-            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" title="Subir" ${idx===0?'disabled style="opacity:.2"':''}>↑</button>
-            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" title="Bajar" ${idx===(dia.rows||[]).length-1?'disabled style="opacity:.2"':''}>↓</button>
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" ${idx===0?'disabled style="opacity:.2"':''}>↑</button>
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" ${idx===(dia.rows||[]).length-1?'disabled style="opacity:.2"':''}>↓</button>
             <button class="sp-break-del-btn" onclick="deletePlanRow('${dia.id}','${row.id}')">×</button>
           </div>
         </div>`;
@@ -4515,11 +4571,14 @@ function spRenderDayContent(dia) {
     const propsEsc = (row.props||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
     const vestuarioEsc = (row.vestuario||'').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
+    const rowColor = row.rowColor || '';
+    const rowColorStyle = rowColor ? `style="--row-color:${rowColor};border-left:3px solid ${rowColor}"` : '';
     return `
-      <div class="sp-shot-card" id="spshot-${row.id}">
+      <div class="sp-shot-card" id="spshot-${row.id}" data-row-color="${rowColor}" ${rowColorStyle}>
 
         <!-- Fila superior: num · horas · tipo · localización · acciones -->
         <div class="sp-shot-topbar">
+          ${spColorTagHtml(rowColor, dia.id, row.id)}
           <span class="sp-shot-num-badge">${idx + 1}</span>
           <div class="sp-shot-time-row">
             ${spTimeSelect(row.hora||'', dia.id, row.id, 'hora')}
@@ -4646,8 +4705,8 @@ function spRenderDayContent(dia) {
             <button class="sp-add-shot-btn" onclick="addPlanRow('${dia.id}')">
               ${icon('plus',13)} Añadir plano
             </button>
-            <button class="sp-add-shot-btn" style="border-color:rgba(255,165,0,.25);color:rgba(255,180,50,.7);" onclick="addBreakRow('${dia.id}')">
-              ☕ Break / Comida
+            <button class="sp-add-shot-btn" style="border-color:rgba(150,150,150,.2);color:rgba(180,180,180,.6);" onclick="addBreakRow('${dia.id}')">
+              + Fila libre
             </button>
           </div>
         </div>
@@ -5267,6 +5326,82 @@ function spRenderSubRow(dia, row, sub, subIdx, parentIdx) {
 // Con input[type=time] nativo el flush ya no es necesario — cada cambio guarda directamente
 function spFlushTimeInputs() { /* no-op: inputs nativos guardan en onchange */ }
 
+/* ── Color tag popover ── */
+const SP_ROW_COLORS = [
+  { v: '',        label: 'Sin color' },
+  { v: '#f5a623', label: 'Naranja'  },
+  { v: '#e05c5c', label: 'Rojo'     },
+  { v: '#7ed321', label: 'Verde'    },
+  { v: '#4a90d9', label: 'Azul'     },
+  { v: '#bd10e0', label: 'Morado'   },
+  { v: '#50e3c2', label: 'Menta'    },
+  { v: '#f8e71c', label: 'Amarillo' },
+  { v: '#b8b8b8', label: 'Gris'     },
+];
+
+function spColorTagHtml(rowColor, diaId, rowId) {
+  const c = rowColor || '';
+  const noColor = !c;
+  const opts = SP_ROW_COLORS.map(o => `
+    <span class="sp-color-opt ${o.v===''?'no-color-opt':''} ${o.v===c?'selected':''}"
+      style="${o.v ? 'background:'+o.v : ''}"
+      title="${o.label}"
+      onclick="spSetRowColor('${diaId}','${rowId}','${o.v}')"></span>`).join('');
+  return `
+    <div class="sp-color-tag-wrap" id="sp-ctw-${rowId}">
+      <span class="sp-color-tag ${noColor?'no-color':''}"
+        style="${c ? '--row-color:'+c : ''}"
+        onclick="spToggleColorPop('${rowId}')"
+        title="Color de fila"></span>
+      <div class="sp-color-popover" id="sp-cpop-${rowId}">
+        <div class="sp-color-popover-row">${opts.slice(0, SP_ROW_COLORS.length)}</div>
+      </div>
+    </div>`;
+}
+
+function spToggleColorPop(rowId) {
+  // Cierra todos los demás
+  document.querySelectorAll('.sp-color-popover.open').forEach(el => {
+    if (el.id !== 'sp-cpop-' + rowId) el.classList.remove('open');
+  });
+  const pop = document.getElementById('sp-cpop-' + rowId);
+  if (pop) pop.classList.toggle('open');
+}
+
+function spSetRowColor(diaId, rowId, color) {
+  updateRowField(diaId, rowId, 'rowColor', color);
+  // Actualizar el DOM directamente sin full re-render
+  const card = document.getElementById('spshot-' + rowId);
+  if (card) {
+    card.style.setProperty('--row-color', color);
+    card.style.setProperty('--bk-color', color); // también para filas libres
+    card.setAttribute('data-row-color', color);
+    if (color) card.style.borderLeft = '3px solid ' + color;
+    else card.style.borderLeft = '';
+  }
+  const tag = card ? card.querySelector('.sp-color-tag') : null;
+  if (tag) {
+    tag.style.setProperty('--row-color', color);
+    tag.classList.toggle('no-color', !color);
+  }
+  // Actualizar selected en el popover
+  const pop = document.getElementById('sp-cpop-' + rowId);
+  if (pop) {
+    pop.querySelectorAll('.sp-color-opt').forEach(el => {
+      const elColor = el.style.background || '';
+      el.classList.toggle('selected', elColor === color || (!elColor && !color));
+    });
+    pop.classList.remove('open');
+  }
+}
+
+// Cerrar popovers al hacer clic fuera
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.sp-color-tag-wrap')) {
+    document.querySelectorAll('.sp-color-popover.open').forEach(el => el.classList.remove('open'));
+  }
+});
+
 function addPlanRow(diaId) {
   spFlushTimeInputs();
   const dia = activeProject.planificacion.find(d => d.id === diaId);
@@ -5282,7 +5417,7 @@ function addBreakRow(diaId) {
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia) return;
   if (!dia.rows) dia.rows = [];
-  dia.rows.push({ id: 'r' + Date.now(), type: 'break', breakLabel: 'Comida', hora: '', horaFin: '', descripcion: '' });
+  dia.rows.push({ id: 'r' + Date.now(), type: 'break', breakLabel: '', breakColor: '#f5a623', hora: '', horaFin: '', descripcion: '' });
   saveToLocalStorage();
   renderShootingPlan(document.getElementById('panelShootingPlan'));
 }
@@ -9804,12 +9939,10 @@ function cvSpRenderDay(p, dia) {
 
         // ── Break row en vista cliente ──
         if (row.type === 'break') {
-          const breakIcons = { 'Comida': '🍽️', 'Cena': '🌙', 'Desayuno': '☀️', 'Break': '☕', 'Pausa': '⏸️' };
-          const bi = breakIcons[row.breakLabel] || '☕';
+          const bkColor = row.rowColor || row.breakColor || '#f5a623';
           const timeStr = row.hora ? `${row.hora}${row.horaFin ? '–'+row.horaFin : ''}` : '';
-          return `<div class="cv-sp-break-card">
-            <span class="cv-sp-break-icon">${bi}</span>
-            <span class="cv-sp-break-label">${row.breakLabel || 'Break'}</span>
+          return `<div class="cv-sp-break-card" style="--bk-color:${bkColor}">
+            <span class="cv-sp-break-label">${row.breakLabel || '—'}</span>
             ${row.descripcion ? `<span class="cv-sp-break-sep">·</span><span class="cv-sp-break-note">${row.descripcion}</span>` : ''}
             ${timeStr ? `<span class="cv-sp-break-time">${timeStr}</span>` : ''}
           </div>`;
@@ -9934,9 +10067,12 @@ function cvSpRenderDay(p, dia) {
             </div>`;
         }).join('');
 
+        const cvRowColor = row.rowColor || '';
+        const cvColorStyle = cvRowColor ? `style="--row-color:${cvRowColor};border-left:3px solid ${cvRowColor}"` : '';
         return `
-          <div class="cv-sp-shot-card">
+          <div class="cv-sp-shot-card" data-row-color="${cvRowColor}" ${cvColorStyle}>
             <div class="cv-sp-shot-topbar">
+              ${cvRowColor ? `<span style="width:8px;height:8px;border-radius:50%;background:${cvRowColor};flex-shrink:0;display:inline-block;"></span>` : ''}
               <span class="cv-sp-shot-num-badge">${idx + 1}</span>
               ${timeHtml}
               ${planoHtml}
