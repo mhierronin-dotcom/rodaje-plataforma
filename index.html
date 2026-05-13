@@ -5119,11 +5119,23 @@ function updateDiaField(diaId, field, val) {
   if (dia) { dia[field] = val; saveToLocalStorage(); }
 }
 
+function _cvRefreshIfOpen() {
+  // Si la vista cliente está abierta y muestra shooting plan, refresca el contenido
+  const cv = document.getElementById('clientView');
+  if (cv && cv.classList.contains('active') && cvActiveSectionId === 'shootingPlan') {
+    const content = document.getElementById('cvSpDayContent');
+    if (content) {
+      const dia = activeProject.planificacion.find(d => d.id === cvSpActiveDayId);
+      if (dia) content.innerHTML = cvSpRenderDay(activeProject, dia);
+    }
+  }
+}
+
 function updateRowField(diaId, rowId, field, val) {
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia) return;
   const row = (dia.rows || []).find(r => r.id === rowId);
-  if (row) { row[field] = val; saveToLocalStorage(); }
+  if (row) { row[field] = val; saveToLocalStorage(); _cvRefreshIfOpen(); }
 }
 
 function updateSubRowField(diaId, rowId, subId, field, val) {
@@ -5132,7 +5144,7 @@ function updateSubRowField(diaId, rowId, subId, field, val) {
   const row = (dia.rows || []).find(r => r.id === rowId);
   if (!row) return;
   const sub = (row.subrows || []).find(s => s.id === subId);
-  if (sub) { sub[field] = val; saveToLocalStorage(); }
+  if (sub) { sub[field] = val; saveToLocalStorage(); _cvRefreshIfOpen(); }
 }
 
 function addSubRow(diaId, rowId) {
