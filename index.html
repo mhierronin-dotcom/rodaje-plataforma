@@ -4392,9 +4392,11 @@ function spTimeSelect(val, diaId, rowId, field) {
   ).join('');
 
   // Guardar siempre que haya al menos hora; si falta minuto usar "00"
+  // Buscar dentro del panel de edición para evitar conflictos con la vista cliente
   const onChange = `(function(el){
-    var hEl=document.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
-    var mEl=document.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
+    var panel=document.getElementById('panelShootingPlan')||document;
+    var hEl=panel.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
+    var mEl=panel.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
     if(!hEl||!mEl) return;
     if(!hEl.value && !mEl.value){
       updateRowField('${diaId}','${rowId}','${field}','');
@@ -4417,8 +4419,9 @@ function spTimeSelectSub(val, diaId, rowId, subId, field) {
   const mOpts = `<option value="">--</option>` + mins.map(m =>
     `<option value="${String(m).padStart(2,'0')}" ${selM===m?'selected':''}>${String(m).padStart(2,'0')}</option>`).join('');
   const onChange = `(function(el){
-    var hEl=document.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_h"]');
-    var mEl=document.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_m"]');
+    var panel=document.getElementById('panelShootingPlan')||document;
+    var hEl=panel.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_h"]');
+    var mEl=panel.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_m"]');
     if(!hEl||!mEl) return;
     if(!hEl.value && !mEl.value){
       updateSubRowField('${diaId}','${rowId}','${subId}','${field}','');
@@ -5135,7 +5138,7 @@ function updateRowField(diaId, rowId, field, val) {
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia) return;
   const row = (dia.rows || []).find(r => r.id === rowId);
-  if (row) { row[field] = val; saveToLocalStorage(); _cvRefreshIfOpen(); }
+  if (row) { row[field] = val; saveToLocalStorage(); }
 }
 
 function updateSubRowField(diaId, rowId, subId, field, val) {
@@ -5144,7 +5147,7 @@ function updateSubRowField(diaId, rowId, subId, field, val) {
   const row = (dia.rows || []).find(r => r.id === rowId);
   if (!row) return;
   const sub = (row.subrows || []).find(s => s.id === subId);
-  if (sub) { sub[field] = val; saveToLocalStorage(); _cvRefreshIfOpen(); }
+  if (sub) { sub[field] = val; saveToLocalStorage(); }
 }
 
 function addSubRow(diaId, rowId) {
@@ -9464,14 +9467,19 @@ let cvActiveSectionId = null;
 function openClientView() {
   const p = activeProject;
   if (!p) return;
+  const cv = document.getElementById('clientView');
+  const alreadyOpen = cv.classList.contains('active');
   // Pick first module that has content (enabled OR has data)
   const firstWithContent = MODULE_DEFS.find(m => cvModuleHasContent(p, m.id));
   // Also check libre sections
   const firstLibre = (p.seccionesLibres || []).find(s => s.clienteVisible !== false && s.docs && s.docs.length);
-  cvActiveSectionId = firstWithContent ? firstWithContent.id : (firstLibre ? 'libre_' + firstLibre.id : 'shootingPlan');
-  cvSpActiveDayId = null;
-  document.getElementById('clientView').classList.add('active');
+  if (!alreadyOpen) {
+    cvActiveSectionId = firstWithContent ? firstWithContent.id : (firstLibre ? 'libre_' + firstLibre.id : 'shootingPlan');
+    cvSpActiveDayId = null;
+  }
+  cv.classList.add('active');
   document.body.style.overflow = 'hidden';
+  // Siempre re-renderizar para mostrar los últimos cambios
   renderClientView();
 }
 
