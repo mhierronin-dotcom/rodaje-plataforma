@@ -645,46 +645,38 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .sp-shot-card:hover { border-color: rgba(255,255,255,.14); }
 
-/* ── Filas genéricas (break/comida/transfer/etc.) ── */
+/* ── Break / pausa rows ── */
 .sp-break-card {
-  display: flex; align-items: center; gap: .6rem;
-  border-radius: .7rem; padding: .5rem .75rem;
-  border-left: 3px solid var(--bk-color, #888);
-  background: color-mix(in srgb, var(--bk-color, #888) 8%, transparent);
-  border-top: 1px solid color-mix(in srgb, var(--bk-color, #888) 14%, transparent);
-  border-right: 1px solid color-mix(in srgb, var(--bk-color, #888) 14%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--bk-color, #888) 14%, transparent);
-  transition: background .15s;
+  display: flex; align-items: center; gap: .75rem;
+  border: 1px solid rgba(255,180,50,.18); border-radius: .7rem; overflow: hidden;
+  background: rgba(255,165,0,.055); padding: .55rem .85rem;
+  transition: border-color .18s;
 }
-/* Selector de colores */
-.sp-break-colors { display: flex; align-items: center; gap: .3rem; flex-shrink: 0; }
-.sp-break-color-dot {
-  width: 11px; height: 11px; border-radius: 50%; cursor: pointer;
-  border: 1.5px solid transparent; transition: border-color .12s, transform .12s;
-  flex-shrink: 0;
+.sp-break-card:hover { border-color: rgba(255,180,50,.32); }
+.sp-break-icon {
+  font-size: 1.05rem; flex-shrink: 0; opacity: .75;
 }
-.sp-break-color-dot:hover { transform: scale(1.25); }
-.sp-break-color-dot.active { border-color: #fff; transform: scale(1.15); }
 .sp-break-label-input {
   background: transparent; border: none; outline: none;
   font-family: inherit; font-size: .82rem; font-weight: 600;
-  color: var(--bk-color, #aaa); letter-spacing: .02em; flex-shrink: 0;
-  min-width: 40px; max-width: 200px;
+  color: rgba(255,180,50,.9); letter-spacing: .02em; flex-shrink: 0;
+  min-width: 60px; max-width: 160px; width: auto;
 }
-.sp-break-label-input::placeholder { color: color-mix(in srgb, var(--bk-color,#888) 40%, transparent); }
-.sp-break-sep { color: rgba(255,255,255,.15); flex-shrink: 0; font-size: .7rem; }
+.sp-break-label-input::placeholder { color: rgba(255,180,50,.35); }
+.sp-break-sep { color: rgba(255,180,50,.2); flex-shrink: 0; }
 .sp-break-note-input {
   background: transparent; border: none; outline: none;
-  font-family: inherit; font-size: .77rem; color: rgba(255,255,255,.4);
+  font-family: inherit; font-size: .77rem; color: rgba(255,255,255,.45);
   flex: 1; min-width: 0;
 }
-.sp-break-note-input::placeholder { color: rgba(255,255,255,.18); }
+.sp-break-note-input::placeholder { color: rgba(255,255,255,.2); }
 .sp-break-time-wrap { display: flex; align-items: center; gap: .3rem; margin-left: auto; flex-shrink: 0; }
-.sp-break-actions { display: flex; align-items: center; gap: .2rem; flex-shrink: 0; }
+.sp-break-actions { display: flex; align-items: center; gap: .25rem; flex-shrink: 0; }
 .sp-break-del-btn {
-  background: transparent; border: none; color: rgba(255,100,100,.35);
+  background: transparent; border: none; color: rgba(255,100,100,.4);
   font-size: .8rem; cursor: pointer; padding: .1rem .3rem;
-  border-radius: .3rem; transition: color .15s, background .15s; font-family: inherit;
+  border-radius: .3rem; transition: color .15s, background .15s;
+  font-family: inherit;
 }
 .sp-break-del-btn:hover { color: rgba(255,100,100,.85); background: rgba(255,100,100,.08); }
 
@@ -2442,22 +2434,19 @@ input[type=range].scale-slider::-moz-range-thumb {
 /* Break card — vista cliente */
 .cv-sp-break-card {
   display: flex; align-items: center; gap: .65rem;
-  border-radius: .65rem; padding: .48rem .85rem;
-  border-left: 3px solid var(--bk-color, #888);
-  background: color-mix(in srgb, var(--bk-color, #888) 7%, transparent);
-  border-top: 1px solid color-mix(in srgb, var(--bk-color, #888) 12%, transparent);
-  border-right: 1px solid color-mix(in srgb, var(--bk-color, #888) 12%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--bk-color, #888) 12%, transparent);
+  border: 1px solid rgba(255,180,50,.18); border-radius: .65rem;
+  background: rgba(255,165,0,.05); padding: .5rem .85rem;
 }
+.cv-sp-break-icon { font-size: 1rem; opacity: .75; flex-shrink: 0; }
 .cv-sp-break-label {
   font-size: .82rem; font-weight: 600;
-  color: var(--bk-color, #aaa); letter-spacing: .02em; flex-shrink: 0;
+  color: rgba(255,180,50,.9); letter-spacing: .02em; flex-shrink: 0;
 }
-.cv-sp-break-sep { color: rgba(255,255,255,.15); flex-shrink: 0; font-size: .7rem; }
-.cv-sp-break-note { font-size: .77rem; color: rgba(255,255,255,.4); flex: 1; }
+.cv-sp-break-sep { color: rgba(255,180,50,.2); flex-shrink: 0; }
+.cv-sp-break-note { font-size: .77rem; color: rgba(255,255,255,.45); flex: 1; }
 .cv-sp-break-time {
-  font-size: .75rem; color: var(--bk-color, #aaa);
-  opacity: .7; font-weight: 500; margin-left: auto; flex-shrink: 0;
+  font-size: .75rem; color: rgba(255,180,50,.6);
+  font-weight: 500; letter-spacing: .03em; margin-left: auto; flex-shrink: 0;
 }
 
 /* Top bar */
@@ -4431,41 +4420,32 @@ function spRenderDayContent(dia) {
 
   // ── Shot cards ──
   const shotsHtml = (dia.rows || []).map((row, idx) => {
-    // ── Fila genérica (break/comida/transfer/etc.) ──
+    // ── Break row ──
     if (row.type === 'break') {
-      const BK_COLORS = ['#f5a623','#e05c5c','#7ed321','#4a90d9','#bd10e0','#50e3c2','#f8e71c','#b8b8b8'];
-      const bkColor = row.breakColor || BK_COLORS[0];
-      // Popover de colores — solo visible al hacer clic en el dot
-      const colorOpts = BK_COLORS.map(c => `<span
-        style="width:14px;height:14px;border-radius:50%;background:${c};cursor:pointer;flex-shrink:0;border:2px solid ${c===bkColor?'#fff':'transparent'};display:inline-block;"
-        onclick="event.stopPropagation();spBreakSetColor('${dia.id}','${row.id}','${c}')"></span>`).join('');
+      const breakIcons = { 'Comida': '🍽️', 'Cena': '🌙', 'Desayuno': '☀️', 'Break': '☕', 'Pausa': '⏸️' };
+      const bi = breakIcons[row.breakLabel] || '☕';
       return `
-        <div class="sp-break-card" id="spshot-${row.id}" style="--bk-color:${bkColor}">
-          <!-- Dot de color — al hacer clic abre/cierra el popover -->
-          <div style="position:relative;flex-shrink:0;">
-            <span id="sp-bkdot-${row.id}"
-              style="width:10px;height:10px;border-radius:50%;background:${bkColor};display:inline-block;cursor:pointer;flex-shrink:0;border:1.5px solid rgba(0,0,0,.2);"
-              onclick="event.stopPropagation();spBreakTogglePop('${row.id}')"></span>
-            <div id="sp-bkpop-${row.id}"
-              style="display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1a1a1a;border:1px solid rgba(255,255,255,.12);border-radius:.5rem;padding:.45rem .5rem;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,.6);">
-              <div style="display:flex;gap:.3rem;align-items:center;">${colorOpts}</div>
-            </div>
-          </div>
-          <input class="sp-break-label-input" value="${(row.breakLabel||'').replace(/"/g,'&quot;')}"
-            placeholder="Comida, Transfer, Break…"
-            oninput="updateRowField('${dia.id}','${row.id}','breakLabel',this.value)">
+        <div class="sp-break-card" id="spshot-${row.id}">
+          <span class="sp-break-icon">${bi}</span>
+          <input class="sp-break-label-input" value="${(row.breakLabel||'Break').replace(/"/g,'&quot;')}"
+            placeholder="Comida, Cena…" list="sp-break-list-${row.id}"
+            oninput="updateRowField('${dia.id}','${row.id}','breakLabel',this.value);this.size=Math.max(5,this.value.length||5)"
+            size="${Math.max(5,(row.breakLabel||'Break').length)}">
+          <datalist id="sp-break-list-${row.id}">
+            <option value="Desayuno"><option value="Comida"><option value="Cena"><option value="Break"><option value="Pausa">
+          </datalist>
           <span class="sp-break-sep">·</span>
           <input class="sp-break-note-input" value="${(row.descripcion||'').replace(/"/g,'&quot;')}"
-            placeholder="Nota…"
+            placeholder="Nota opcional (lugar, duración…)"
             oninput="updateRowField('${dia.id}','${row.id}','descripcion',this.value)">
           <div class="sp-break-time-wrap">
             ${spTimeSelect(row.hora||'', dia.id, row.id, 'hora')}
-            <span class="sp-shot-time-sep" style="color:#444">–</span>
+            <span class="sp-shot-time-sep">–</span>
             ${spTimeSelect(row.horaFin||'', dia.id, row.id, 'horaFin')}
           </div>
           <div class="sp-break-actions">
-            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" ${idx===0?'disabled style="opacity:.2"':''}>↑</button>
-            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" ${idx===(dia.rows||[]).length-1?'disabled style="opacity:.2"':''}>↓</button>
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',-1)" title="Subir" ${idx===0?'disabled style="opacity:.2"':''}>↑</button>
+            <button class="sp-shot-action-btn" onclick="spMoveRow('${dia.id}','${row.id}',1)" title="Bajar" ${idx===(dia.rows||[]).length-1?'disabled style="opacity:.2"':''}>↓</button>
             <button class="sp-break-del-btn" onclick="deletePlanRow('${dia.id}','${row.id}')">×</button>
           </div>
         </div>`;
@@ -4666,8 +4646,8 @@ function spRenderDayContent(dia) {
             <button class="sp-add-shot-btn" onclick="addPlanRow('${dia.id}')">
               ${icon('plus',13)} Añadir plano
             </button>
-            <button class="sp-add-shot-btn" style="border-color:rgba(150,150,150,.2);color:rgba(180,180,180,.6);" onclick="addBreakRow('${dia.id}')">
-              + Fila libre
+            <button class="sp-add-shot-btn" style="border-color:rgba(255,165,0,.25);color:rgba(255,180,50,.7);" onclick="addBreakRow('${dia.id}')">
+              ☕ Break / Comida
             </button>
           </div>
         </div>
@@ -5297,35 +5277,12 @@ function addPlanRow(diaId) {
   renderShootingPlan(document.getElementById('panelShootingPlan'));
 }
 
-function spBreakTogglePop(rowId) {
-  const pop = document.getElementById('sp-bkpop-' + rowId);
-  if (!pop) return;
-  const isOpen = pop.style.display === 'flex';
-  // Cierra todos
-  document.querySelectorAll('[id^="sp-bkpop-"]').forEach(el => el.style.display = 'none');
-  if (!isOpen) pop.style.display = 'flex';
-}
-function spBreakSetColor(diaId, rowId, color) {
-  updateRowField(diaId, rowId, 'breakColor', color);
-  // Actualiza el DOM sin re-render completo
-  const card = document.getElementById('spshot-' + rowId);
-  if (card) card.style.setProperty('--bk-color', color);
-  const dot = document.getElementById('sp-bkdot-' + rowId);
-  if (dot) dot.style.background = color;
-  const pop = document.getElementById('sp-bkpop-' + rowId);
-  if (pop) pop.style.display = 'none';
-}
-// Cerrar popover al clicar fuera
-document.addEventListener('click', () => {
-  document.querySelectorAll('[id^="sp-bkpop-"]').forEach(el => el.style.display = 'none');
-});
-
 function addBreakRow(diaId) {
   spFlushTimeInputs();
   const dia = activeProject.planificacion.find(d => d.id === diaId);
   if (!dia) return;
   if (!dia.rows) dia.rows = [];
-  dia.rows.push({ id: 'r' + Date.now(), type: 'break', breakLabel: '', breakColor: '#f5a623', hora: '', horaFin: '', descripcion: '' });
+  dia.rows.push({ id: 'r' + Date.now(), type: 'break', breakLabel: 'Comida', hora: '', horaFin: '', descripcion: '' });
   saveToLocalStorage();
   renderShootingPlan(document.getElementById('panelShootingPlan'));
 }
@@ -9847,10 +9804,12 @@ function cvSpRenderDay(p, dia) {
 
         // ── Break row en vista cliente ──
         if (row.type === 'break') {
-          const bkColor = row.breakColor || '#888888';
+          const breakIcons = { 'Comida': '🍽️', 'Cena': '🌙', 'Desayuno': '☀️', 'Break': '☕', 'Pausa': '⏸️' };
+          const bi = breakIcons[row.breakLabel] || '☕';
           const timeStr = row.hora ? `${row.hora}${row.horaFin ? '–'+row.horaFin : ''}` : '';
-          return `<div class="cv-sp-break-card" style="--bk-color:${bkColor}">
-            <span class="cv-sp-break-label">${row.breakLabel || '—'}</span>
+          return `<div class="cv-sp-break-card">
+            <span class="cv-sp-break-icon">${bi}</span>
+            <span class="cv-sp-break-label">${row.breakLabel || 'Break'}</span>
             ${row.descripcion ? `<span class="cv-sp-break-sep">·</span><span class="cv-sp-break-note">${row.descripcion}</span>` : ''}
             ${timeStr ? `<span class="cv-sp-break-time">${timeStr}</span>` : ''}
           </div>`;
