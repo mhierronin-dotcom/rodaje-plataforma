@@ -756,6 +756,11 @@ input[type=range].scale-slider::-moz-range-thumb {
 }
 .sp-shot-time-input:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.07); }
 .sp-shot-time-input:focus { border-color: rgba(255,255,255,.3); color: #fff; outline: none; }
+/* Input time nativo — ancho fijo para HH:MM */
+.sp-time-native {
+  width: 82px; font-family: 'Inter', sans-serif; font-size: .78rem;
+  letter-spacing: 0; padding: .22rem .4rem; color-scheme: dark;
+}
 .sp-time-colon { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; color: #444; }
 .sp-shot-time-sep {
   font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
@@ -4376,60 +4381,24 @@ function spSelectDay(diaId) {
 }
 
 function spTimeSelect(val, diaId, rowId, field) {
-  // val formato "HH:MM" o vacío
-  const parts = val.match(/^(\d{1,2}):(\d{2})$/);
-  const selH = parts ? parseInt(parts[1]) : '';
-  const selM = parts ? parseInt(parts[2]) : '';
-
-  const hours = Array.from({length:24}, (_,i) => i);
-  const mins  = Array.from({length:12}, (_,i) => i*5);
-
-  const hOpts = `<option value="">--</option>` + hours.map(h =>
-    `<option value="${String(h).padStart(2,'0')}" ${selH===h?'selected':''}>${String(h).padStart(2,'0')}</option>`
-  ).join('');
-  const mOpts = `<option value="">--</option>` + mins.map(m =>
-    `<option value="${String(m).padStart(2,'0')}" ${selM===m?'selected':''}>${String(m).padStart(2,'0')}</option>`
-  ).join('');
-
-  // Guardar siempre que haya al menos hora; si falta minuto usar "00"
-  // Buscar dentro del panel de edición para evitar conflictos con la vista cliente
-  const onChange = `(function(el){
-    var panel=document.getElementById('panelShootingPlan')||document;
-    var hEl=panel.querySelector('[data-tf="${diaId}_${rowId}_${field}_h"]');
-    var mEl=panel.querySelector('[data-tf="${diaId}_${rowId}_${field}_m"]');
-    if(!hEl||!mEl) return;
-    if(!hEl.value && !mEl.value){
-      updateRowField('${diaId}','${rowId}','${field}','');
-    } else if(hEl.value) {
-      updateRowField('${diaId}','${rowId}','${field}',hEl.value+':'+(mEl.value||'00'));
-    }
-  })(this)`;
-
-  return `<select class="sp-shot-time-input" data-tf="${diaId}_${rowId}_${field}_h" onchange="${onChange}" title="Hora">${hOpts}</select><span class="sp-time-colon">:</span><select class="sp-shot-time-input" data-tf="${diaId}_${rowId}_${field}_m" onchange="${onChange}" title="Minutos">${mOpts}</select>`;
+  // Usa input[type=time] nativo — guarda en un solo evento, sin problemas de sincronización
+  const safeVal = val && /^\d{1,2}:\d{2}$/.test(val)
+    ? val.padStart(5, '0').slice(0,5)  // normalizar a HH:MM
+    : '';
+  return `<input type="time" class="sp-shot-time-input sp-time-native"
+    value="${safeVal}"
+    onchange="updateRowField('${diaId}','${rowId}','${field}',this.value)"
+    title="${field === 'hora' ? 'Hora inicio' : 'Hora fin'}">`;
 }
 
 function spTimeSelectSub(val, diaId, rowId, subId, field) {
-  const parts = val.match(/^(\d{1,2}):(\d{2})$/);
-  const selH = parts ? parseInt(parts[1]) : '';
-  const selM = parts ? parseInt(parts[2]) : '';
-  const hours = Array.from({length:24}, (_,i) => i);
-  const mins  = Array.from({length:12}, (_,i) => i*5);
-  const hOpts = `<option value="">--</option>` + hours.map(h =>
-    `<option value="${String(h).padStart(2,'0')}" ${selH===h?'selected':''}>${String(h).padStart(2,'0')}</option>`).join('');
-  const mOpts = `<option value="">--</option>` + mins.map(m =>
-    `<option value="${String(m).padStart(2,'0')}" ${selM===m?'selected':''}>${String(m).padStart(2,'0')}</option>`).join('');
-  const onChange = `(function(el){
-    var panel=document.getElementById('panelShootingPlan')||document;
-    var hEl=panel.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_h"]');
-    var mEl=panel.querySelector('[data-stf="${diaId}_${rowId}_${subId}_${field}_m"]');
-    if(!hEl||!mEl) return;
-    if(!hEl.value && !mEl.value){
-      updateSubRowField('${diaId}','${rowId}','${subId}','${field}','');
-    } else if(hEl.value) {
-      updateSubRowField('${diaId}','${rowId}','${subId}','${field}',hEl.value+':'+(mEl.value||'00'));
-    }
-  })(this)`;
-  return `<select class="sp-shot-time-input" data-stf="${diaId}_${rowId}_${subId}_${field}_h" onchange="${onChange}" title="Hora">${hOpts}</select><span class="sp-time-colon">:</span><select class="sp-shot-time-input" data-stf="${diaId}_${rowId}_${subId}_${field}_m" onchange="${onChange}" title="Minutos">${mOpts}</select>`;
+  const safeVal = val && /^\d{1,2}:\d{2}$/.test(val)
+    ? val.padStart(5, '0').slice(0,5)
+    : '';
+  return `<input type="time" class="sp-shot-time-input sp-time-native"
+    value="${safeVal}"
+    onchange="updateSubRowField('${diaId}','${rowId}','${subId}','${field}',this.value)"
+    title="${field === 'hora' ? 'Hora inicio' : 'Hora fin'}">`;
 }
 
 function spRenderDayContent(dia) {
@@ -5295,60 +5264,8 @@ function spRenderSubRow(dia, row, sub, subIdx, parentIdx) {
     </div>`;
 }
 
-// Flush any partially-entered time selects from the DOM into the data model
-// before a full re-render (prevents losing hora/horaFin when only one select is set)
-function spFlushTimeInputs() {
-  const panel = document.getElementById('panelShootingPlan');
-  if (!panel) return;
-  // All time select pairs share data-tf="diaId_rowId_field_h/m"
-  panel.querySelectorAll('[data-tf]').forEach(el => {
-    const tf = el.getAttribute('data-tf');
-    if (!tf || !tf.endsWith('_h')) return; // only process hour selects
-    const base = tf.slice(0, -2); // e.g. "diaId_rowId_hora"
-    const parts = base.split('_');
-    if (parts.length < 3) return;
-    const field = parts[parts.length - 1];
-    const rowId = parts[parts.length - 2];
-    const diaId = parts.slice(0, parts.length - 2).join('_');
-    const mEl = panel.querySelector(`[data-tf="${base}_m"]`);
-    if (!mEl) return;
-    const hVal = el.value; const mVal = mEl.value;
-    const dia = activeProject.planificacion.find(d => d.id === diaId);
-    if (!dia) return;
-    // Check if it's a subrow (data-stf) — handled separately
-    // Regular row
-    const row = (dia.rows || []).find(r => r.id === rowId);
-    if (row) {
-      if (!hVal && !mVal) row[field] = '';
-      else if (hVal) row[field] = hVal + ':' + (mVal || '00');
-    }
-  });
-  // Also flush subrow time selects (use data-stf)
-  panel.querySelectorAll('[data-stf]').forEach(el => {
-    const stf = el.getAttribute('data-stf');
-    if (!stf || !stf.endsWith('_h')) return;
-    const base = stf.slice(0, -2);
-    const parts = base.split('_');
-    if (parts.length < 4) return;
-    const field = parts[parts.length - 1];
-    const subId = parts[parts.length - 2];
-    const rowId = parts[parts.length - 3];
-    const diaId = parts.slice(0, parts.length - 3).join('_');
-    const mEl = panel.querySelector(`[data-stf="${base}_m"]`);
-    if (!mEl) return;
-    const hVal = el.value; const mVal = mEl.value;
-    const dia = activeProject.planificacion.find(d => d.id === diaId);
-    if (!dia) return;
-    const row = (dia.rows || []).find(r => r.id === rowId);
-    if (!row) return;
-    const sub = (row.subrows || []).find(s => s.id === subId);
-    if (sub) {
-      if (!hVal && !mVal) sub[field] = '';
-      else if (hVal) sub[field] = hVal + ':' + (mVal || '00');
-    }
-  });
-  saveToLocalStorage();
-}
+// Con input[type=time] nativo el flush ya no es necesario — cada cambio guarda directamente
+function spFlushTimeInputs() { /* no-op: inputs nativos guardan en onchange */ }
 
 function addPlanRow(diaId) {
   spFlushTimeInputs();
